@@ -84,7 +84,7 @@ namespace trend {
 
    class Toshader : public Tenderer {
       public:
-                           Toshader( layprop::DrawProperties*, real UU);
+                           Toshader( layprop::DrawProperties*, real UU, int W, int H);
          virtual          ~Toshader();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);

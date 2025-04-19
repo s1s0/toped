@@ -151,9 +151,12 @@ bool TopedApp::OnInit()
       wxToolTip::SetDelay(500);
       // First thing after initialising openGL - load the shaders (eventually)
       std::string stdShaderDir(_tpdShadersDir.mb_str(wxConvFile));
-      TRENDC->initShaders(stdShaderDir);
-      // and then - load available layout fonts
-      loadGlfFonts();
+//      bool shadersOK =
+      if (TRENDC->initShaders(stdShaderDir))
+         // and then - load available layout fonts
+         loadGlfFonts();
+      else
+         Toped->view()->shaderError();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
       // Put a rendering info in the log

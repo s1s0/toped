@@ -466,6 +466,8 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& /*event*/) {
    GetClientSize(&w, &h);
    _lpBL = TP(0,0)  * _layCTM;
    _lpTR = TP(w, h) * _layCTM;
+   if (TRENDC)
+      TRENDC->setCanvasSize(w,h);
    _invalidWindow |= _glRC->resizeGL(w,h);
 }
 
@@ -491,14 +493,11 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
         
-         int W, H;
-         GetClientSize(&W,&H);
-
          GLuint VertexArrayID;
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
          updateViewport();
-         DATC->renderOGLBuffer(W, H);
+         DATC->renderOGLBuffer();
          if (0 == _blinkInterval) DATC->grcDraw();
          _invalidWindow = false;
          drawOGLBuffer();
@@ -1288,7 +1287,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 //      DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
-      DATC->renderOGLBuffer(/*W,H*/0,0);    // draw data
+      DATC->renderOGLBuffer();    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
       _canvas->drawOGLBuffer();

@@ -249,8 +249,8 @@ void trend::TolderMarks::draw(layprop::DrawProperties* drawprop)
 //
 // class Tolder
 //
-trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
-    TrendBase            (drawprop, UU)
+trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU, int W, int H ) :
+    TrendBase            (drawprop, UU, W, H)
 {
    _refLayer = DEBUG_NEW TolderRefLay();
    _marks    = DEBUG_NEW TolderMarks();

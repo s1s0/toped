@@ -70,7 +70,7 @@ namespace trend {
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
          virtual void      collect(bool, GLuint, GLuint);
-         virtual void      collectSelected(unsigned int*);
+         virtual void      collectSelected(TNDR_GLDATAT*);
 
       protected:
          GLuint            _pbuffer;
@@ -116,7 +116,7 @@ namespace trend {
    */
    class Tenderer : public TrendBase {
       public:
-                           Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
+                           Tenderer( layprop::DrawProperties* , real, int W, int H, bool createRefLay = true);
          virtual          ~Tenderer();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);

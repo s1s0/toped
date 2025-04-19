@@ -93,6 +93,7 @@ namespace tui {
       void           setOglThread(bool /*val*/) {_oglThread = true;}
       TpdOglContext* glRC() { return _glRC;}
       void           glewContext() {_glRC->glewContext(this);_initialised = true;}
+      void           shaderError() {_initialised = false;}
 
       bool           initStatus() {
 #ifdef __WXGTK__

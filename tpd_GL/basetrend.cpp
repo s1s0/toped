@@ -344,12 +344,12 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
    }
    else
    {
-      _asindxs[llps] += sobj->csize();
+//      _asindxs[llps] += sobj->csize();
 //      we need 4 invocations of the vertex shader for the first segment,
 //              2 invocations of the vertex shader for each consequitive segement,
 //      AND - 4 points for each invocation
 //      Number of segments for fully selected box is equal to the number of vertexes
-//      _asindxs[llps] += 4*(2 + 2*(sobj->csize()));
+      _asindxs[llps] += /*4**/(2 + 2*(sobj->csize()));
       _asobjix[llps]++;
    }
 }
@@ -480,9 +480,11 @@ unsigned trend::TrendMarks::total_points()
 //
 // class TrendBase
 //
-trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
+trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU, int W, int H ) :
    _drawprop             ( drawprop  ),
    _UU                   (        UU ),
+   _screenW              (         W ),
+   _screenH              (         H ),
    _clayer               (      NULL ),
    _grcLayer             (      NULL ),
    _refLayer             (      NULL ),

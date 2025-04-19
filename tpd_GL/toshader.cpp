@@ -249,16 +249,26 @@ bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 
 void trend::ToshaderLay::drawSelected()
 {
-   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
+//   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
    DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+   unsigned dataRows = total_slctdx();
+   assert(bufferSize == (GLint)(4 * 2 * dataRows * sizeof(TNDR_GLDATAT)));
 
-   // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
+   GLint varLoc = TRENDC->getVarLoc(glslv_in_Vertex);
+   
+//   DBGL_CALL(glVertexAttribPointer, varLoc    , 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr                          /*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
+   DBGL_CALL(glVertexAttribPointer, varLoc    , 2, TNDR_GLENUMT, GL_FALSE, 4*2*sizeof(TNDR_GLENUMT), nullptr                          /*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
+   DBGL_CALL(glVertexAttribPointer, varLoc + 1, 2, TNDR_GLENUMT, GL_FALSE, 4*2*sizeof(TNDR_GLENUMT), (void*)(1*2*sizeof(TNDR_GLENUMT))/*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
+   DBGL_CALL(glVertexAttribPointer, varLoc + 2, 2, TNDR_GLENUMT, GL_FALSE, 4*2*sizeof(TNDR_GLENUMT), (void*)(2*2*sizeof(TNDR_GLENUMT))/*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
+   DBGL_CALL(glVertexAttribPointer, varLoc + 3, 2, TNDR_GLENUMT, GL_FALSE, 4*2*sizeof(TNDR_GLENUMT), (void*)(3*2*sizeof(TNDR_GLENUMT))/*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
+   // Activate the vertex buffers in the vertex shader ...
+   DBGL_CALL(glEnableVertexAttribArray, varLoc  )
+   DBGL_CALL(glEnableVertexAttribArray, varLoc+1)
+   DBGL_CALL(glEnableVertexAttribArray, varLoc+2)
+   DBGL_CALL(glEnableVertexAttribArray, varLoc+3)
 
 //   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
 //   
@@ -277,7 +287,8 @@ void trend::ToshaderLay::drawSelected()
       assert(_fstslix[llps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[llps]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
+         DBGL_CALL(glDrawArrays,GL_TRIANGLE_STRIP, 0, dataRows)
+//         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
 //         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
    }
    if (_asobjix[lnes] > 0)
@@ -291,7 +302,7 @@ void trend::ToshaderLay::drawSelected()
    }
    DBGL_CALL(glDisable,GL_PROGRAM_POINT_SIZE)
    DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
-   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
+//   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 }
 
 
@@ -414,8 +425,8 @@ void trend::ToshaderMarks::setStipple(const byte* markStipple)
 //
 // class Toshader
 //
-trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU) :
-    Tenderer             (drawprop, UU, false )
+trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU, int W, int H) :
+    Tenderer             (drawprop, UU, W, H, false )
 {
    _refLayer = DEBUG_NEW ToshaderRefLay();
    _marks    = DEBUG_NEW ToshaderMarks();
@@ -571,7 +582,7 @@ void trend::Toshader::setLine(bool selected)
    {
       GLuint lPattern = curLine.pattern();
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStipple), lPattern)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale())
+//      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 1)
    }
 }
@@ -597,22 +608,22 @@ void trend::Toshader::draw()
       }
    }
    // Lines with stipples
-   TRENDC->setGlslProg(glslp_VG);// i.e. line stipple shader
-//   TRENDC->setGlslProg(glslp_LW); i.e. line stipple shader
-//   TRENDC->setGlslProg(glslp_PS);
+   TRENDC->setGlslProg(glslp_LW); //i.e. line stipple shader
    _drawprop->resetCurrentColor();
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+   DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),5.0)
+   glUniform2f(TRENDC->getUniformLoc(glslu_in_ScreenSize), (float)_screenW, (float)_screenH);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          setLayColor(CLAY());
          setLine(true);
-         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
+         DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _sbuffer)
          setShaderCtm(_drawprop, _activeCS);
          CLAY->drawSelected();
          _drawprop->popCtm();
-         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0)
+         DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
       }
    }
    // draw reference boxes

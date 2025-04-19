@@ -519,7 +519,6 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_MStippleEn] = "in_MStippleEn";
    _glslVarNames[glslp_VF][glslv_in_Vertex]        = "in_Vertex";
 
-
    _glslUniVarNames[glslp_LW][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_LW][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_LW][glslu_in_ScreenSize] = "in_ScreenSize";
@@ -960,7 +959,9 @@ trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, b
    _zRenderer       (              NULL),
    _dRenderer       (              NULL),
    _cShaders        (              NULL),
-   _activeFontName  (                  )
+   _activeFontName  (                  ),
+   _canvasW         (                 0),
+   _canvasH         (                 0)
 {
    if      (!gui)             _renderType = trend::rtTocom;
    else if ( sprtShaders)     _renderType = trend::rtToshader;
@@ -1023,6 +1024,7 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
       case trend::rtTBD     : {
          switch (_renderType)
          {
+//            case trend::rtTBD     : tell_log(console::MT_ERROR, "Error during renderer initialisation"); break;
             case trend::rtTocom   : /* Don't clutter the command line with nonsence*/ break;
             case trend::rtTolder  : tell_log(console::MT_INFO,"Using basic rendering."); break;
             case trend::rtTenderer: tell_log(console::MT_INFO,"Using VBO rendering.");break;
@@ -1036,7 +1038,7 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
    }
 }
 
-void trend::TrendCenter::initShaders(const std::string& codeDirectory)
+bool trend::TrendCenter::initShaders(const std::string& codeDirectory)
 {
    if (trend::rtToshader == _renderType)
    {
@@ -1050,9 +1052,10 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
       {
          wxLogDebug("Falling back to VBO rendering because of the errors above");
          tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
-         _renderType = trend::rtTenderer;
+//         _renderType = trend::rtTBD;
       }
    }
+   return _cShaders->status();
 }
 
 void trend::TrendCenter::drawFrameBuffer()
@@ -1068,7 +1071,7 @@ void trend::TrendCenter::drawFrameBuffer()
    
 }
 
-trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
+trend::TrendBase* trend::TrendCenter::makeCRenderer()
 {
    if (NULL != _cRenderer)
    {
@@ -1086,12 +1089,12 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
-            _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );break;
+            _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU(), _canvasW, _canvasH );break;
          case trend::rtTenderer :
-            _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
-         case trend::rtToshader : 
-            _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() );
-            if (!_cShaders->setFrameBuffer(W, H))
+            _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU(), _canvasW, _canvasH ); break;
+         case trend::rtToshader :
+            _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU(), _canvasW, _canvasH);
+            if (!_cShaders->setFrameBuffer(_canvasW, _canvasH))
             {
                delete _cRenderer;
                _cRenderer = NULL;
@@ -1140,11 +1143,11 @@ trend::TrendBase* trend::TrendCenter::makeHRenderer()
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
-            _hRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
+            _hRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU(), _canvasW, _canvasH); break;
          case trend::rtTenderer :
-            _hRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
+            _hRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU(), _canvasW, _canvasH ); break;
          case trend::rtToshader :
-            _hRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
+            _hRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU(), _canvasW, _canvasH); break;
          default: assert(false); break;
       }
    }
@@ -1161,11 +1164,11 @@ trend::TrendBase* trend::TrendCenter::makeMRenderer(console::ACTIVE_OP& curOp)
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
-            _mRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
+            _mRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU(), _canvasW, _canvasH ); break;
          case trend::rtTenderer :
-            _mRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
+            _mRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU(), _canvasW, _canvasH); break;
          case trend::rtToshader :
-            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
+            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU(), _canvasW, _canvasH); break;
          default: assert(false); break;
       }
       curOp = drawProp->currentOp();
@@ -1183,11 +1186,11 @@ trend::TrendBase* trend::TrendCenter::makeZRenderer()
       {
       case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
       case trend::rtTolder:
-         _zRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU()); break;
+         _zRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       case trend::rtTenderer:
-         _zRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU()); break;
+         _zRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       case trend::rtToshader:
-         _zRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU()); break;
+         _zRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       default: assert(false); break;
       }
    }
@@ -1204,11 +1207,11 @@ trend::TrendBase* trend::TrendCenter::makeDRenderer()
       {
       case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
       case trend::rtTolder:
-         _dRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU()); break;
+         _dRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       case trend::rtTenderer:
-         _dRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU()); break;
+         _dRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       case trend::rtToshader:
-         _dRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU()); break;
+         _dRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU(), _canvasW, _canvasH); break;
       default: assert(false); break;
       }
    }
@@ -1378,6 +1381,12 @@ void trend::TrendCenter::setGlslProg(const glsl_Programs prog) const
 {
    assert(_cShaders);
    _cShaders->useProgram(prog);
+}
+
+void trend::TrendCenter::setCanvasSize(int W, int H)
+{
+   _canvasW = (unsigned)W;
+   _canvasH = (unsigned)H;
 }
 
 trend::TrendCenter::~TrendCenter()

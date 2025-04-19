@@ -733,7 +733,7 @@ unsigned trend::TrxSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrxSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSCnvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -785,7 +785,8 @@ void trend::TrxSCnvx::drctDrawSlctd()
 //
 unsigned trend::TrxSBox::ssize()
 {
-   if (NULL == _slist) return _csize;
+   if (NULL == _slist) //return _csize;
+      return 4*(2+2*4);
    // get the number of selected segments first - don't forget that here
    // we're using GL_LINE_STRIP which means that we're counting selected
    // line segments and for each segment we're going to store two indexes
@@ -802,7 +803,7 @@ unsigned trend::TrxSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxBox::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrxSBox::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -818,8 +819,26 @@ unsigned trend::TrxSBox::sDataCopy(unsigned* array, unsigned& pindex)
    }
    else
    {
-      for (unsigned i = 0; i < _csize; i++)
-         array[pindex++] = _offset + i;
+      const unsigned char kidx[4][8] = { {0,1,2,1,2,3,0,3}
+                                        ,{2,1,2,3,0,3,0,1}
+                                        ,{2,3,0,3,0,1,2,1}
+                                        ,{0,3,0,1,2,1,2,3}
+      };
+      
+      for (unsigned curSeg = 0; curSeg < 4 ; curSeg++)
+         for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
+               for (unsigned j = 0; j < 8;j++)
+                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg][j]];
+
+      
+//      for (unsigned i = 0; i < _csize; i++)
+//         array[pindex++] = _offset + i;
+
+//      array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
+//      array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
+//      array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
+//      array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
+
    }
    return ssize();
 }
@@ -879,7 +898,7 @@ unsigned trend::TrxSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrxSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSNcvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -962,7 +981,7 @@ unsigned trend::TrxSWire::ssize()
    return ssegs;
 }
 
-unsigned trend::TrxSWire::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSWire::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -1046,7 +1065,7 @@ unsigned trend::TrxTextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxTextOvlBox::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxTextSOvlBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert (NULL == _slist);
    for (unsigned i = 0; i < 4; i++)

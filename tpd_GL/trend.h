@@ -223,8 +223,8 @@ namespace trend {
          virtual               ~TrendCenter();
 //         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
-         void                   initShaders(const std::string&);
-         trend::TrendBase*      makeCRenderer(int W, int H);         //!Get current renderer
+         bool                   initShaders(const std::string&);
+         trend::TrendBase*      makeCRenderer();                     //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
          trend::TrendBase*      makeHRenderer();                     //!Get hover renderer
@@ -252,6 +252,7 @@ namespace trend {
          GLint                  getUniformLoc(const glsl_Uniforms) const;
          GLint                  getVarLoc(const glsl_Variables) const;
          void                   setGlslProg(const glsl_Programs) const;
+         void                   setCanvasSize(int W, int H);
          void                   drawFrameBuffer();
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
@@ -264,6 +265,8 @@ namespace trend {
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
          RenderType             _renderType;
+         unsigned               _canvasW;
+         unsigned               _canvasH;
    };
 }
 

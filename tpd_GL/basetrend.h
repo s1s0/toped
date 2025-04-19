@@ -504,7 +504,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... ||   lstr  |   llps  |  lnes  ||   lstr  |   llps  |  lnes  || ...
       ... ||----------------------------||----------------------------|| ...
-      ... ||  this TrendLay index data ||  next TrendLay index data || ...
+      ... ||  this TrendLay index data  ||  next TrendLay index data  || ...
       -------------------------------------------------------------------------
       \endverbatim
 
@@ -515,7 +515,7 @@ namespace trend {
       traversing in the field _stv_array_offset. Having done that, the drawing is
       now trivial
 
-      ----------------------------------------------------------------
+       ----------------------------------------------------------------
       |      |                                        |       VBO      |
       | data |            openGL function             |----------------|
       | type |                                        | vertex | index |
@@ -556,7 +556,7 @@ namespace trend {
          virtual void      drawSelected() = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
          virtual void      collect(bool, GLuint, GLuint) { assert(false); }
-         virtual void      collectSelected(unsigned int*) { assert(false); }
+         virtual void      collectSelected(TNDR_GLDATAT*) { assert(false); }
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
          unsigned          total_slctdx();
@@ -675,7 +675,7 @@ namespace trend {
    */
    class TrendBase {
       public:
-                           TrendBase( layprop::DrawProperties* drawprop, real UU );
+                           TrendBase( layprop::DrawProperties* drawprop, real UU, int W, int H );
          virtual          ~TrendBase();
          virtual void      setLayer(const LayerDef&, bool) = 0;
          virtual void      setHvrLayer(const LayerDef&) = 0;
@@ -747,6 +747,8 @@ namespace trend {
          void              genRulerMarks (const CTM&, DBline&, DBline&, DBline&, double&);
          layprop::DrawProperties*   _drawprop;
          real              _UU;
+         int               _screenW;         //!Screen width
+         int               _screenH;         //!Screen height
          DataLay           _data;            //!All editable data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
          TrendLay*         _clayer;          //!Working variable pointing to the current edit slice

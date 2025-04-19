@@ -323,7 +323,7 @@ namespace trend {
          bool              partSelected() {return (NULL != _slist);}
          virtual SlctTypes type() = 0;
          virtual unsigned  ssize() = 0;
-         virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&) = 0;
          virtual void      drctDrawSlctd() = 0;
       protected:
          const SGBitSet*   _slist;  //! A bit set array with selected vertexes
@@ -347,7 +347,7 @@ namespace trend {
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawSlctd();
    };
 
@@ -358,7 +358,7 @@ namespace trend {
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawSlctd();
    };
 
@@ -377,7 +377,7 @@ namespace trend {
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawSlctd();
    };
 
@@ -401,7 +401,7 @@ namespace trend {
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
          virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawSlctd();
       protected:
                            TrxSWire(unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
@@ -418,7 +418,7 @@ namespace trend {
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return llps;}
          virtual unsigned  ssize(){ return 4;}
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual unsigned  sDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawSlctd();
    };
 

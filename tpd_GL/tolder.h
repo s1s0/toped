@@ -79,7 +79,7 @@ namespace trend {
 
    class Tolder : public TrendBase {
       public:
-                           Tolder( layprop::DrawProperties* drawprop, real UU );
+                           Tolder( layprop::DrawProperties* drawprop, real UU, int W, int H );
          virtual          ~Tolder();
          virtual void      grdDraw();
          virtual void      setLayer(const LayerDef&, bool);

@@ -447,7 +447,7 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
    }
 }
 
-void trend::TenderLay::collectSelected(unsigned int* slctd_array)
+void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
 {
    unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
    if (0 == slct_arr_size) return;
@@ -484,21 +484,21 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
          case lstr : // LINES_STRIP
          {
             assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
+            _fstslix[lstr][size_sindex[lstr]  ] = (4 * 2 * sizeof(int)) * index_soffset[lstr];
             _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
             break;
          }
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = sizeof(unsigned) * index_soffset[llps];
+            _fstslix[llps][size_sindex[llps]  ] = (4 * 2 * sizeof(TNDR_GLDATAT)) * index_soffset[llps];
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
          case lnes   : // LINE
          {
             assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = sizeof(unsigned) * index_soffset[lnes];
+            _fstslix[lnes][size_sindex[lnes]  ] = (4 * 2 * sizeof(int)) * index_soffset[lnes];
             _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
             break;
          }
@@ -781,8 +781,8 @@ void trend::TenderMarks::draw(layprop::DrawProperties* drawprop)
 //
 // class Tenderer
 //
-trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool createRefLay ) :
-    TrendBase            (drawprop, UU),
+trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, int W, int H, bool createRefLay) :
+    TrendBase            (drawprop, UU, W, H),
    _num_ogl_buffers      (       0u   ),
    _num_ogl_grc_buffers  (       0u   ),
 //   _num_grid_points      (       0u   ),
@@ -926,7 +926,7 @@ bool trend::Tenderer::collect()
    _clayer = NULL;
    if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < _marks->total_points()   )  _num_ogl_buffers ++; // reference marks
-   if (0 < num_total_slctdx         )  _num_ogl_buffers ++;  // selected
+   if (0 < num_total_slctdx         )  _num_ogl_buffers ++; // selected
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
    {
@@ -965,19 +965,22 @@ bool trend::Tenderer::collect()
    if (0 < num_total_slctdx)
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
-      DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
-      DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER           ,
-                   num_total_slctdx * sizeof(unsigned) ,
-                   nullptr                             ,
+      DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _sbuffer)
+      // for every index we need 4 points
+      // each point has 2 coordinates
+      // each coordinate is of type int
+      DBGL_CALL(glBufferData, GL_ARRAY_BUFFER      ,
+                   num_total_slctdx * (4 * 2 * sizeof(TNDR_GLDATAT)),
+                   nullptr                                 ,
                    GL_DYNAMIC_DRAW                    )
-      unsigned int* sindex_array = (unsigned int*)DBGL_CALL(glMapBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
+      TNDR_GLDATAT* sindex_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
          if (0 == CLAY->total_slctdx())
             continue;
          CLAY->collectSelected(sindex_array);
       }
-      DBGL_CALL(glUnmapBuffer, GL_ELEMENT_ARRAY_BUFFER)
+      DBGL_CALL(glUnmapBuffer, GL_ARRAY_BUFFER)
    }
 
 //   checkOGLError("collect");
