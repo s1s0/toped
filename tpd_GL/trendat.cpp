@@ -654,60 +654,6 @@ void trend::TrxTextOvlBox::drctDrawContour()
 //   return std::make_tuple(arrData,numDataRows*sizeof(VertexSet), numDataRows);
 //}
 
-//void  trend::TrxSelected::genSIndx(unsigned* sarr, unsigned& pindex, unsigned numVertices, bool closedLoop = false)
-//{
-//   //   unsigned numVertices = (numSegments - (closedLoop ? 0:1)) * 4;
-//      unsigned numDataRows;
-////      VertexSet* arrData;
-//      switch (numVertices) {
-//         case 0:
-//         case 1: assert(false); // no such segment
-//         case 2: // i.e. single segment
-//            numDataRows = 4;
-////            arrData = new VertexSet[numDataRows];
-//            for (unsigned i = pindex; i < pindex+numDataRows; i++)
-//            {
-//               sarr[i] = {pindex+0,pindex+0,pindex+1,pindex+1};
-//            }
-//            pindex += numDataRows*4
-//            break;
-//         default:// segment stripe/sequence
-//            static const unsigned repeats = 2;
-//            unsigned numSegments = numVertices - (closedLoop ? 0 : 1);
-//            numDataRows = repeats * numSegments + 2;
-//            arrData = new VertexSet[numDataRows];
-//            unsigned cib=0;// Current Index Base
-//            for (unsigned curSeg = 0; curSeg < numSegments ; curSeg++)
-//            {
-//               for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
-//               {
-//                  if      (0 == curSeg) // first segment - distinguish the neighboring point
-//                     arrData[cib++] = { vrtx[closedLoop ? (numVertices-1): curSeg]
-//                                       ,vrtx[(curSeg  )              ]
-//                                       ,vrtx[(curSeg+1) % numVertices]
-//                                       ,vrtx[(curSeg+2) % numVertices]
-//                     };
-//                  else if (numSegments-1 == curSeg) // last segment - distinguish the neighboring point
-//                     arrData[cib++] = { vrtx[(curSeg-1)              ]
-//                                       ,vrtx[(curSeg  )              ]
-//                                       ,vrtx[(curSeg+1) % numVertices]
-//                                       ,vrtx[(curSeg+(closedLoop?2:1)) % numVertices]
-//                     };
-//                  else
-//                     arrData[cib++] = { vrtx[(curSeg-1)              ]
-//                                       ,vrtx[(curSeg  )              ]
-//                                       ,vrtx[(curSeg+1) % numVertices]
-//                                       ,vrtx[(curSeg+2) % numVertices]
-//                     };
-//               }
-//            }
-//            break;
-//      }
-//      return std::make_tuple(arrData,numDataRows*sizeof(VertexSet), numDataRows);
-//
-//   
-//}
-
 
 
 //=============================================================================
@@ -786,7 +732,7 @@ void trend::TrxSCnvx::drctDrawSlctd()
 unsigned trend::TrxSBox::ssize()
 {
    if (NULL == _slist) //return _csize;
-      return 4*(2+2*4);
+      return 2*(_csize+1);
    // get the number of selected segments first - don't forget that here
    // we're using GL_LINE_STRIP which means that we're counting selected
    // line segments and for each segment we're going to store two indexes
@@ -825,20 +771,14 @@ unsigned trend::TrxSBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
                                         ,{0,3,0,1,2,1,2,3}
       };
       
-      for (unsigned curSeg = 0; curSeg < 4 ; curSeg++)
-         for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
+      for (unsigned curSeg = 0; curSeg < 5 ; curSeg++)
+         for(int i = 0; i <  2; i++)
                for (unsigned j = 0; j < 8;j++)
-                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg][j]];
-
-      
-//      for (unsigned i = 0; i < _csize; i++)
-//         array[pindex++] = _offset + i;
-
-//      array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
-//      array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
-//      array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
-//      array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
-
+                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[(0==curSeg)?3:(curSeg-1)][j]];
+//      for (unsigned curSeg = 0; curSeg < 4 ; curSeg++)
+//         for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
+//               for (unsigned j = 0; j < 8;j++)
+//                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg][j]];
    }
    return ssize();
 }

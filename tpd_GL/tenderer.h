@@ -77,7 +77,7 @@ namespace trend {
          GLuint            _ibuffer;
          // index related data for selected objects
          GLsizei*          _sizslix[3]; //! arrays of sizes for index sets of selected objects
-         GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
+         GLint*            _fstslix[3]; //! arrays of first indexes for selected objects
          // offsets in the VBO
          unsigned          _stv_array_offset; //! first point in the TenderTV with selected objects in this layer
          unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes

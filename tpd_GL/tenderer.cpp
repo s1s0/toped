@@ -456,17 +456,17 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
    if (0 < _asobjix[lstr])// line strip
    {
       _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
-      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
+      _fstslix[lstr] = DEBUG_NEW GLint[_asobjix[lstr]];
    }
    if (0 < _asobjix[llps])// line loops
    {
       _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
-      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
+      _fstslix[llps] = DEBUG_NEW GLint[_asobjix[llps]];
    }
    if (0 < _asobjix[lnes]) // lines (individual)
    {
       _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
-      _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
+      _fstslix[lnes] = DEBUG_NEW GLint[_asobjix[lnes]];
    }
    unsigned size_sindex[3];
    unsigned index_soffset[3];
@@ -491,7 +491,7 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = (4 * 2 * sizeof(TNDR_GLDATAT)) * index_soffset[llps];
+            _fstslix[llps][size_sindex[llps]  ] = index_soffset[llps] / (4 * 2);
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
@@ -968,7 +968,7 @@ bool trend::Tenderer::collect()
       DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _sbuffer)
       // for every index we need 4 points
       // each point has 2 coordinates
-      // each coordinate is of type int
+      // each coordinate is of type TNDR_GLDATAT
       DBGL_CALL(glBufferData, GL_ARRAY_BUFFER      ,
                    num_total_slctdx * (4 * 2 * sizeof(TNDR_GLDATAT)),
                    nullptr                                 ,
