@@ -349,7 +349,7 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
 //              2 invocations of the vertex shader for each consequitive segement,
 //      AND - 4 points for each invocation
 //      Number of segments for fully selected box is equal to the number of vertexes
-      _asindxs[llps] += /*4**/(2 + 2*(sobj->csize()));
+      _asindxs[llps] += 2*(sobj->csize()+1);
       _asobjix[llps]++;
    }
 }
@@ -372,7 +372,7 @@ void trend::TrendLay::registerSPoly (TrxSNcvx* sobj)
    }
    else
    {
-      _asindxs[llps] += sobj->csize();
+      _asindxs[llps] += 2*(sobj->csize()+1);
       _asobjix[llps]++;
    }
 }

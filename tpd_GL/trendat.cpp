@@ -771,14 +771,10 @@ unsigned trend::TrxSBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
                                         ,{0,3,0,1,2,1,2,3}
       };
       
-      for (unsigned curSeg = 0; curSeg < 5 ; curSeg++)
+      for (unsigned curSeg = 0; curSeg <= 4 ; curSeg++)
          for(int i = 0; i <  2; i++)
                for (unsigned j = 0; j < 8;j++)
-                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[(0==curSeg)?3:(curSeg-1)][j]];
-//      for (unsigned curSeg = 0; curSeg < 4 ; curSeg++)
-//         for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
-//               for (unsigned j = 0; j < 8;j++)
-//                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg][j]];
+                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg%4][j]];
    }
    return ssize();
 }
@@ -821,7 +817,8 @@ void trend::TrxSBox::drctDrawSlctd()
 //
 unsigned trend::TrxSNcvx::ssize()
 {
-   if (NULL == _slist) return _csize;
+   if (NULL == _slist) //return _csize;
+      return 2*(_csize+1);
    // get the number of selected segments first - don't forget that here
    // we're using GL_LINE_STRIP which means that we're counting selected
    // line segments and for each segment we're going to store two indexes
@@ -854,8 +851,10 @@ unsigned trend::TrxSNcvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    }
    else
    {
-      for (unsigned i = 0; i < _csize; i++)
-         array[pindex++] = _offset + i;
+      for (unsigned curSeg = 0; curSeg <= _csize ; curSeg++)
+         for(int i = 0; i <  2; i++)
+               for (unsigned j = 0; j < 8; j++)
+                  array[pindex++] = (TNDR_GLDATAT)_cdata[(curSeg*2+j) % (2*_csize)];
    }
    return ssize();
 }
