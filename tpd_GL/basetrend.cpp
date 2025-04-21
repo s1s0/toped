@@ -339,7 +339,7 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lnes] += sobj->ssize();
+      _asindxs[lnes] += 2*sobj->ssize();
       _asobjix[lnes]++;
    }
    else

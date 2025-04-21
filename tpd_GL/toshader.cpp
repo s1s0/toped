@@ -262,7 +262,6 @@ void trend::ToshaderLay::drawSelected()
    {
       DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(i*vrtxSize))
       DBGL_CALL(glEnableVertexAttribArray, varLoc+i)
-      
    }
 //   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
 //   
@@ -282,10 +281,7 @@ void trend::ToshaderLay::drawSelected()
    {// lines
       assert(_sizslix[lnes]);
       assert(_fstslix[lnes]);
-         //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
-      for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
-//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
+      DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[lnes],_sizslix[lnes],_asobjix[lnes])
    }
    DBGL_CALL(glDisable,GL_PROGRAM_POINT_SIZE)
    DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))

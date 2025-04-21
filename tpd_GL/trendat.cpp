@@ -604,7 +604,7 @@ void trend::TrxTextOvlBox::drctDrawContour()
    DBGL_CALL0(glEnd)
 }
 
-/=============================================================================
+//=============================================================================
 //
 // TrxSCnvx
 //
@@ -699,32 +699,39 @@ unsigned trend::TrxSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 unsigned trend::TrxSBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
+   const unsigned char kidx[4][2*PPVRTX] = { {0,3,0,1,2,1}
+                                            ,{0,1,2,1,2,3}
+                                            ,{2,1,2,3,0,3}
+                                            ,{2,3,0,3,0,1}
+   };
+   
    if (NULL != _slist)
    { // shape is partially selected
       // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _csize; i++)
+      for (unsigned k = 0; k < _csize; k++)
       {
-         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         if (_slist->check(k) && _slist->check((k+1)%_csize))
          {
-            array[pindex++] = _offset + i;
-            array[pindex++] = _offset + ((i+1)%_csize);
+            for (unsigned curSeg = k; curSeg <= k+1 ; curSeg++)
+               for(int i = 0; i <  2; i++)
+                  for (unsigned j = 0; j < 2*PPVRTX;j++)
+                  {
+                     unsigned koko = (curSeg==k) ? ((j < 2) ? j+2 : j)
+                                                 : ((j > 3) ? j-2 : j);
+                     array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg%4][koko]];
+                  }
          }
       }
+      return 2*ssize();
    }
    else
    {
-      const unsigned char kidx[4][2*PPVRTX] = { {0,1,2,1,2,3}
-                                               ,{2,1,2,3,0,3}
-                                               ,{2,3,0,3,0,1}
-                                               ,{0,3,0,1,2,1}
-      };
-      
       for (unsigned curSeg = 0; curSeg <= 4 ; curSeg++)
          for(int i = 0; i <  2; i++)
             for (unsigned j = 0; j < 2*PPVRTX;j++)
                array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg%4][j]];
+      return ssize();
    }
-   return ssize();
 }
 
 void trend::TrxSBox::drctDrawSlctd()
