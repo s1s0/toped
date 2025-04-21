@@ -604,59 +604,7 @@ void trend::TrxTextOvlBox::drctDrawContour()
    DBGL_CALL0(glEnd)
 }
 
-
-//auto fillTest (unsigned numVertices, VrtxCoords* vrtx, bool closedLoop = false)
-//{
-////   unsigned numVertices = (numSegments - (closedLoop ? 0:1)) * 4;
-//   unsigned numDataRows;
-//   VertexSet* arrData;
-//   switch (numVertices) {
-//      case 0:
-//      case 1: assert(false); // no such segment
-//      case 2: // i.e. single segment
-//         numDataRows = 4;
-//         arrData = new VertexSet[numDataRows];
-//         for (unsigned i = 0; i < numDataRows; i++)
-//            arrData[i] = {vrtx[0],vrtx[0],vrtx[1],vrtx[1]};
-//         break;
-//      default:// segment stripe/sequence
-//         static const unsigned repeats = 2;
-//         unsigned numSegments = numVertices - (closedLoop ? 0 : 1);
-//         numDataRows = repeats * numSegments + 2;
-//         arrData = new VertexSet[numDataRows];
-//         unsigned cib=0;// Current Index Base
-//         for (unsigned curSeg = 0; curSeg < numSegments ; curSeg++)
-//         {
-//            for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
-//            {
-//               if      (0 == curSeg) // first segment - distinguish the neighboring point
-//                  arrData[cib++] = { vrtx[closedLoop ? (numVertices-1): curSeg]
-//                                    ,vrtx[(curSeg  )              ]
-//                                    ,vrtx[(curSeg+1) % numVertices]
-//                                    ,vrtx[(curSeg+2) % numVertices]
-//                  };
-//               else if (numSegments-1 == curSeg) // last segment - distinguish the neighboring point
-//                  arrData[cib++] = { vrtx[(curSeg-1)              ]
-//                                    ,vrtx[(curSeg  )              ]
-//                                    ,vrtx[(curSeg+1) % numVertices]
-//                                    ,vrtx[(curSeg+(closedLoop?2:1)) % numVertices]
-//                  };
-//               else
-//                  arrData[cib++] = { vrtx[(curSeg-1)              ]
-//                                    ,vrtx[(curSeg  )              ]
-//                                    ,vrtx[(curSeg+1) % numVertices]
-//                                    ,vrtx[(curSeg+2) % numVertices]
-//                  };
-//            }
-//         }
-//         break;
-//   }
-//   return std::make_tuple(arrData,numDataRows*sizeof(VertexSet), numDataRows);
-//}
-
-
-
-//=============================================================================
+/=============================================================================
 //
 // TrxSCnvx
 //
@@ -901,7 +849,8 @@ unsigned trend::TrxSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 unsigned trend::TrxSWire::ssize()
 {
-   if (NULL == _slist) return _lsize;
+   if (NULL == _slist) //return _lsize;
+      return 2*(_lsize);
    // get the number of selected segments first - don't forget that here
    // we're using GL_LINE_STRIP which means that we're counting selected
    // line segments and for each segment we're going to store two indexes
@@ -950,8 +899,15 @@ unsigned trend::TrxSWire::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    }
    else
    {
-      for (unsigned i = 0; i < _lsize; i++)
-         array[pindex++] = _loffset + i;
+      for (unsigned curSeg = 0; curSeg < _lsize ; curSeg++)
+         for(unsigned i = 0; i <  2; i++)
+            for (unsigned j = 0; j < 2*PPVRTX; j++)
+            {
+               int ridx=(curSeg-1)*2 + j;
+               ridx += ( 0                  > ridx) ? 2 : 0;//first point repeated
+               ridx -= ((int)((2*_lsize)-1) < ridx) ? 2 : 0;// last point repeated
+               array[pindex++] = (TNDR_GLDATAT)_ldata[ridx];
+            }
    }
    return ssize();
 }

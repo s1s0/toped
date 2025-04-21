@@ -50,9 +50,9 @@ void main()
       va[i].xy = (va[i].xy + 1.0) * 0.5 * in_ScreenSize;
    }
 
-   vec2 v_line  = normalize(va[1].xy - va[0].xy);
+   vec2 v_line  = (va[1].xy == va[0].xy) ? normalize(va[2].xy - va[1].xy) : normalize(va[1].xy - va[0].xy);
    vec2 nv_line = vec2(-v_line.y, v_line.x);
-   vec2 v_pred = (va[2].xy == va[1].xy) ? v_line : normalize(va[2].xy - va[1].xy);
+   vec2 v_pred  = (va[2].xy == va[1].xy) ? v_line : normalize(va[2].xy - va[1].xy);
    vec4 pos = va[1];
       
    vec2 v_miter = normalize(nv_line + vec2(-v_pred.y, v_pred.x));

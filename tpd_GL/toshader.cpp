@@ -255,9 +255,8 @@ void trend::ToshaderLay::drawSelected()
    unsigned dataRows = total_slctdx();
    assert(bufferSize == (GLint)(PPVRTX * 2 * dataRows * sizeof(TNDR_GLDATAT)));
 
-   // Set-up the offset in the binded Vertex buffer
+   // Set-up the offset in the bound Vertex buffer
    GLint varLoc = TRENDC->getVarLoc(glslv_in_Vertex);
-   //   DBGL_CALL(glVertexAttribPointer, varLoc    , 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr                          /*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
    unsigned vrtxSize = 2*sizeof(TNDR_GLENUMT);
    for (unsigned i=0; i < PPVRTX; i++)
    {
@@ -271,20 +270,13 @@ void trend::ToshaderLay::drawSelected()
    {//line strip
       assert(_sizslix[lstr]);
       assert(_fstslix[lstr]);
-      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
-      for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
-//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
+      DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[lstr],_sizslix[lstr],_asobjix[lstr])
    }
    if (_asobjix[llps] > 0)
    {// line loops
       assert(_sizslix[llps]);
       assert(_fstslix[llps]);
       DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[llps],_sizslix[llps],_asobjix[llps])
-//      for (unsigned i= 0; i < _asobjix[llps]; i++)
-//      DBGL_CALL(glDrawArrays,GL_LINE_LOOP, 10, 10 /*dataRows*/)
-//         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
-//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
    }
    if (_asobjix[lnes] > 0)
    {// lines

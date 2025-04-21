@@ -469,11 +469,9 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
       _fstslix[lnes] = DEBUG_NEW GLint[_asobjix[lnes]];
    }
    unsigned size_sindex[3];
-   unsigned index_soffset[3];
+   unsigned sOffset = 0;
+   
    size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
-   index_soffset[lstr] = _slctd_array_offset;
-   index_soffset[llps] = index_soffset[lstr] + _asindxs[lstr];
-   index_soffset[lnes] = index_soffset[llps] + _asindxs[llps];
 
 
    for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
@@ -484,22 +482,28 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
          case lstr : // LINES_STRIP
          {
             assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = (4 * 2 * sizeof(int)) * index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
+//            unsigned koko = size_sindex[lstr];
+//            std::cout << "Before linestrip (" << koko << "):" << _fstslix[lstr][koko] << " | " << _sizslix[lstr][koko] << std::endl;
+            _fstslix[lstr][size_sindex[lstr]  ] = sOffset / (PPVRTX * 2);
+            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, sOffset);
+//            std::cout << "After  linestrip (" << koko << "):" << _fstslix[lstr][koko] << " | " << _sizslix[lstr][koko] << std::endl;
             break;
          }
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = index_soffset[llps] / (PPVRTX * 2);
-            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+//            unsigned koko = size_sindex[llps];
+//            std::cout << "Before lineloop (" << koko << "):" << _fstslix[llps][koko] << " | " << _sizslix[llps][koko] << std::endl;
+            _fstslix[llps][size_sindex[llps]  ] = sOffset / (PPVRTX * 2);
+            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, sOffset);
+//            std::cout << "After lineloop (" << koko << "):" << _fstslix[llps][koko] << " | " << _sizslix[llps][koko] << std::endl;
             break;
          }
          case lnes   : // LINE
          {
             assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = (4 * 2 * sizeof(int)) * index_soffset[lnes];
-            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
+            _fstslix[lnes][size_sindex[lnes]  ] = sOffset / (PPVRTX * 2);
+            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, sOffset);
             break;
          }
          default: assert(false);break;
@@ -966,9 +970,6 @@ bool trend::Tenderer::collect()
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
       DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _sbuffer)
-      // for every index we need 4 points
-      // each point has 2 coordinates
-      // each coordinate is of type TNDR_GLDATAT
       DBGL_CALL(glBufferData, GL_ARRAY_BUFFER
                             , num_total_slctdx * (PPVRTX * 2 * sizeof(TNDR_GLDATAT))
                             , nullptr

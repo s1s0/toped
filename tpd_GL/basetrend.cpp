@@ -344,11 +344,6 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
    }
    else
    {
-//      _asindxs[llps] += sobj->csize();
-//      we need 4 invocations of the vertex shader for the first segment,
-//              2 invocations of the vertex shader for each consequitive segement,
-//      AND - 4 points for each invocation
-//      Number of segments for fully selected box is equal to the number of vertexes
       _asindxs[llps] += 2*(sobj->csize()+1);
       _asobjix[llps]++;
    }
@@ -387,7 +382,7 @@ void trend::TrendLay::registerSWire (TrxSWire* sobj)
    }
    else
    {
-      _asindxs[lstr] += sobj->lsize();
+      _asindxs[lstr] += 2*sobj->lsize();
       _asobjix[lstr]++;
    }
 }
