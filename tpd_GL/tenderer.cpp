@@ -502,8 +502,17 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
          case lnes   : // LINE
          {
             assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = sOffset / (PPVRTX * 2);
-            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, sOffset);
+            // The whole fuzz here is because we can have several segments selected in the part selected object.
+            // sDataCopy is gathering all data for all segments, yet those segments shall be drawn as separate objects.
+            // The selected segments are not necessarily neighboring.
+            unsigned curOffset = sOffset/(PPVRTX * 2);
+            unsigned numSegments = (cchunk->sDataCopy(slctd_array, sOffset)) / 4;
+            for (unsigned curSeg = 0; curSeg < numSegments;curSeg++)
+            {
+               _fstslix[lnes][size_sindex[lnes]  ] = curOffset+(curSeg*4);
+               _sizslix[lnes][size_sindex[lnes]++] = 4;
+               
+            }
             break;
          }
          default: assert(false);break;

@@ -795,14 +795,22 @@ unsigned trend::TrxSNcvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    if (NULL != _slist)
    { // shape is partially selected
       // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _csize; i++)
+      for (unsigned k = 0; k < _csize; k++)
       {
-         if (_slist->check(i) && _slist->check((i+1)%_csize))
-         {
-            array[pindex++] = _offset + i;
-            array[pindex++] = _offset + ((i+1)%_csize);
-         }
+         if (_slist->check(k) && _slist->check((k+1)%_csize))
+            for (unsigned curSeg = k; curSeg <= k+1 ; curSeg++)
+            {
+               unsigned curSegCorr = (0==curSeg) ? _csize-1 : curSeg-1;
+               for(int i = 0; i <  2; i++)
+                  for (unsigned j = 0; j < 2*PPVRTX; j++)
+                  {
+                     unsigned jCorr = (curSeg==k) ? ((j < 2) ? j+2 : j)
+                                                  : ((j > 3) ? j-2 : j);
+                     array[pindex++] = (TNDR_GLDATAT)_cdata[(curSegCorr*2+jCorr) % (2*_csize)];
+                  }
+            }
       }
+      return 2*ssize();
    }
    else
    {
@@ -810,8 +818,8 @@ unsigned trend::TrxSNcvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
          for(int i = 0; i <  2; i++)
             for (unsigned j = 0; j < 2*PPVRTX; j++)
                   array[pindex++] = (TNDR_GLDATAT)_cdata[(curSeg*2+j) % (2*_csize)];
+      return ssize();
    }
-   return ssize();
 }
 
 void trend::TrxSNcvx::drctDrawSlctd()
