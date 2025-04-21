@@ -28,7 +28,7 @@
 // but optimized
 #version 330
 
-#define vrtxNum 4
+#define vrtxNum 3
 
 uniform mat4  in_CTM;
 uniform float in_Z = 0;
@@ -39,7 +39,6 @@ in vec2 in_Vertex[vrtxNum];
 noperspective out vec2 markCoord;
 noperspective out float patternCoord;
 
-// TODO! va[0] is not used! Reduce the data!
 void main()
 {
    gl_PointSize = 10;
@@ -51,10 +50,10 @@ void main()
       va[i].xy = (va[i].xy + 1.0) * 0.5 * in_ScreenSize;
    }
 
-   vec2 v_line  = normalize(va[2].xy - va[1].xy);
+   vec2 v_line  = normalize(va[1].xy - va[0].xy);
    vec2 nv_line = vec2(-v_line.y, v_line.x);
-   vec2 v_pred = (va[3].xy == va[2].xy) ? v_line : normalize(va[3].xy - va[2].xy);
-   vec4 pos = va[2];
+   vec2 v_pred = (va[2].xy == va[1].xy) ? v_line : normalize(va[2].xy - va[1].xy);
+   vec4 pos = va[1];
       
    vec2 v_miter = normalize(nv_line + vec2(-v_pred.y, v_pred.x));
    pos.xy += v_miter * in_LineWidth * ((gl_VertexID%2) == 0 ? -0.5 : 0.5) / dot(v_miter, nv_line);

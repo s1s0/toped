@@ -253,15 +253,15 @@ void trend::ToshaderLay::drawSelected()
    GLint bufferSize;
    DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    unsigned dataRows = total_slctdx();
-   assert(bufferSize == (GLint)(4 * 2 * dataRows * sizeof(TNDR_GLDATAT)));
+   assert(bufferSize == (GLint)(PPVRTX * 2 * dataRows * sizeof(TNDR_GLDATAT)));
 
    // Set-up the offset in the binded Vertex buffer
    GLint varLoc = TRENDC->getVarLoc(glslv_in_Vertex);
    //   DBGL_CALL(glVertexAttribPointer, varLoc    , 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr                          /*(GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset*/)
    unsigned vrtxSize = 2*sizeof(TNDR_GLENUMT);
-   for (unsigned i=0; i < 4; i++)
+   for (unsigned i=0; i < PPVRTX; i++)
    {
-      DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, 4*vrtxSize, (GLvoid*)(i*vrtxSize))
+      DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(i*vrtxSize))
       DBGL_CALL(glEnableVertexAttribArray, varLoc+i)
       
    }

@@ -765,16 +765,16 @@ unsigned trend::TrxSBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    }
    else
    {
-      const unsigned char kidx[4][8] = { {0,1,2,1,2,3,0,3}
-                                        ,{2,1,2,3,0,3,0,1}
-                                        ,{2,3,0,3,0,1,2,1}
-                                        ,{0,3,0,1,2,1,2,3}
+      const unsigned char kidx[4][2*PPVRTX] = { {0,1,2,1,2,3}
+                                               ,{2,1,2,3,0,3}
+                                               ,{2,3,0,3,0,1}
+                                               ,{0,3,0,1,2,1}
       };
       
       for (unsigned curSeg = 0; curSeg <= 4 ; curSeg++)
          for(int i = 0; i <  2; i++)
-               for (unsigned j = 0; j < 8;j++)
-                  array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg%4][j]];
+            for (unsigned j = 0; j < 2*PPVRTX;j++)
+               array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg%4][j]];
    }
    return ssize();
 }
@@ -853,7 +853,7 @@ unsigned trend::TrxSNcvx::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    {
       for (unsigned curSeg = 0; curSeg <= _csize ; curSeg++)
          for(int i = 0; i <  2; i++)
-               for (unsigned j = 0; j < 8; j++)
+            for (unsigned j = 0; j < 2*PPVRTX; j++)
                   array[pindex++] = (TNDR_GLDATAT)_cdata[(curSeg*2+j) % (2*_csize)];
    }
    return ssize();

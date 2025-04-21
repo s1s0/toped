@@ -39,6 +39,7 @@
    #define TNDR_GLDATAT GLint
    #define TNDR_GLENUMT GL_INT
 #endif
+#define PPVRTX 3 // points per vertex - used for handling lineW shader data
 
 //=============================================================================
 //

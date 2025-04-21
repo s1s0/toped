@@ -491,7 +491,7 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = index_soffset[llps] / (4 * 2);
+            _fstslix[llps][size_sindex[llps]  ] = index_soffset[llps] / (PPVRTX * 2);
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
@@ -969,10 +969,11 @@ bool trend::Tenderer::collect()
       // for every index we need 4 points
       // each point has 2 coordinates
       // each coordinate is of type TNDR_GLDATAT
-      DBGL_CALL(glBufferData, GL_ARRAY_BUFFER      ,
-                   num_total_slctdx * (4 * 2 * sizeof(TNDR_GLDATAT)),
-                   nullptr                                 ,
-                   GL_DYNAMIC_DRAW                    )
+      DBGL_CALL(glBufferData, GL_ARRAY_BUFFER
+                            , num_total_slctdx * (PPVRTX * 2 * sizeof(TNDR_GLDATAT))
+                            , nullptr
+                            , GL_DYNAMIC_DRAW
+                )
       TNDR_GLDATAT* sindex_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
