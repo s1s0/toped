@@ -379,8 +379,9 @@ void trend::TrendLay::registerSWire (TrxSWire* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lnes] += sobj->ssize();
-      _asobjix[lnes]++;
+      unsigned interm = sobj->ssize();
+      _asindxs[lnes] += 2*interm;
+      _asobjix[lnes]+=(interm/2);
    }
    else
    {

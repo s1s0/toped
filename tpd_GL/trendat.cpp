@@ -888,29 +888,45 @@ unsigned trend::TrxSWire::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
-      // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _lsize - 1; i++)
+      for (unsigned k = 0; k < _lsize; k++)
       {
-         if (_slist->check(i) && _slist->check(i+1))
-         {
-            array[pindex++] = _loffset + i;
-            array[pindex++] = _loffset + i + 1;
+         if ((k < (_lsize-1)) && _slist->check(k) && _slist->check(k+1))
+            // i.e. full wire segment, not edge points only
+            for (unsigned curSeg = k; curSeg <= k+1 ; curSeg++)
+            {
+               unsigned curSegCorr = (0==curSeg) ? _lsize-1 : curSeg-1;
+               for(int i = 0; i <  2; i++)
+                  for (unsigned j = 0; j < 2*PPVRTX; j++)
+                  {
+                     unsigned jCorr = (curSeg==k) ? ((j < 2) ? j+2 : j)
+                                                  : ((j > 3) ? j-2 : j);
+                     array[pindex++] = (TNDR_GLDATAT)_ldata[(curSegCorr*2+jCorr) % (2*_lsize)];
+                  }
+            }
+         if ( ((0==k) || ((_lsize - 1)==k)) && _slist->check(k))
+         {// i.e. the selected vertex is the first or the last one of the wire
+            unsigned idxA, idxB;//countour indexes
+            if (0==k)
+            {
+               idxA = 2 * (_lsize - 1);  idxB = 2 * _lsize;
+            }
+            else
+            {
+               idxA = 4 * _lsize - 2; idxB = 0;
+            }
+            unsigned kidx[2][2*PPVRTX] = { {idxA,idxA+1,idxA,idxA+1,idxB,idxB+1}
+                                          ,{idxA,idxA+1,idxB,idxB+1,idxB,idxB+1}
+            };
+            for (unsigned curSeg = 0; curSeg <= 1 ; curSeg++)
+            {
+               for(int i = 0; i <  2; i++)
+                  for (unsigned j = 0; j < 2*PPVRTX; j++)
+                     array[pindex++] = (TNDR_GLDATAT)_cdata[kidx[curSeg][j]];
+            }
+
          }
       }
-      if (!_celno)
-      {
-         // And the edge points!
-         if (_slist->check(0)       ) // if first point is selected
-         {
-            array[pindex++] = _offset + (_csize/2) -1;
-            array[pindex++] = _offset + (_csize/2);
-         }
-         if (_slist->check(_lsize-1))// if last point is selected
-         {
-            array[pindex++] = _offset;
-            array[pindex++] = _offset + _csize -1;
-         }
-      }
+      return 2*ssize();
    }
    else
    {
@@ -923,8 +939,8 @@ unsigned trend::TrxSWire::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
                ridx -= ((int)((2*_lsize)-1) < ridx) ? 2 : 0;// last point repeated
                array[pindex++] = (TNDR_GLDATAT)_ldata[ridx];
             }
+      return ssize();
    }
-   return ssize();
 }
 
 void trend::TrxSWire::drctDrawSlctd()

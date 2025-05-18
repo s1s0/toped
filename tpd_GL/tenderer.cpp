@@ -505,7 +505,7 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
             // The whole fuzz here is because we can have several segments selected in the part selected object.
             // sDataCopy is gathering all data for all segments, yet those segments shall be drawn as separate objects.
             // The selected segments are not necessarily neighboring.
-            unsigned curOffset = sOffset/(PPVRTX * 2);
+            unsigned curOffset = sOffset / (PPVRTX * 2);
             unsigned numSegments = (cchunk->sDataCopy(slctd_array, sOffset)) / 4;
             for (unsigned curSeg = 0; curSeg < numSegments;curSeg++)
             {

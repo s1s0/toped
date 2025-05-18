@@ -229,7 +229,7 @@ namespace trend {
          virtual void      drctDrawCLine();
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
-         virtual const TeselChain* tdata()               {return _tdata;}
+         virtual const TeselChain* tdata()         {return _tdata;}
       protected:
                            TrxWire(unsigned, const WireWidth, bool);
          int4b*            _ldata; //! the vertexes of the wires central line
