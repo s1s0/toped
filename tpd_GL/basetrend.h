@@ -556,7 +556,7 @@ namespace trend {
          virtual void      drawSelected() = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
          virtual void      collect(bool, GLuint, GLuint) { assert(false); }
-         virtual void      collectSelected(TNDR_GLDATAT*) { assert(false); }
+         virtual void      collectSelected(TNDR_GLDATAT*, unsigned& ) { assert(false); }
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
          unsigned          total_slctdx();

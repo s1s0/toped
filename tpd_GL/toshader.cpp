@@ -251,9 +251,9 @@ void trend::ToshaderLay::drawSelected()
 {
    // Check the state of the buffer
    GLint bufferSize;
-   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
-   unsigned dataRows = total_slctdx();
-   assert(bufferSize == (GLint)(PPVRTX * 2 * dataRows * sizeof(TNDR_GLDATAT)));
+//   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
+//   unsigned dataRows = total_slctdx();
+//   assert(bufferSize == (GLint)(PPVRTX * 2 * dataRows * sizeof(TNDR_GLDATAT)));
 
    // Set-up the offset in the bound Vertex buffer
    GLint varLoc = TRENDC->getVarLoc(glslv_in_Vertex);
@@ -591,8 +591,8 @@ void trend::Toshader::draw()
       }
    }
    // Selected items
-   TRENDC->setGlslProg(glslp_LW); //i.e. line stipple shader
-   _drawprop->resetCurrentColor();
+   TRENDC->setGlslProg(glslp_LW); //i.e. line with arbitrary width
+   _drawprop->resetCurrentColor(); // required after changing the renderer
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
    DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),5.0)
    glUniform2f(TRENDC->getUniformLoc(glslu_in_ScreenSize), (float)_screenW, (float)_screenH);
@@ -612,6 +612,8 @@ void trend::Toshader::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
+      TRENDC->setGlslProg(glslp_VG);// i.e. line stipple shader
+      _drawprop->resetCurrentColor(); // required after changing the renderer
       setLayColor(REF_LAY_DEF);
       setLine(false);
       float mtrxOrtho [16];

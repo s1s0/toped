@@ -70,7 +70,7 @@ namespace trend {
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
          virtual void      collect(bool, GLuint, GLuint);
-         virtual void      collectSelected(TNDR_GLDATAT*);
+         virtual void      collectSelected(TNDR_GLDATAT*, unsigned& );
 
       protected:
          GLuint            _pbuffer;

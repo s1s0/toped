@@ -447,7 +447,7 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
    }
 }
 
-void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
+void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array, unsigned& sOffset)
 {
    unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
    if (0 == slct_arr_size) return;
@@ -469,7 +469,7 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
       _fstslix[lnes] = DEBUG_NEW GLint[_asobjix[lnes]];
    }
    unsigned size_sindex[3];
-   unsigned sOffset = 0;
+//   unsigned sOffset = 0;
    
    size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
 
@@ -482,21 +482,15 @@ void trend::TenderLay::collectSelected(TNDR_GLDATAT* slctd_array)
          case lstr : // LINES_STRIP
          {
             assert(_sizslix[lstr]);
-//            unsigned koko = size_sindex[lstr];
-//            std::cout << "Before linestrip (" << koko << "):" << _fstslix[lstr][koko] << " | " << _sizslix[lstr][koko] << std::endl;
             _fstslix[lstr][size_sindex[lstr]  ] = sOffset / (PPVRTX * 2);
             _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, sOffset);
-//            std::cout << "After  linestrip (" << koko << "):" << _fstslix[lstr][koko] << " | " << _sizslix[lstr][koko] << std::endl;
             break;
          }
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-//            unsigned koko = size_sindex[llps];
-//            std::cout << "Before lineloop (" << koko << "):" << _fstslix[llps][koko] << " | " << _sizslix[llps][koko] << std::endl;
             _fstslix[llps][size_sindex[llps]  ] = sOffset / (PPVRTX * 2);
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, sOffset);
-//            std::cout << "After lineloop (" << koko << "):" << _fstslix[llps][koko] << " | " << _sizslix[llps][koko] << std::endl;
             break;
          }
          case lnes   : // LINE
@@ -985,11 +979,12 @@ bool trend::Tenderer::collect()
                             , GL_DYNAMIC_DRAW
                 )
       TNDR_GLDATAT* sindex_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
+      unsigned sOffset = 0;
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
          if (0 == CLAY->total_slctdx())
             continue;
-         CLAY->collectSelected(sindex_array);
+         CLAY->collectSelected(sindex_array,sOffset);
       }
       DBGL_CALL(glUnmapBuffer, GL_ARRAY_BUFFER)
    }
