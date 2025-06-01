@@ -449,10 +449,10 @@ unsigned trend::TrendRefLay::total_points()
    return (_alvrtxs + _asindxs);
 }
 
-unsigned trend::TrendRefLay::total_indexes()
-{
-   return (_alobjvx + _asobjix);
-}
+//unsigned trend::TrendRefLay::total_indexes()
+//{
+//   return (_alobjvx + _asobjix);
+//}
 
 trend::TrendRefLay::~TrendRefLay()
 {

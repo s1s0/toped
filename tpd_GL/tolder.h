@@ -67,6 +67,9 @@ namespace trend {
                            TolderRefLay() : TrendRefLay() {}
          virtual          ~TolderRefLay() {}
          virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawSelected(layprop::DrawProperties*) {assert(false);}
+         virtual void      collect(GLuint) { assert(false); }
+         virtual void      scollect(GLuint){ assert(false); }
       protected:
          virtual void      setLine(layprop::DrawProperties*, bool);
    };

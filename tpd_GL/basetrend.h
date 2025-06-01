@@ -593,10 +593,14 @@ namespace trend {
                            TrendRefLay();
          virtual          ~TrendRefLay();
          void              addCellOBox(TrxCellRef*, word, bool);
-         virtual void      collect(GLuint)  { assert(false); }
+         virtual void      collect(GLuint)  = 0;
+         virtual void      scollect(GLuint) = 0;
          virtual void      draw(layprop::DrawProperties*) = 0;
+         virtual void      drawSelected (layprop::DrawProperties*) = 0;
          unsigned          total_points();
-         unsigned          total_indexes();
+//         unsigned          total_indexes();
+         unsigned          alvrtxs() const {return _alvrtxs;}
+         unsigned          asindxs() const {return _asindxs;}
       protected:
          virtual void      setLine(layprop::DrawProperties*,bool) = 0;
          RefBoxList        _cellRefBoxes;
@@ -604,7 +608,7 @@ namespace trend {
          // vertex related data
          unsigned          _alvrtxs; //! total number of vertexes
          unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
-         // index related data for selected boxes
+         // data related to selected boxes
          unsigned          _asindxs; //! total number of selected vertexes
          unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
    };

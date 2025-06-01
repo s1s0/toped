@@ -615,11 +615,42 @@ trend::TenderLay::~TenderLay()
 trend::TenderRefLay::TenderRefLay() :
    TrendRefLay    (      ),
    _pbuffer       (   0u ),
+   _sbuffer       (   0u ),
    _sizesvx       ( NULL ),
    _firstvx       ( NULL ),
    _sizslix       ( NULL ),
    _fstslix       ( NULL )
 {
+}
+
+void trend::TenderRefLay::scollect(GLuint pbuf)
+{
+   TNDR_GLDATAT* cpoint_array = NULL;
+   _sbuffer = pbuf;
+   unsigned dataSize = _asobjix * 2*(4+1) * (PPVRTX * 2 * sizeof(TNDR_GLDATAT));
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _sbuffer)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER ,
+                dataSize                   ,
+                nullptr                    ,
+                GL_DYNAMIC_DRAW             )
+   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY)
+
+   // initialise the indexing
+   unsigned pntindx = 0;
+   unsigned  szindx  = 0;
+   _fstslix = DEBUG_NEW GLsizei[_asobjix];// array of first indexes
+   _sizslix = DEBUG_NEW GLsizei[_asobjix];// array of shape sizes
+   // collect the cell overlapping boxes
+   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+   {
+      _fstslix[szindx  ] = pntindx/(2*PPVRTX);
+      _sizslix[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx, true);
+   }
+   assert(pntindx  == (_asobjix * 2*(4+1) * (PPVRTX * 2)) );
+   assert(szindx   == _asobjix);
+
+   // Unmap the buffers
+   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void trend::TenderRefLay::collect(GLuint pbuf)
@@ -628,7 +659,7 @@ void trend::TenderRefLay::collect(GLuint pbuf)
    _pbuffer = pbuf;
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER              ,
-                2 * total_points() * sizeof(TNDR_GLDATAT) ,
+                2 * alvrtxs()* sizeof(TNDR_GLDATAT) ,
                 nullptr                         ,
                 GL_DYNAMIC_DRAW               )
    cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY)
@@ -636,33 +667,19 @@ void trend::TenderRefLay::collect(GLuint pbuf)
    // initialise the indexing
    unsigned pntindx = 0;
    unsigned  szindx  = 0;
-   if (0 < (_alvrtxs + _asindxs))
-   {
-      _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-      _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-      if (0 < _asobjix)
-      {
-         _fstslix = DEBUG_NEW GLsizei[_asobjix];
-         _sizslix = DEBUG_NEW GLsizei[_asobjix];
-      }
-   }
+   _firstvx = DEBUG_NEW GLsizei[_alobjvx];// array of first indexes
+   _sizesvx = DEBUG_NEW GLsizei[_alobjvx];// array of shape sizes
    // collect the cell overlapping boxes
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
       if (1 < (*CSH)->alphaDepth())
       {
          _firstvx[szindx  ] = pntindx/2;
-         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx, false);
       }
    }
-   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
-   {
-      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
-      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
-      szindx++;
-   }
-   assert(pntindx == 2 * (_alvrtxs + _asindxs));
-   assert(szindx  ==     (_alobjvx + _asobjix));
+   assert(pntindx == (2 * _alvrtxs ));
+   assert(szindx  ==      _alobjvx  );
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -931,9 +948,10 @@ bool trend::Tenderer::collect()
          ++CCLAY;
    }
    _clayer = NULL;
-   if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
-   if (0 < _marks->total_points()   )  _num_ogl_buffers ++; // reference marks
-   if (0 < num_total_slctdx         )  _num_ogl_buffers ++; // selected
+   if (0 < _refLayer->alvrtxs()  ) _num_ogl_buffers++; // reference boxes
+   if (0 < _refLayer->asindxs()  ) _num_ogl_buffers++; // selected reference boxes
+   if (0 < _marks->total_points()) _num_ogl_buffers++; // reference marks
+   if (0 < num_total_slctdx      ) _num_ogl_buffers++; // selected
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
    {
@@ -992,12 +1010,19 @@ bool trend::Tenderer::collect()
 //   checkOGLError("collect");
 
    //
-   // collect the reference boxes
-   if (0 < _refLayer->total_points())
+   // collect the unselected reference boxes
+   if (0 < _refLayer->alvrtxs())
    {
       GLuint pbuf = _ogl_buffers[current_buffer++];
       _refLayer->collect(pbuf);
    }
+   // collect selected reference boxes
+   if (0 < _refLayer->asindxs())
+   {
+      GLuint pbuf = _ogl_buffers[current_buffer++];
+      _refLayer->scollect(pbuf);
+   }
+       
    // collect reference marks
    if (0 < _marks->total_points())
    {

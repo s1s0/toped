@@ -88,10 +88,13 @@ namespace trend {
                            TenderRefLay();
          virtual          ~TenderRefLay();
          virtual void      collect(GLuint);
+         virtual void      scollect(GLuint);
          virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawSelected (layprop::DrawProperties*) {assert(false);}
       protected:
          virtual void      setLine(layprop::DrawProperties*, bool);
-         GLuint            _pbuffer;
+         GLuint            _pbuffer; //! buffer for unselected overlapping boxes
+         GLuint            _sbuffer; //! buffer for selected overlapping boxes
          // vertex related data
          GLsizei*          _sizesvx; //! array of sizes for vertex sets
          GLsizei*          _firstvx; //! array of first vertexes

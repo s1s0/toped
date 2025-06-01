@@ -519,7 +519,7 @@ namespace trend {
          real*             translation()  {return _translation;}
          const CTM&        ctm() const    {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
-         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
+         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&, bool);
          void              drctDrawContour();
       private:
          std::string       _name;

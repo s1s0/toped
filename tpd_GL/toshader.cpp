@@ -250,7 +250,7 @@ bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 void trend::ToshaderLay::drawSelected()
 {
    // Check the state of the buffer
-   GLint bufferSize;
+//   GLint bufferSize;
 //   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
 //   unsigned dataRows = total_slctdx();
 //   assert(bufferSize == (GLint)(PPVRTX * 2 * dataRows * sizeof(TNDR_GLDATAT)));
@@ -260,32 +260,29 @@ void trend::ToshaderLay::drawSelected()
    unsigned vrtxSize = 2*sizeof(TNDR_GLENUMT);
    for (unsigned i=0; i < PPVRTX; i++)
    {
-      DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(i*vrtxSize))
+      DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(size_t)(i*vrtxSize))
       DBGL_CALL(glEnableVertexAttribArray, varLoc+i)
    }
-//   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
-//   
    if (_asobjix[lstr] > 0)
-   {//line strip
+   {
       assert(_sizslix[lstr]);
       assert(_fstslix[lstr]);
       DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[lstr],_sizslix[lstr],_asobjix[lstr])
    }
    if (_asobjix[llps] > 0)
-   {// line loops
+   {
       assert(_sizslix[llps]);
       assert(_fstslix[llps]);
       DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[llps],_sizslix[llps],_asobjix[llps])
    }
    if (_asobjix[lnes] > 0)
-   {// lines
+   {
       assert(_sizslix[lnes]);
       assert(_fstslix[lnes]);
       DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix[lnes],_sizslix[lnes],_asobjix[lnes])
    }
-   DBGL_CALL(glDisable,GL_PROGRAM_POINT_SIZE)
-   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
-//   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
+   for (unsigned i=0; i < PPVRTX; i++)
+      DBGL_CALL(glDisableVertexAttribArray, varLoc+i)
 }
 
 
@@ -299,32 +296,51 @@ trend::ToshaderRefLay::ToshaderRefLay() :
 }
 
 
-void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
+void trend::ToshaderRefLay::draw(layprop::DrawProperties* /*drawprop*/)
 {
    // Bind the buffer
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
    DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
-   assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
+   assert(bufferSize == (GLint)(2 * alvrtxs() * sizeof(TNDR_GLDATAT)));
 
    DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
    DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
    // ... and here we go ...
-   if (0 < (_alvrtxs + _asindxs))
-   {
+//   if (0 < (_alvrtxs ))
+//   {
       assert(_firstvx); assert(_sizesvx);
-      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix)
-      if (0 < _asindxs)
-      {
-         assert(_fstslix); assert(_sizslix);
-         setLine(drawprop, true);
-         DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _fstslix, _sizslix, _asobjix)
-         setLine(drawprop, false);
-      }
-   }
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx)
+//   }
    DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
+}
+
+void trend::ToshaderRefLay::drawSelected(layprop::DrawProperties* /*drawprop*/)
+{
+   // Bind the buffer
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _sbuffer)
+   // Check the state of the buffer
+   GLint bufferSize;
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
+   assert(bufferSize == (GLint)(2 * _asobjix*5 * (2*PPVRTX) * sizeof(TNDR_GLDATAT)));
+
+   GLint varLoc = TRENDC->getVarLoc(glslv_in_Vertex);
+   unsigned vrtxSize = 2*sizeof(TNDR_GLENUMT);
+   for (unsigned i=0; i < PPVRTX; i++)
+   {
+      DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(size_t)(i*vrtxSize))
+      DBGL_CALL(glEnableVertexAttribArray, varLoc+i)
+   }
+//   if (0 < _asindxs)
+//   {
+      assert(_fstslix); assert(_sizslix);
+      DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix,_sizslix,_asobjix)
+//         setLine(drawprop, false);
+//   }
+   for (unsigned i=0; i < PPVRTX; i++)
+      DBGL_CALL(glDisableVertexAttribArray, varLoc+i)
 }
 
 void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
@@ -557,7 +573,7 @@ void trend::Toshader::setLine(bool selected)
 {
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
-   GLfloat clnw = static_cast<GLfloat>(curLine.width());
+//   GLfloat clnw = static_cast<GLfloat>(curLine.width());
 //   DBGL_CALL(glLineWidth,clnw)
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
@@ -610,7 +626,7 @@ void trend::Toshader::draw()
       }
    }
    // draw reference boxes
-   if (0 < _refLayer->total_points())
+   if (0 < _refLayer->alvrtxs())
    {
       TRENDC->setGlslProg(glslp_VG);// i.e. line stipple shader
       _drawprop->resetCurrentColor(); // required after changing the renderer
@@ -620,6 +636,19 @@ void trend::Toshader::draw()
       _drawprop->topCtm().oglForm(mtrxOrtho);
       DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
       _refLayer->draw(_drawprop);
+      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
+   }
+   if (0 < _refLayer->asindxs())
+   {
+      TRENDC->setGlslProg(glslp_LW);//i.e. line with arbitrary width
+      _drawprop->resetCurrentColor(); // required after changing the renderer
+      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),5.0)
+      setLayColor(REF_LAY_DEF);
+//      setLine(false);
+      float mtrxOrtho [16];
+      _drawprop->topCtm().oglForm(mtrxOrtho);
+      DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+      _refLayer->drawSelected(_drawprop);
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    }
    // draw reference marks

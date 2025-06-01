@@ -1312,16 +1312,33 @@ trend::TrxCellRef::TrxCellRef() :
    for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex, bool sel)
 {
+   if (sel)
+   {
+      const unsigned csize = 4;
+      const unsigned char kidx[csize][2*PPVRTX] = { {0,5,0,1,4,1}
+                                                   ,{0,1,4,1,4,5}
+                                                   ,{4,1,4,5,0,5}
+                                                   ,{4,5,0,5,0,1}
+                                            };
+      for (unsigned curSeg = 0; curSeg <= csize ; curSeg++)
+         for(int i = 0; i <  2; i++)
+            for (unsigned j = 0; j < 2*PPVRTX;j++)
+               array[pindex++] = (TNDR_GLDATAT)_obox[kidx[curSeg%csize][j]];
+      return 2*(csize+1);
+   }
+   else
+   {
 #ifdef TENDERER_USE_FLOATS
-   for (unsigned i = 0; i <  8; i++)
-      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
+      for (unsigned i = 0; i <  8; i++)
+         array[pindex+i] = (TNDR_GLDATAT) _obox[i];
 #else
-   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
+      memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
 #endif
-   pindex += 8;
-   return 4;
+      pindex += 8;
+      return 4;
+   }
 }
 
 void trend::TrxCellRef::drctDrawContour()

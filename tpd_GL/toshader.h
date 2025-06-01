@@ -70,6 +70,7 @@ namespace trend {
                            ToshaderRefLay();
          virtual          ~ToshaderRefLay();
          virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawSelected(layprop::DrawProperties*);
       protected:
          virtual void      setLine(layprop::DrawProperties*, bool);
    };
