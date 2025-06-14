@@ -993,10 +993,18 @@ unsigned trend::TrxTextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 unsigned trend::TrxTextSOvlBox::sDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
-   assert (NULL == _slist);
-   for (unsigned i = 0; i < 4; i++)
-      array[pindex++] = _offset + i;
-   return ssize();
+
+   const unsigned csize = 4;
+   const unsigned char kidx[csize][2*PPVRTX] = { {6,7,0,1,2,3}
+                                                ,{0,1,2,3,4,5}
+                                                ,{2,3,4,5,6,7}
+                                                ,{4,5,6,7,0,1}
+                                         };
+   for (unsigned curSeg = 0; curSeg <= csize ; curSeg++)
+      for(int i = 0; i <  2; i++)
+         for (unsigned j = 0; j < 2*PPVRTX;j++)
+            array[pindex++] = (TNDR_GLDATAT)_obox[kidx[curSeg%csize][j]];
+   return 2*(csize+1);
 }
 
 void trend::TrxTextSOvlBox::drctDrawSlctd()
@@ -1317,11 +1325,16 @@ unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex, boo
    if (sel)
    {
       const unsigned csize = 4;
-      const unsigned char kidx[csize][2*PPVRTX] = { {0,5,0,1,4,1}
-                                                   ,{0,1,4,1,4,5}
-                                                   ,{4,1,4,5,0,5}
-                                                   ,{4,5,0,5,0,1}
+      const unsigned char kidx[csize][2*PPVRTX] = { {6,7,0,1,2,3}
+                                                   ,{0,1,2,3,4,5}
+                                                   ,{2,3,4,5,6,7}
+                                                   ,{4,5,6,7,0,1}
                                             };
+//      const unsigned char kidx[csize][2*PPVRTX] = { {0,5,0,1,4,1}
+//                                                   ,{0,1,4,1,4,5}
+//                                                   ,{4,1,4,5,0,5}
+//                                                   ,{4,5,0,5,0,1}
+//                                            };
       for (unsigned curSeg = 0; curSeg <= csize ; curSeg++)
          for(int i = 0; i <  2; i++)
             for (unsigned j = 0; j < 2*PPVRTX;j++)

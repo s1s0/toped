@@ -493,6 +493,7 @@ trend::Shaders::Shaders() :
    _fnShdrVrtxLineW       ( "linew.vrtx.glsl"  ),
    _fnShdrVrtxFB          ( "fb.vrtx.glsl"     ),
    _fnShdrGeomDefault     ( "default.geom.glsl"),
+   _fnShdrGeomLineW       ( "linew.geom.glsl"  ),
    _fnShdrGeomSprite      ( "sprite.geom.glsl" ),
    _fnShdrFragDefault     ( "default.frag.glsl"),
    _fnShdrFragFB          ( "fb.frag.glsl"     ),
@@ -500,6 +501,7 @@ trend::Shaders::Shaders() :
    _idShdrVrtxLineW       (                 -1 ),
    _idShdrVrtxFB          (                 -1 ),
    _idShdrGeomDefault     (                 -1 ),
+   _idShdrGeomLineW       (                 -1 ),
    _idShdrGeomSprite      (                 -1 ),
    _idShdrFragDefault     (                 -1 ),
    _idShdrFragFB          (                 -1 ),
@@ -607,6 +609,7 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
    _fnShdrVrtxLineW   = codeDirectory + _fnShdrVrtxLineW   ;
    _fnShdrVrtxFB      = codeDirectory + _fnShdrVrtxFB      ;
    _fnShdrGeomDefault = codeDirectory + _fnShdrGeomDefault ;
+   _fnShdrGeomLineW   = codeDirectory + _fnShdrGeomLineW   ;
    _fnShdrGeomSprite  = codeDirectory + _fnShdrGeomSprite  ;
    _fnShdrFragDefault = codeDirectory + _fnShdrFragDefault ;
    _fnShdrFragFB      = codeDirectory + _fnShdrFragFB      ;
@@ -614,6 +617,7 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       &&(_status &= compileShader(_fnShdrVrtxLineW   , _idShdrVrtxLineW   , GL_VERTEX_SHADER   ))
       &&(_status &= compileShader(_fnShdrVrtxFB      , _idShdrVrtxFB      , GL_VERTEX_SHADER   ))
       &&(_status &= compileShader(_fnShdrGeomDefault , _idShdrGeomDefault , GL_GEOMETRY_SHADER ))
+      &&(_status &= compileShader(_fnShdrGeomLineW   , _idShdrGeomLineW   , GL_GEOMETRY_SHADER ))
       &&(_status &= compileShader(_fnShdrGeomSprite  , _idShdrGeomSprite  , GL_GEOMETRY_SHADER ))
       &&(_status &= compileShader(_fnShdrFragDefault , _idShdrFragDefault , GL_FRAGMENT_SHADER ))
       &&(_status &= compileShader(_fnShdrFragFB      , _idShdrFragFB      , GL_FRAGMENT_SHADER ))
@@ -626,7 +630,9 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       _status &= linkProgram(glslp_FB);
       
       DBGL_CALL(glDeleteShader,_idShdrVrtxDefault )
+      DBGL_CALL(glDeleteShader,_idShdrVrtxLineW   )
       DBGL_CALL(glDeleteShader,_idShdrGeomDefault )
+      DBGL_CALL(glDeleteShader,_idShdrGeomLineW   )
       DBGL_CALL(glDeleteShader,_idShdrGeomSprite  )
       DBGL_CALL(glDeleteShader,_idShdrFragDefault )
       DBGL_CALL(glDeleteShader,_idShdrVrtxFB      )
@@ -658,7 +664,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       case glslp_LW:
       {// Line with arbitrary width
          DBGL_CALL(glAttachShader, program, _idShdrVrtxLineW   )
-         DBGL_CALL(glAttachShader, program, _idShdrGeomDefault )
+         DBGL_CALL(glAttachShader, program, _idShdrGeomLineW   )
          DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
          info << "GLSL program LW (line width)";
          break;
@@ -718,6 +724,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       case glslp_LW:
       {// Line with arbitrary width
          DBGL_CALL(glDetachShader, program, _idShdrVrtxLineW   )
+         DBGL_CALL(glDetachShader, program, _idShdrGeomLineW   )
          DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
          break;
       }

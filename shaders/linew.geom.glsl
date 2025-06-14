@@ -16,7 +16,7 @@
 //           $URL: https://toped.googlecode.com/svn/trunk/shaders/fragment.glsl $
 //        Created: Sat Dec  8 2012
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: GLSL Geometry shader
+//    Description: GLSL Geometry shader for line widths shader
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -27,8 +27,8 @@
 
 #version 330
 
-layout(lines) in;
-layout(line_strip, max_vertices=2) out;
+layout(triangles) in;
+layout(triangle_strip, max_vertices=3) out;
 
 uniform vec2 in_ScreenSize;
 uniform uint in_PatScale = 1u;
@@ -48,6 +48,7 @@ void main()
 {
    vec2 p0Pos = in_ScreenSize.xy * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
    vec2 p1Pos = in_ScreenSize.xy * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
+   vec2 p2Pos = in_ScreenSize.xy * gl_in[2].gl_Position.xy / gl_in[2].gl_Position.w;
    markCoord = vec2(0,0);
 
    gl_Position = gl_in[0].gl_Position;
@@ -56,6 +57,10 @@ void main()
    
    gl_Position = gl_in[1].gl_Position;
    patternCoord = 0.5 * length(p1Pos - p0Pos) / float(in_PatScale);
+   EmitVertex();
+
+   gl_Position = gl_in[2].gl_Position;
+   patternCoord = 0.5 * length(p2Pos - p1Pos) / float(in_PatScale);
    EmitVertex();
 
    EndPrimitive();

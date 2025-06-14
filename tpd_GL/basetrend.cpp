@@ -353,7 +353,7 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
 void trend::TrendLay::registerSOBox (TrxTextSOvlBox* sobj)
 {
    _slct_data.push_back(sobj);
-   _asindxs[llps] += 4;
+   _asindxs[llps] += 2*(4+1);
    _asobjix[llps]++;
 }
 

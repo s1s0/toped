@@ -197,6 +197,7 @@ namespace trend {
          std::string            _fnShdrVrtxLineW   ; // for drawing selected lines
          std::string            _fnShdrVrtxFB      ; // for framebuffer rendering
          std::string            _fnShdrGeomDefault ;
+         std::string            _fnShdrGeomLineW   ;
          std::string            _fnShdrGeomSprite  ;
          std::string            _fnShdrFragDefault ;
          std::string            _fnShdrFragFB      ; // for framebuffer rendering
@@ -204,6 +205,7 @@ namespace trend {
          GLint                  _idShdrVrtxLineW   ;
          GLint                  _idShdrVrtxFB      ;
          GLint                  _idShdrGeomDefault ;
+         GLint                  _idShdrGeomLineW   ;
          GLint                  _idShdrGeomSprite  ;
          GLint                  _idShdrFragDefault ;
          GLint                  _idShdrFragFB      ;

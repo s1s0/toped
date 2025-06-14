@@ -333,12 +333,8 @@ void trend::ToshaderRefLay::drawSelected(layprop::DrawProperties* /*drawprop*/)
       DBGL_CALL(glVertexAttribPointer, varLoc + i, 2, TNDR_GLENUMT, GL_FALSE, PPVRTX*vrtxSize, (GLvoid*)(size_t)(i*vrtxSize))
       DBGL_CALL(glEnableVertexAttribArray, varLoc+i)
    }
-//   if (0 < _asindxs)
-//   {
-      assert(_fstslix); assert(_sizslix);
-      DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix,_sizslix,_asobjix)
-//         setLine(drawprop, false);
-//   }
+   assert(_fstslix); assert(_sizslix);
+   DBGL_CALL(glMultiDrawArrays,GL_TRIANGLE_STRIP,_fstslix,_sizslix,_asobjix)
    for (unsigned i=0; i < PPVRTX; i++)
       DBGL_CALL(glDisableVertexAttribArray, varLoc+i)
 }
