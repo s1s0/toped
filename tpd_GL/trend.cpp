@@ -658,6 +658,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       case glslp_LW:
       {// Line with arbitrary width
          DBGL_CALL(glAttachShader, program, _idShdrVrtxLineW   )
+         DBGL_CALL(glAttachShader, program, _idShdrGeomDefault )
          DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
          info << "GLSL program LW (line width)";
          break;

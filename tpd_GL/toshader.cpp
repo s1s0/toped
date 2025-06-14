@@ -347,7 +347,8 @@ void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool sele
 {
    layprop::LineSettings curLine;
    drawprop->getCurrentLine(curLine, selected);
-   DBGL_CALL(glLineWidth,curLine.width())
+   if (selected)
+      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),static_cast<GLfloat>(curLine.width()))
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -573,8 +574,8 @@ void trend::Toshader::setLine(bool selected)
 {
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
-//   GLfloat clnw = static_cast<GLfloat>(curLine.width());
-//   DBGL_CALL(glLineWidth,clnw)
+   if (selected)
+      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),static_cast<GLfloat>(curLine.width()))
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -610,7 +611,6 @@ void trend::Toshader::draw()
    TRENDC->setGlslProg(glslp_LW); //i.e. line with arbitrary width
    _drawprop->resetCurrentColor(); // required after changing the renderer
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
-   DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),5.0)
    glUniform2f(TRENDC->getUniformLoc(glslu_in_ScreenSize), (float)_screenW, (float)_screenH);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -642,9 +642,8 @@ void trend::Toshader::draw()
    {
       TRENDC->setGlslProg(glslp_LW);//i.e. line with arbitrary width
       _drawprop->resetCurrentColor(); // required after changing the renderer
-      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LineWidth),5.0)
       setLayColor(REF_LAY_DEF);
-//      setLine(false);
+      setLine(true);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
       DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
@@ -706,8 +705,7 @@ void trend::Toshader::rlrDraw()
    oglColor[3] = 0.7f ;
    DBGL_CALL(glUniform3fv, TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
    DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
-   //Line width
-   DBGL_CALL(glLineWidth,1)
+   //Line width is default i.e. 1
 
    //draw
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])

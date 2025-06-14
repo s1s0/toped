@@ -44,20 +44,20 @@ void main(void)
 {
    bool dropThePixel = false;
    if (in_StippleEn)
-   {
+   {// shape pattern fill
       uvec2 ufCoord = uvec2(gl_FragCoord.x, gl_FragCoord.y);
       uint index = 31u - (ufCoord.y % 32u);
       uint mask  = uint(0x80000000) >> (ufCoord.x % 32u);
       dropThePixel = !bool(in_Stipple[index+uint(1)] & mask);
    }
    else if (in_LStippleEn)
-   {
+   {// line stipple
       uint pcoord = uint(patternCoord);
       uint mask  = uint(0x00008000) >> (pcoord % 16u);
       dropThePixel = !bool(in_LStipple & mask);
    }
    else if (in_MStippleEn)
-   {
+   {// cell & text marks
       uvec2 ufCoord = uvec2(markCoord);
       uint index = 15u - (ufCoord.y % 16u);
       uint mask  = uint(0x00008000) >> (ufCoord.x % 16u);
