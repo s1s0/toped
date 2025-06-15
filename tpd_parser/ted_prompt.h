@@ -148,7 +148,7 @@ namespace console {
       void                    onGUInput(wxCommandEvent&);
       void                    onExternalDone(wxCommandEvent&);
       wxTextCtrl*             _cmdLineWnd;
-      DECLARE_EVENT_TABLE();
+      wxDECLARE_EVENT_TABLE();
    };
 
    class TllCCmdLine: public TllCmdLine {

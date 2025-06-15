@@ -250,7 +250,7 @@ bool tui::TpdOglContext::resizeGL(int w, int h)
 // class LayoutCanvas
 //=============================================================================
 
-BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
+wxBEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_PAINT            ( tui::LayoutCanvas::OnpaintGL         )
    EVT_SIZE             ( tui::LayoutCanvas::OnresizeGL        )
    EVT_MOTION           ( tui::LayoutCanvas::OnMouseMotion     )
@@ -278,7 +278,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_MENU(          CM_FLIP, LayoutCanvas::OnCMFlip          )
    EVT_MENU(        CM_ROTATE, LayoutCanvas::OnCMRotate        )
    EVT_MENU( TMVIEW_PANCENTER, LayoutCanvas::OnPanCenter       )
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 //   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
