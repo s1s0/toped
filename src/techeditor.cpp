@@ -47,7 +47,7 @@ tui::LayerListPanel*                   layerListPtr = NULL; //!Required by SortI
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
-BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
+wxBEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayerSelected  )
    EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayListSort    )
    EVT_CHECKBOX         ( DTE_NEWLAYER     , tui::TechEditorDialog::OnNewLayer       )
@@ -61,7 +61,7 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_TEXT             ( DTE_LAYER_TYPE   , tui::TechEditorDialog::OnChangeLayType  )
    EVT_TEXT             ( DTE_LAYER_NAME   , tui::TechEditorDialog::OnChangeProperty )
    EVT_BUTTON           ( DTE_APPLY        , tui::TechEditorDialog::OnApply          )
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const LayerDef laydef) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
@@ -880,10 +880,10 @@ tui::LineListComboBox::~LineListComboBox()
 }
 
 //==========================================================================
-BEGIN_EVENT_TABLE(tui::DefaultLayer, wxDialog)
+wxBEGIN_EVENT_TABLE(tui::DefaultLayer, wxDialog)
    EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::DefaultLayer::OnLayerSelected  )
    EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::DefaultLayer::OnLayListSort    )
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, bool check) :
    wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),

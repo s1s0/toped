@@ -46,17 +46,22 @@
 #else
 #include <sys/time.h>
 #endif
+
+wxDEFINE_EVENT(console::wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_TPDSTATUS     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_FUNC_BROWSER  , wxCommandEvent);
+
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS      , 10000)
     DECLARE_EVENT_TYPE(wxEVT_RENDER_PARAMS      , 10001)
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_PARAMS      , 10002)
     DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER        , 10003)
-    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE     , 10004)
+//    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE     , 10004)
     DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL        , 10005)
     DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT        , 10006)
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM        , 10007)
-    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER       , 10008)
-    DECLARE_EVENT_TYPE(wxEVT_TPDSTATUS          , 10009)
+//    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER       , 10008)
+//    DECLARE_EVENT_TYPE(wxEVT_TPDSTATUS          , 10009)
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR      , 10010)
     DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE      , 10011)
     DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER      , 10012)
@@ -78,12 +83,12 @@ DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS        )
 DEFINE_EVENT_TYPE(wxEVT_RENDER_PARAMS        )
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_PARAMS        )
 DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER          )
-DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE       )
+//DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE       )
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL          )
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT          )
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM          )
-DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER         )
-DEFINE_EVENT_TYPE(wxEVT_TPDSTATUS            )
+//DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER         )
+//DEFINE_EVENT_TYPE(wxEVT_TPDSTATUS            )
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_CURSOR        )
 DEFINE_EVENT_TYPE(wxEVT_CONSOLE_PARSE        )
 DEFINE_EVENT_TYPE(wxEVT_CURRENT_LAYER        )
@@ -113,11 +118,6 @@ wxWindow*               TpdPost::_mainWindow    = NULL;
 wxDialog*               TpdPost::_techEditor    = NULL;
 
 //==============================================================================
-// The ted_log event table
-BEGIN_EVENT_TABLE( console::ted_log, wxTextCtrl )
-   EVT_TECUSTOM_COMMAND(wxEVT_LOG_ERRMESSAGE, -1, ted_log::OnLOGMessage)
-END_EVENT_TABLE()
-
 console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, id, wxT(""),
    wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxNO_BORDER|wxTE_RICH)
 {
@@ -125,11 +125,12 @@ console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, 
    gui_mark = wxT(">> ");
    rply_mark = wxT("<= ");
    shell_mark = wxT("# ");
+   Bind(wxEVT_LOG_ERRMESSAGE,&ted_log::OnLOGMessage, this);
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    wxColour logColour;
-   long int startPos = GetLastPosition();
+//   long int startPos = GetLastPosition();
    // TODO - the colours of the log window!
    // The issue is when a dark or light desktop are used (on MAC for example)
    // the colours are completely unadequate
@@ -303,22 +304,20 @@ void tell_log(console::LOG_TYPE lt, const wxString& msg)
 }
 
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(console::TopedStatus, wxStatusBar)
-   EVT_SIZE(console::TopedStatus::OnSize)
-   EVT_TECUSTOM_COMMAND(wxEVT_TPDSTATUS  , wxID_ANY, console::TopedStatus::OnTopedStatus)
-END_EVENT_TABLE()
-
 console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::ID_TPD_STATUS)
 {
    const unsigned Field_Max = 3;
    static const int widths[Field_Max] = { -1, -1, 64 };
 
-    SetFieldsCount(Field_Max);
-    SetStatusWidths(Field_Max, widths);
-    _dbLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
-    _rndrLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
-    _progress = NULL;
-    _progressAdj = 1.0;
+   SetFieldsCount(Field_Max);
+   SetStatusWidths(Field_Max, widths);
+   _dbLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+   _rndrLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+   _progress = NULL;
+   _progressAdj = 1.0;
+   Bind(wxEVT_SIZE, &console::TopedStatus::OnSize,this);
+   Bind(wxEVT_TPDSTATUS,&console::TopedStatus::OnTopedStatus, this);
+
 }
 
 void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
@@ -440,7 +439,7 @@ TpdPost::TpdPost(wxWindow* mainWindow)
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
 {
    if (NULL == _statusBar) return;
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   wxCommandEvent eventSTATUSUPD(console::wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    wxPostEvent(_statusBar, eventSTATUSUPD);
 }
@@ -454,7 +453,7 @@ void TpdPost::postMenuEvent(int eventID)
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxFileOffset indx)
 {
    if (NULL == _statusBar) return;
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   wxCommandEvent eventSTATUSUPD(console::wxEVT_TPDSTATUS);
    wxFileOffset* foPtr = DEBUG_NEW wxFileOffset(indx);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetClientData(foPtr);
@@ -464,7 +463,7 @@ void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxFileOffset indx)
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cmd)
 {
    if (NULL == _statusBar) return;
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   wxCommandEvent eventSTATUSUPD(console::wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(wxString(sts_cmd.c_str(), wxConvUTF8));
    wxPostEvent(_statusBar, eventSTATUSUPD);
@@ -473,7 +472,7 @@ void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, std::string sts_cm
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
 {
    if (NULL == _statusBar) return;
-   wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   wxCommandEvent eventSTATUSUPD(console::wxEVT_TPDSTATUS);
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(sts_cmd);
    wxPostEvent(_statusBar, eventSTATUSUPD);
@@ -748,7 +747,7 @@ void TpdPost::restoreAuiState(const wxString state)
 
 void TpdPost::tellFnAdd(const std::string name, void* arguments)
 {
-   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   wxCommandEvent eventFUNCTION_ADD(console::wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventFUNCTION_ADD.SetClientData(arguments);
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_ADD);
@@ -757,7 +756,7 @@ void TpdPost::tellFnAdd(const std::string name, void* arguments)
 
 void TpdPost::tellFnSort()
 {
-   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   wxCommandEvent eventFUNCTION_ADD(console::wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_SORT);
    wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
 }
@@ -881,12 +880,7 @@ wxString console::HelpObject::getHelp(const wxString &funcName)
    return _helpItems[funcName];
 }
 
-BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
-   EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
-   EVT_MOTION(TELLFuncList::onMouseMove)
-   EVT_LEFT_DCLICK(TELLFuncList::onLMouseDblClk)
-END_EVENT_TABLE()
-
+//-----------------------------------------------------------------------------
 console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       wxListView(parent, id, pos, size, style),
@@ -895,6 +889,10 @@ console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    InsertColumn(0, wxT("type"));
    InsertColumn(1, wxT("name"));
    InsertColumn(2, wxT("arguments"));
+   Bind(wxEVT_MOTION      , &TELLFuncList::onMouseMove    , this);
+   Bind(wxEVT_LEFT_DCLICK , &TELLFuncList::onLMouseDblClk , this);
+   Bind(wxEVT_FUNC_BROWSER, &TELLFuncList::OnCommand      , this);
+   
 //   SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 //   SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
 //   SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);

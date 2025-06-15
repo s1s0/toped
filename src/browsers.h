@@ -131,7 +131,7 @@ namespace browsers
          wxColor           _listColor;
          wxColor           _editColor;
          wxString          _cellFilter;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -145,7 +145,7 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -159,7 +159,7 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -173,7 +173,7 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -197,7 +197,7 @@ namespace browsers
          wxTextCtrl*       _cellFilter;
          CellBrowser*      _cellBrowser;
          bool              _hierarchy_view;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -217,7 +217,7 @@ namespace browsers
          wxButton*         _flatButton;
          CellBrowser*      _cellBrowser;
          bool              _hierarchy_view;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -268,7 +268,7 @@ namespace browsers
          bool                 _locked;
          bool                 _filled;
 
-      DECLARE_EVENT_TABLE();
+      wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -290,7 +290,7 @@ namespace browsers
          LayerButton*         checkDefined(const LayerDef&);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -310,7 +310,7 @@ namespace browsers
          wxString             getAllSelected();
          LayerPanel*          _layerPanel;
          wxBoxSizer*          _thesizer;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
  //===========================================================================
    class ErrorBrowser: public wxTreeCtrl
@@ -333,7 +333,7 @@ namespace browsers
       wxString                _cluster;
       //wxString               _cell;
       wxTreeItemId            _rbCellID;
-      DECLARE_EVENT_TABLE();
+      wxDECLARE_EVENT_TABLE();
    };
 
   //===========================================================================
@@ -358,7 +358,7 @@ namespace browsers
 //      wxButton*               _explainButton;
       wxButton*               _rulesButton;
       wxButton*               _cellsButton;
-      DECLARE_EVENT_TABLE();
+      wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -392,7 +392,7 @@ namespace browsers
 //         int                 _gdsPageIndex;
 //         int                 _cifPageIndex;
          LayerBrowser*       _layers;
-         DECLARE_EVENT_TABLE();
+         wxDECLARE_EVENT_TABLE();
    };
 
    //type of wxTreeItem for DRC browser

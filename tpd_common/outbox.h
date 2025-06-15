@@ -145,6 +145,9 @@ namespace console {
       op_dwire
    } ACTIVE_OP;
 
+   wxDECLARE_EVENT(wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_TPDSTATUS     , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_FUNC_BROWSER  , wxCommandEvent);
    //===========================================================================
    class ted_log : public wxTextCtrl  {
    public:
@@ -155,7 +158,6 @@ namespace console {
       wxString          gui_mark;
       wxString          rply_mark;
       wxString          shell_mark;
-      DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -201,7 +203,6 @@ namespace console {
          typedef std::map<TmpWxIntPtr, std::string> FuncItems;
          FuncItems    _funcItems;
          HelpObject*  _helpObject;
-         DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -226,7 +227,6 @@ namespace console {
       wxStaticBitmap*      _rndrLamp;
       wxGauge*             _progress;
       real                 _progressAdj;
-      DECLARE_EVENT_TABLE();
    };
 }
 

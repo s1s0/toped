@@ -592,10 +592,10 @@ console::TllCmdLine::~TllCmdLine()
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE( console::TedCmdLine, wxEvtHandler )
+wxBEGIN_EVENT_TABLE( console::TedCmdLine, wxEvtHandler )
    EVT_TEXT_ENTER(tui::ID_CMD_LINE, console::TedCmdLine::onGetCommand)
    EVT_CHAR(console::TedCmdLine::onChar)
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       TllCmdLine  ( canvas      ),

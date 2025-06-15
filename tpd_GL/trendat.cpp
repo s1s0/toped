@@ -1330,11 +1330,6 @@ unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex, boo
                                                    ,{2,3,4,5,6,7}
                                                    ,{4,5,6,7,0,1}
                                             };
-//      const unsigned char kidx[csize][2*PPVRTX] = { {0,5,0,1,4,1}
-//                                                   ,{0,1,4,1,4,5}
-//                                                   ,{4,1,4,5,0,5}
-//                                                   ,{4,5,0,5,0,1}
-//                                            };
       for (unsigned curSeg = 0; curSeg <= csize ; curSeg++)
          for(int i = 0; i <  2; i++)
             for (unsigned j = 0; j < 2*PPVRTX;j++)

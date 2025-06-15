@@ -162,9 +162,9 @@ void tui::CanvasStatus::setSelected(wxString numsel)
 }
 
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tui::ExternalProcess, wxProcess)
+wxBEGIN_EVENT_TABLE(tui::ExternalProcess, wxProcess)
    EVT_TIMER(wxID_ANY, tui::ExternalProcess::OnTimer)
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) :
    wxProcess     ( parent       ),
@@ -262,7 +262,7 @@ tui::CommandPanel::CommandPanel(wxWindow* parent, wxWindowID id, const wxPoint& 
 
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
-BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
+wxBEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
    EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
    EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
@@ -379,7 +379,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE           , wxID_ANY, tui::TopedFrame::OnExecExtTextEnter   )
    EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS       , wxID_ANY, tui::TopedFrame::onReloadTellFuncs    )
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE         , wxID_ANY, tui::TopedFrame::onParseCommand       )
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size),_exitAproved(false)
