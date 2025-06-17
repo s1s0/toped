@@ -41,7 +41,6 @@ extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::TllCmdLine*      Console;
 extern console::toped_logfile    LogFile;
-extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 
@@ -98,7 +97,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    // the operand stack
    Console->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);
    // flag the canvas that a mouse input will be required
-   wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
+   wxCommandEvent eventMOUSEIN(console::wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);

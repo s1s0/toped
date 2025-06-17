@@ -42,7 +42,6 @@ extern layprop::PropertyCenter*        PROPC;
 extern tui::TopedFrame*                Toped;
 extern console::TllCmdLine*            Console;
 extern const wxEventType               wxEVT_TECHEDITUPDATE;
-extern const wxEventType               wxEVT_CANVAS_ZOOM;
 tui::LayerListPanel*                   layerListPtr = NULL; //!Required by SortItem callback
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
@@ -376,7 +375,7 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 
    Console->parseCommand(ost);
    //Refresh layout
-   wxCommandEvent eventZoom(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZoom(console::wxEVT_CANVAS_ZOOM);
    eventZoom.SetInt(tui::ZOOM_REFRESH);
    wxPostEvent(Toped->view(), eventZoom);
 

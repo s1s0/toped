@@ -64,10 +64,7 @@ extern void delete_tell_lex_buffer( void* b );
 extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
 
-//extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::TllCmdLine*        Console = NULL;
-//extern const wxEventType    wxEVT_CONSOLE_PARSE;
-extern const wxEventType    wxEVT_CANVAS_ZOOM;
 extern const wxEventType    wxEVT_EXECEXTDONE;
 
 
@@ -328,7 +325,7 @@ void* console::parse_thread::Entry()
       }
       else if (Console->canvas_invalid())
       {
-         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_REFRESH);
          wxPostEvent(_canvas_wnd, eventZOOM);
          Console->set_canvas_invalid(false);

@@ -148,6 +148,12 @@ namespace console {
    wxDECLARE_EVENT(wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_TPDSTATUS     , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_FUNC_BROWSER  , wxCommandEvent);
+   
+   wxDECLARE_EVENT(wxEVT_CANVAS_ZOOM   , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_MOUSE_INPUT   , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_CANVAS_CURSOR , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_DRCDRAWPREP   , wxCommandEvent);
+//   
    //===========================================================================
    class ted_log : public wxTextCtrl  {
    public:
