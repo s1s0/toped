@@ -36,7 +36,6 @@
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
-extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern wxWindow*                 TopedCanvasW;
 
 //=============================================================================
@@ -292,7 +291,7 @@ void tellstdfunc::stdOPENCELL::undo()
       LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
-      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(tui::ZOOM_WINDOW);
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(TopedCanvasW, eventZOOM);
@@ -337,7 +336,7 @@ int tellstdfunc::stdOPENCELL::execute()
             ovl = DEBUG_NEW DBbox(tDesign->activeOverlap());
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          TpdPost::celltree_open(nm);
-         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
          wxPostEvent(TopedCanvasW, eventZOOM);

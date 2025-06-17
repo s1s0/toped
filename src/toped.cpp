@@ -52,7 +52,6 @@
 #endif
 
 extern const wxEventType         wxEVT_CANVAS_STATUS;
-extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
@@ -2230,7 +2229,7 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
-      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(tui::ZOOM_WINDOW);
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(_canvas, eventZOOM);
@@ -2244,43 +2243,43 @@ void tui::TopedFrame::OnUndo(wxCommandEvent& WXUNUSED(event))
 }
 
 void tui::TopedFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanLeft(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_LEFT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanRight(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_RIGHT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanUp(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_UP);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_DOWN);
    wxPostEvent(_canvas, eventZOOM);
 }
@@ -2347,7 +2346,7 @@ void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)
 {
    wxString wxsAuiMagicString(evt.GetString());
    _winManager.LoadPerspective(wxsAuiMagicString, true);
-   wxCommandEvent eventREFRESH(wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventREFRESH(console::wxEVT_CANVAS_ZOOM);
    eventREFRESH.SetInt(ZOOM_REFRESH);
    wxPostEvent(_canvas, eventREFRESH);
 //   Refresh(true); //-> doesn't make any difference!
@@ -2380,7 +2379,7 @@ void tui::TopedFrame::OnIconize(wxIconizeEvent& evt)
    if (!evt.Iconized())
 #endif
    {
-      wxCommandEvent eventREFRESH(wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventREFRESH(console::wxEVT_CANVAS_ZOOM);
       eventREFRESH.SetInt(ZOOM_REFRESH);
       wxPostEvent(_canvas, eventREFRESH);
    }

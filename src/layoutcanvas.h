@@ -184,7 +184,6 @@ namespace tui {
       XVisualInfo*   _xVisual;       //
 #endif
 //      StatusLine     _status_line;
-      wxDECLARE_EVENT_TABLE();
    };
 
    class DrawThread : public wxThread
