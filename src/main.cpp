@@ -68,7 +68,6 @@ extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
 extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern console::TllCmdLine*      Console;
-extern const wxEventType         wxEVT_RENDER_PARAMS;
 
 
 //=============================================================================
@@ -319,7 +318,7 @@ void TopedApp::loadGlfFonts()
    }
    else
    {
-      wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
+      wxCommandEvent eventLoadFont(console::wxEVT_RENDER_PARAMS);
       eventLoadFont.SetId(tui::RPS_SLCT_FONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);

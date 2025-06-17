@@ -51,23 +51,6 @@
 #define tpdfSAVE wxSAVE
 #endif
 
-extern const wxEventType         wxEVT_CANVAS_STATUS;
-extern const wxEventType         wxEVT_RENDER_PARAMS;
-extern const wxEventType         wxEVT_CANVAS_PARAMS;
-extern const wxEventType         wxEVT_MOUSE_ACCEL;
-extern const wxEventType         wxEVT_CURRENT_LAYER;
-extern const wxEventType         wxEVT_TOOLBARSIZE;
-extern const wxEventType         wxEVT_TOOLBARADDITEM;
-extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
-extern const wxEventType         wxEVT_AUI_RESTORE;
-extern const wxEventType         wxEVT_EDITLAYER;
-extern const wxEventType         wxEVT_EXITAPP;
-extern const wxEventType         wxEVT_EXECEXT;
-extern const wxEventType         wxEVT_EXECEXTPIPE;
-extern const wxEventType         wxEVT_EXECEXTDONE;
-extern const wxEventType         wxEVT_RELOADTELLFUNCS;
-extern const wxEventType         wxEVT_CONSOLE_PARSE;
-
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
@@ -195,7 +178,7 @@ void tui::ExternalProcess::OnTerminate(int /*pid*/, int /*status*/)
    }
    _idleTimer.Stop();
    //Post an event to notify the console, that the external command has exited
-   wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+   wxCommandEvent eventExecExDone(console::wxEVT_EXECEXTPIPE);
    wxPostEvent(Console, eventExecExDone);
 
    delete this;
@@ -261,128 +244,247 @@ tui::CommandPanel::CommandPanel(wxWindow* parent, wxWindowID id, const wxPoint& 
 
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
-wxBEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
-   EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
-   EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
-   EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
-   EVT_MENU( TMLIB_LOAD          , tui::TopedFrame::OnTDTLoadLib  )
-   EVT_MENU( TMLIB_UNLOAD        , tui::TopedFrame::OnTDTUnloadLib)
-
-   EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
-   EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
-   EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
-   EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
-   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
-   EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
-
-   EVT_MENU( TMCIF_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
-//   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFimport   )
-   EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
-   EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
-   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
-   EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
-
-   EVT_MENU( TMOAS_OPEN          , tui::TopedFrame::OnOASRead     )
-   EVT_MENU( TMOAS_IMPORT        , tui::TopedFrame::OnOASimport   )
-   EVT_MENU( TMOAS_TRANSLATE     , tui::TopedFrame::OnOAStranslate)
-//   EVT_MENU( TMOAS_EXPORTL       , tui::TopedFrame::OnOASexportLIB)
-//   EVT_MENU( TMOAS_EXPORTC       , tui::TopedFrame::OnOASexportCELL)
-   EVT_MENU( TMOAS_CLOSE         , tui::TopedFrame::OnOASclose    )
-
-   EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
-   EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
-   EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
-   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::checkExit     )
-
-   EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
-   EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
-   EVT_MENU( TMEDIT_MOVE         , tui::TopedFrame::OnMove        )
-   EVT_MENU( TMEDIT_DELETE       , tui::TopedFrame::OnDelete      )
-   EVT_MENU( TMEDIT_ROTATE90     , tui::TopedFrame::OnRotate90      )
-   EVT_MENU( TMEDIT_FLIPX        , tui::TopedFrame::OnFlipVert    )
-   EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipHor     )
-   EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
-   EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
-   EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
-
-   EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnZoomIn      )
-   EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnZoomOut     )
-   EVT_MENU( TMVIEW_PANLEFT      , tui::TopedFrame::OnpanLeft     )
-   EVT_MENU( TMVIEW_PANRIGHT     , tui::TopedFrame::OnpanRight    )
-   EVT_MENU( TMVIEW_PANUP        , tui::TopedFrame::OnpanUp       )
-   EVT_MENU( TMVIEW_PANDOWN      , tui::TopedFrame::OnpanDown     )
-   EVT_MENU( TMVIEW_ZOOMALL      , tui::TopedFrame::OnZoomAll     )
-   EVT_MENU( TMVIEW_ZOOMVISIBLE  , tui::TopedFrame::OnZoomVisible )
-
-   EVT_MENU( TMCELL_NEW          , tui::TopedFrame::OnCellNew     )
-   EVT_MENU( TMCELL_OPEN         , tui::TopedFrame::OnCellOpen    )
-   EVT_MENU( TMCELL_REMOVE       , tui::TopedFrame::OnCellRemove  )
-   EVT_MENU( TMCELL_PUSH         , tui::TopedFrame::OnCellPush    )
-   EVT_MENU( TMCELL_PREV         , tui::TopedFrame::OnCellPrev    )
-   EVT_MENU( TMCELL_POP          , tui::TopedFrame::OnCellPop     )
-   EVT_MENU( TMCELL_TOP          , tui::TopedFrame::OnCellTop     )
-   EVT_MENU( TMCELL_REF_B        , tui::TopedFrame::OnCellRef_B   )
-   EVT_MENU( TMCELL_REF_M        , tui::TopedFrame::OnCellRef_M   )
-   EVT_MENU( TMCELL_AREF_B       , tui::TopedFrame::OnCellARef_B  )
-   EVT_MENU( TMCELL_AREF_M       , tui::TopedFrame::OnCellARef_M  )
-   EVT_MENU( TMCELL_GROUP        , tui::TopedFrame::OnCellGroup   )
-   EVT_MENU( TMCELL_UNGROUP      , tui::TopedFrame::OnCellUngroup )
-
-   EVT_MENU( TMDRAW_BOX          , tui::TopedFrame::OnDrawBox     )
-   EVT_MENU( TMDRAW_POLY         , tui::TopedFrame::OnDrawPoly    )
-   EVT_MENU( TMDRAW_WIRE         , tui::TopedFrame::OnDrawWire    )
-   EVT_MENU( TMDRAW_TEXT         , tui::TopedFrame::OnDrawText    )
-
-   EVT_MENU( TMSEL_SELECT_IN     , tui::TopedFrame::OnSelectIn    )
-   EVT_MENU( TMSEL_PSELECT_IN    , tui::TopedFrame::OnPselectIn   )
-   EVT_MENU( TMSEL_SELECT_ALL    , tui::TopedFrame::OnSelectAll   )
-   EVT_MENU( TMSEL_UNSELECT_IN   , tui::TopedFrame::OnUnselectIn  )
-   EVT_MENU( TMSEL_PUNSELECT_IN  , tui::TopedFrame::OnPunselectIn )
-   EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
-   EVT_MENU( TMSEL_REPORT_SLCTD  , tui::TopedFrame::OnReportSelected )
-
-   EVT_MENU( TMSET_ALLPROP       , tui::TopedFrame::OnPropertySheet)
-
-   EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
-
-   EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
-   EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
-   EVT_MENU( TMSET_DEFSTYLE      , tui::TopedFrame::OnDefineStyle )
-   EVT_MENU( TMSET_TECHEDITOR    , tui::TopedFrame::OnTechEditor  )
-
-   EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
-   EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
-   EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
-   EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
-      // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
-   EVT_MENU_RANGE(TMDUMMY    , TMDUMMY    +999 , tui::TopedFrame::OnMenu   )
-   EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+999 , tui::TopedFrame::OnToolBar)
-   EVT_ICONIZE(tui::TopedFrame::OnIconize)
-   EVT_CLOSE(tui::TopedFrame::OnClose)
-//   EVT_SIZE( TopedFrame::OnSize )
-//   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
-   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER        , tui::TopedFrame::OnUncapturedMouseClick)
-   EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
-   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS         , wxID_ANY, tui::TopedFrame::OnCanvasStatus       )
-   EVT_TECUSTOM_COMMAND(wxEVT_RENDER_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateRenderParams )
-   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams )
-   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL           , wxID_ANY, tui::TopedFrame::OnMouseAccel         )
-   EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER         , wxID_ANY, tui::TopedFrame::OnCurrentLayer       )
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE           , wxID_ANY, tui::TopedFrame::OnToolBarSize        )
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM        , wxID_ANY, tui::TopedFrame::OnToolBarAddItem     )
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM     , wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem  )
-   EVT_TECUSTOM_COMMAND(wxEVT_AUI_RESTORE           , wxID_ANY, tui::TopedFrame::OnAuiManagerRestore  )
-   EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER             , wxID_ANY, tui::TopedFrame::OnEditLayer          )
-   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP               , wxID_ANY, tui::TopedFrame::OnExitRequest        )
-   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT               , wxID_ANY, tui::TopedFrame::OnExecExt            )
-   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE           , wxID_ANY, tui::TopedFrame::OnExecExtTextEnter   )
-   EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS       , wxID_ANY, tui::TopedFrame::onReloadTellFuncs    )
-   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE         , wxID_ANY, tui::TopedFrame::onParseCommand       )
-wxEND_EVENT_TABLE()
+//wxBEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
+//   EVT_MENU( TMFILE_NEW          , tui::TopedFrame::OnNewDesign   )
+//   EVT_MENU( TMFILE_OPEN         , tui::TopedFrame::OnTDTRead     )
+//   EVT_MENU( TMFILE_INCLUDE      , tui::TopedFrame::OnTELLRead    )
+//   EVT_MENU( TMLIB_LOAD          , tui::TopedFrame::OnTDTLoadLib  )
+//   EVT_MENU( TMLIB_UNLOAD        , tui::TopedFrame::OnTDTUnloadLib)
+//
+//   EVT_MENU( TMGDS_OPEN          , tui::TopedFrame::OnGDSRead     )
+//   EVT_MENU( TMGDS_IMPORT        , tui::TopedFrame::OnGDSimport   )
+//   EVT_MENU( TMGDS_TRANSLATE     , tui::TopedFrame::OnGDStranslate)
+//   EVT_MENU( TMGDS_EXPORTL       , tui::TopedFrame::OnGDSexportLIB)
+//   EVT_MENU( TMGDS_EXPORTC       , tui::TopedFrame::OnGDSexportCELL)
+//   EVT_MENU( TMGDS_CLOSE         , tui::TopedFrame::OnGDSclose    )
+//
+//   EVT_MENU( TMCIF_EXPORTL       , tui::TopedFrame::OnCIFexportLIB)
+////   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFimport   )
+//   EVT_MENU( TMCIF_OPEN          , tui::TopedFrame::OnCIFRead     )
+//   EVT_MENU( TMCIF_TRANSLATE     , tui::TopedFrame::OnCIFtranslate)
+//   EVT_MENU( TMCIF_EXPORTC       , tui::TopedFrame::OnCIFexportCELL)
+//   EVT_MENU( TMCIF_CLOSE         , tui::TopedFrame::OnCIFclose    )
+//
+//   EVT_MENU( TMOAS_OPEN          , tui::TopedFrame::OnOASRead     )
+//   EVT_MENU( TMOAS_IMPORT        , tui::TopedFrame::OnOASimport   )
+//   EVT_MENU( TMOAS_TRANSLATE     , tui::TopedFrame::OnOAStranslate)
+////   EVT_MENU( TMOAS_EXPORTL       , tui::TopedFrame::OnOASexportLIB)
+////   EVT_MENU( TMOAS_EXPORTC       , tui::TopedFrame::OnOASexportCELL)
+//   EVT_MENU( TMOAS_CLOSE         , tui::TopedFrame::OnOASclose    )
+//
+//   EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
+//   EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
+//   EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
+//   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::checkExit     )
+//
+//   EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
+//   EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
+//   EVT_MENU( TMEDIT_MOVE         , tui::TopedFrame::OnMove        )
+//   EVT_MENU( TMEDIT_DELETE       , tui::TopedFrame::OnDelete      )
+//   EVT_MENU( TMEDIT_ROTATE90     , tui::TopedFrame::OnRotate90      )
+//   EVT_MENU( TMEDIT_FLIPX        , tui::TopedFrame::OnFlipVert    )
+//   EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipHor     )
+//   EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
+//   EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
+//   EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
+//
+//   EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnZoomIn      )
+//   EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnZoomOut     )
+//   EVT_MENU( TMVIEW_PANLEFT      , tui::TopedFrame::OnpanLeft     )
+//   EVT_MENU( TMVIEW_PANRIGHT     , tui::TopedFrame::OnpanRight    )
+//   EVT_MENU( TMVIEW_PANUP        , tui::TopedFrame::OnpanUp       )
+//   EVT_MENU( TMVIEW_PANDOWN      , tui::TopedFrame::OnpanDown     )
+//   EVT_MENU( TMVIEW_ZOOMALL      , tui::TopedFrame::OnZoomAll     )
+//   EVT_MENU( TMVIEW_ZOOMVISIBLE  , tui::TopedFrame::OnZoomVisible )
+//
+//   EVT_MENU( TMCELL_NEW          , tui::TopedFrame::OnCellNew     )
+//   EVT_MENU( TMCELL_OPEN         , tui::TopedFrame::OnCellOpen    )
+//   EVT_MENU( TMCELL_REMOVE       , tui::TopedFrame::OnCellRemove  )
+//   EVT_MENU( TMCELL_PUSH         , tui::TopedFrame::OnCellPush    )
+//   EVT_MENU( TMCELL_PREV         , tui::TopedFrame::OnCellPrev    )
+//   EVT_MENU( TMCELL_POP          , tui::TopedFrame::OnCellPop     )
+//   EVT_MENU( TMCELL_TOP          , tui::TopedFrame::OnCellTop     )
+//   EVT_MENU( TMCELL_REF_B        , tui::TopedFrame::OnCellRef_B   )
+//   EVT_MENU( TMCELL_REF_M        , tui::TopedFrame::OnCellRef_M   )
+//   EVT_MENU( TMCELL_AREF_B       , tui::TopedFrame::OnCellARef_B  )
+//   EVT_MENU( TMCELL_AREF_M       , tui::TopedFrame::OnCellARef_M  )
+//   EVT_MENU( TMCELL_GROUP        , tui::TopedFrame::OnCellGroup   )
+//   EVT_MENU( TMCELL_UNGROUP      , tui::TopedFrame::OnCellUngroup )
+//
+//   EVT_MENU( TMDRAW_BOX          , tui::TopedFrame::OnDrawBox     )
+//   EVT_MENU( TMDRAW_POLY         , tui::TopedFrame::OnDrawPoly    )
+//   EVT_MENU( TMDRAW_WIRE         , tui::TopedFrame::OnDrawWire    )
+//   EVT_MENU( TMDRAW_TEXT         , tui::TopedFrame::OnDrawText    )
+//
+//   EVT_MENU( TMSEL_SELECT_IN     , tui::TopedFrame::OnSelectIn    )
+//   EVT_MENU( TMSEL_PSELECT_IN    , tui::TopedFrame::OnPselectIn   )
+//   EVT_MENU( TMSEL_SELECT_ALL    , tui::TopedFrame::OnSelectAll   )
+//   EVT_MENU( TMSEL_UNSELECT_IN   , tui::TopedFrame::OnUnselectIn  )
+//   EVT_MENU( TMSEL_PUNSELECT_IN  , tui::TopedFrame::OnPunselectIn )
+//   EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
+//   EVT_MENU( TMSEL_REPORT_SLCTD  , tui::TopedFrame::OnReportSelected )
+//
+//   EVT_MENU( TMSET_ALLPROP       , tui::TopedFrame::OnPropertySheet)
+//
+//   EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
+//
+//   EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
+//   EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
+//   EVT_MENU( TMSET_DEFSTYLE      , tui::TopedFrame::OnDefineStyle )
+//   EVT_MENU( TMSET_TECHEDITOR    , tui::TopedFrame::OnTechEditor  )
+//
+//   EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
+//   EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
+//   EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
+//   EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
+//      // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
+//   EVT_MENU_RANGE(TMDUMMY    , TMDUMMY    +999 , tui::TopedFrame::OnMenu   )
+//   EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+999 , tui::TopedFrame::OnToolBar)
+//   EVT_ICONIZE(tui::TopedFrame::OnIconize)
+//   EVT_CLOSE(tui::TopedFrame::OnClose)
+////   EVT_SIZE( TopedFrame::OnSize )
+////   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
+//   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER        , tui::TopedFrame::OnUncapturedMouseClick)
+//   EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
+//   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS         , wxID_ANY, tui::TopedFrame::OnCanvasStatus       )
+//   EVT_TECUSTOM_COMMAND(wxEVT_RENDER_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateRenderParams )
+//   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams )
+//   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL           , wxID_ANY, tui::TopedFrame::OnMouseAccel         )
+//   EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER         , wxID_ANY, tui::TopedFrame::OnCurrentLayer       )
+//   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE           , wxID_ANY, tui::TopedFrame::OnToolBarSize        )
+//   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM        , wxID_ANY, tui::TopedFrame::OnToolBarAddItem     )
+//   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM     , wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem  )
+//   EVT_TECUSTOM_COMMAND(wxEVT_AUI_RESTORE           , wxID_ANY, tui::TopedFrame::OnAuiManagerRestore  )
+//   EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER             , wxID_ANY, tui::TopedFrame::OnEditLayer          )
+//   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP               , wxID_ANY, tui::TopedFrame::OnExitRequest        )
+//   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT               , wxID_ANY, tui::TopedFrame::OnExecExt            )
+//   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE           , wxID_ANY, tui::TopedFrame::OnExecExtTextEnter   )
+//   EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS       , wxID_ANY, tui::TopedFrame::onReloadTellFuncs    )
+//   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE         , wxID_ANY, tui::TopedFrame::onParseCommand       )
+//wxEND_EVENT_TABLE()
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size),_exitAproved(false)
 {
+
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnNewDesign      , this,  TMFILE_NEW         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTRead        , this,  TMFILE_OPEN        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTELLRead       , this,  TMFILE_INCLUDE     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTLoadLib     , this,  TMLIB_LOAD         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTUnloadLib   , this,  TMLIB_UNLOAD       );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDSRead        , this,  TMGDS_OPEN         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDSimport      , this,  TMGDS_IMPORT       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDStranslate   , this,  TMGDS_TRANSLATE    );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDSexportLIB   , this,  TMGDS_EXPORTL      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDSexportCELL  , this,  TMGDS_EXPORTC      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnGDSclose       , this,  TMGDS_CLOSE        );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFexportLIB   , this,   TMCIF_EXPORTL     );
+//   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFimport      , this,   TMCIF_EXPORTC     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFRead        , this,   TMCIF_OPEN        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFtranslate   , this,   TMCIF_TRANSLATE   );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFexportCELL  , this,   TMCIF_EXPORTC     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCIFclose       , this,   TMCIF_CLOSE       );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnOASRead        , this, TMOAS_OPEN          );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnOASimport      , this, TMOAS_IMPORT        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnOAStranslate   , this, TMOAS_TRANSLATE     );
+//   Bind(wxEVT_MENU, &tui::TopedFrame::OnOASexportLIB   , this, TMOAS_EXPORTL       );
+//   Bind(wxEVT_MENU, &tui::TopedFrame::OnOASexportCELL  , this, TMOAS_EXPORTC       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnOASclose       , this,  TMOAS_CLOSE        );
+
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTSave        , this,  TMFILE_SAVE        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTSaveAs      , this,  TMFILE_SAVEAS      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnPropSave       , this,  TMPROP_SAVE        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::checkExit        , this,  TMFILE_EXIT        );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnUndo           , this,  TMEDIT_UNDO        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCopy           , this,  TMEDIT_COPY        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnMove           , this,  TMEDIT_MOVE        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDelete         , this,  TMEDIT_DELETE      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnRotate90       , this,  TMEDIT_ROTATE90    );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnFlipVert       , this,  TMEDIT_FLIPX       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnFlipHor        , this,  TMEDIT_FLIPY       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnPolyCut        , this,  TMEDIT_POLYCUT     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnMerge          , this,  TMEDIT_MERGE       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnResize         , this,  TMEDIT_RESIZE      );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnZoomIn         , this,  TMVIEW_ZOOMIN      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnZoomOut        , this,  TMVIEW_ZOOMOUT     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnpanLeft        , this,  TMVIEW_PANLEFT     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnpanRight       , this,  TMVIEW_PANRIGHT    );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnpanUp          , this,  TMVIEW_PANUP       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnpanDown        , this,  TMVIEW_PANDOWN     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnZoomAll        , this,  TMVIEW_ZOOMALL     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnZoomVisible    , this,  TMVIEW_ZOOMVISIBLE );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellNew        , this,  TMCELL_NEW         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellOpen       , this,  TMCELL_OPEN        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellRemove     , this,  TMCELL_REMOVE      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellPush       , this,  TMCELL_PUSH        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellPrev       , this,  TMCELL_PREV        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellPop        , this,  TMCELL_POP         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellTop        , this,  TMCELL_TOP         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellRef_B      , this,  TMCELL_REF_B       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellRef_M      , this,  TMCELL_REF_M       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellARef_B     , this,  TMCELL_AREF_B      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellARef_M     , this,  TMCELL_AREF_M      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellGroup      , this,  TMCELL_GROUP       );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCellUngroup    , this,  TMCELL_UNGROUP     );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDrawBox        , this,  TMDRAW_BOX         );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDrawPoly       , this,  TMDRAW_POLY        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDrawWire       , this,  TMDRAW_WIRE        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDrawText       , this,  TMDRAW_TEXT        );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnSelectIn       , this,  TMSEL_SELECT_IN    );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnPselectIn      , this,  TMSEL_PSELECT_IN   );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnSelectAll      , this,  TMSEL_SELECT_ALL   );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnUnselectIn     , this,  TMSEL_UNSELECT_IN  );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnPunselectIn    , this,  TMSEL_PUNSELECT_IN );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnUnselectAll    , this,  TMSEL_UNSELECT_ALL );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnReportSelected , this,  TMSEL_REPORT_SLCTD );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnPropertySheet  , this,  TMSET_ALLPROP      );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnUndoDepth      , this,  TMSET_UNDODEPTH    );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDefineColor    , this,  TMSET_DEFCOLOR     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDefineFill     , this,  TMSET_DEFFILL      );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnDefineStyle    , this,  TMSET_DEFSTYLE     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTechEditor     , this,  TMSET_TECHEDITOR   );
+   
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnAddRuler       , this,  TMADD_RULER        );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnClearRulers    , this,  TMCLEAR_RULERS     );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnCadenceConvert , this,  TMCADENCE_CONVERT  );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnTDTSnapshot    , this,  TMGET_SNAPSHOT     );
+//   Bind(wxEVT_MENU, &tui::TopedFrame::OnAbout          , this,  TMHELP_ABOUTAPP    );
+   Bind(wxEVT_MENU, &tui::TopedFrame::OnMenu           , this, TMDUMMY    , TMDUMMY    +999 );
+   Bind(wxEVT_TOOL, &tui::TopedFrame::OnToolBar        , this, TDUMMY_TOOL, TDUMMY_TOOL+999 );
+   Bind(wxEVT_ICONIZE, &tui::TopedFrame::OnIconize, this);
+   Bind(wxEVT_CLOSE_WINDOW,&tui::TopedFrame::OnClose, this);
+////   EVT_SIZE( TopedFrame::OnSize )
+////   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
+   Bind(wxEVT_COMMAND_ENTER,&tui::TopedFrame::OnUncapturedMouseClick, this);
+   Bind(wxEVT_TEXT_MAXLEN, &tui::TopedFrame::OnTextLogOverflow, this, ID_WIN_TXT_LOG);
+
+   Bind(console::wxEVT_CANVAS_STATUS      , &tui::TopedFrame::OnCanvasStatus       , this);
+   Bind(console::wxEVT_RENDER_PARAMS      , &tui::TopedFrame::OnUpdateRenderParams , this);
+   Bind(console::wxEVT_CANVAS_PARAMS      , &tui::TopedFrame::OnUpdateCanvasParams , this);
+   Bind(console::wxEVT_MOUSE_ACCEL        , &tui::TopedFrame::OnMouseAccel         , this);
+   Bind(console::wxEVT_CURRENT_LAYER      , &tui::TopedFrame::OnCurrentLayer       , this);
+   Bind(console::wxEVT_TOOLBARSIZE        , &tui::TopedFrame::OnToolBarSize        , this);
+   Bind(console::wxEVT_TOOLBARADDITEM     , &tui::TopedFrame::OnToolBarAddItem     , this);
+   Bind(console::wxEVT_TOOLBARDELETEITEM  , &tui::TopedFrame::OnToolBarDeleteItem  , this);
+   Bind(console::wxEVT_AUI_RESTORE        , &tui::TopedFrame::OnAuiManagerRestore  , this);
+   Bind(console::wxEVT_EDITLAYER          , &tui::TopedFrame::OnEditLayer          , this);
+   Bind(console::wxEVT_EXITAPP            , &tui::TopedFrame::OnExitRequest        , this);
+   Bind(console::wxEVT_EXECEXT            , &tui::TopedFrame::OnExecExt            , this);
+   Bind(console::wxEVT_EXECEXTPIPE        , &tui::TopedFrame::OnExecExtTextEnter   , this);
+   Bind(console::wxEVT_RELOADTELLFUNCS    , &tui::TopedFrame::onReloadTellFuncs    , this);
+   Bind(console::wxEVT_CONSOLE_PARSE      , &tui::TopedFrame::onParseCommand       , this);
+
    SetIcon(wxIcon( toped16x16_xpm ));
    initView();
    wxCommandEvent dummy;
@@ -838,7 +940,7 @@ void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
    if ( 0 == returnCode )
    {
       //Post an event to notify the console, that the external command has exited
-      wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+      wxCommandEvent eventExecExDone(console::wxEVT_EXECEXTPIPE);
       wxPostEvent(Console, eventExecExDone);
    }
 }

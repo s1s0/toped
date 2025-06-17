@@ -38,10 +38,6 @@
 extern tui::TopedFrame*          Toped;
 extern console::toped_logfile    LogFile;
 
-extern const wxEventType         wxEVT_TOOLBARSIZE;
-extern const wxEventType         wxEVT_TOOLBARADDITEM;
-extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
-
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function) :
    _ID            ( ID        ),
    _menuItem      ( menuItem  ),
@@ -888,7 +884,7 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
    std::string toolbarName = getStringValue();
    if (size < tui::ICON_SIZE_END)
    {
-      wxCommandEvent eventToolBarSize(wxEVT_TOOLBARSIZE);
+      wxCommandEvent eventToolBarSize(console::wxEVT_TOOLBARSIZE);
       eventToolBarSize.SetString(wxString(toolbarName.c_str(), wxConvUTF8));
       eventToolBarSize.SetInt(size);
       wxPostEvent(Toped, eventToolBarSize);
@@ -927,7 +923,7 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
    LogFile << LogFile.getFN() << "(\""<< toolbarName << "\"," << *iconCmdMapList << ");";LogFile.flush();
    delete iconCmdMapList;
 
-   wxCommandEvent eventToolBarDef(wxEVT_TOOLBARADDITEM);
+   wxCommandEvent eventToolBarDef(console::wxEVT_TOOLBARADDITEM);
    eventToolBarDef.SetString(wxtbName);
    eventToolBarDef.SetClientData(clientData);
    wxPostEvent(Toped, eventToolBarDef);
@@ -971,7 +967,7 @@ int tellstdfunc::stdTOOLBARDELETEITEM::execute()
    WxStringPair* clientData  = DEBUG_NEW WxStringPair(wxString(toolbarName.c_str(), wxConvUTF8),
                                                       wxString(itemName.c_str()   , wxConvUTF8));
 
-   wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
+   wxCommandEvent eventToolBarDelItem(console::wxEVT_TOOLBARDELETEITEM);
    eventToolBarDelItem.SetClientData(clientData);
    wxPostEvent(Toped, eventToolBarDelItem);
 

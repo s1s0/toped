@@ -48,9 +48,6 @@ extern layprop::PropertyCenter*  PROPC;
 extern console::TllCmdLine*      Console;
 extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern trend::TrendCenter*       TRENDC;
-extern const wxEventType         wxEVT_CANVAS_STATUS;
-extern const wxEventType         wxEVT_MOUSE_ACCEL;
-extern const wxEventType         wxEVT_CURRENT_LAYER;
 
 //-----------------------------------------------------------------------------
 // Static members
@@ -582,7 +579,7 @@ void tui::LayoutCanvas::cursorControl(bool shift, bool ctl)
 
 void tui::LayoutCanvas::updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype) {
    wxString ws;
-   wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
+   wxCommandEvent eventPOSITION(console::wxEVT_CANVAS_STATUS);
    ws.sprintf(wxT("%9.3f"),coord*PROPC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
@@ -851,7 +848,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
 {
    wxString ws;
-   wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
+   wxCommandEvent eventMOUSEACCEL(console::wxEVT_MOUSE_ACCEL);
    ws.sprintf(wxT("{%3.2f,%3.2f}"),_scrMark.x()*PROPC->UU(), _scrMark.y()*PROPC->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
@@ -1027,7 +1024,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
          _reperX = _longCursor;
          _reperY = _longCursor;
          drawProp->setCurrentOp(console::op_none);
-         wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
+         wxCommandEvent eventPOSITION(console::wxEVT_CANVAS_STATUS);
          eventPOSITION.SetString(wxT(""));
          eventPOSITION.SetInt(CNVS_DEL_Y);
          wxPostEvent(this, eventPOSITION);
@@ -1075,7 +1072,7 @@ void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))
 void tui::LayoutCanvas::OnCMchangeLayer(wxCommandEvent& WXUNUSED(event))
 {
    // post an event to the toped.cpp
-   wxCommandEvent eventCurLay(wxEVT_CURRENT_LAYER);
+   wxCommandEvent eventCurLay(console::wxEVT_CURRENT_LAYER);
    wxPostEvent(this, eventCurLay);
 }
 

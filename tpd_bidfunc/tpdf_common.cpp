@@ -41,9 +41,6 @@ extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::TllCmdLine*      Console;
 extern console::toped_logfile    LogFile;
-extern const wxEventType         wxEVT_CANVAS_STATUS;
-extern const wxEventType         wxEVT_CANVAS_PARAMS;
-
 
 //=============================================================================
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
@@ -396,7 +393,7 @@ void tellstdfunc::UpdateLV(unsigned int numSel)
 {
    wxString ws;
    ws.sprintf(wxT("%d"),numSel);
-   wxCommandEvent eventUPDATESEL(wxEVT_CANVAS_STATUS);
+   wxCommandEvent eventUPDATESEL(console::wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);
    wxPostEvent(TopedCanvasW, eventUPDATESEL);
@@ -424,7 +421,7 @@ void tellstdfunc::RefreshGL()
 //=============================================================================
 void tellstdfunc::gridON(byte No, bool status)
 {
-   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
+   wxCommandEvent eventGRIDUPD(console::wxEVT_CANVAS_PARAMS);
    status = PROPC->viewGrid(No, status);
    switch (No)
    {
