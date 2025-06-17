@@ -47,6 +47,7 @@
 #include <sys/time.h>
 #endif
 
+wxDEFINE_EVENT(console::wxEVT_CMD_BROWSER   , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
 
 wxDEFINE_EVENT(console::wxEVT_MOUSE_INPUT   , wxCommandEvent);
@@ -62,7 +63,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS      , 10000)
     DECLARE_EVENT_TYPE(wxEVT_RENDER_PARAMS      , 10001)
     DECLARE_EVENT_TYPE(wxEVT_CANVAS_PARAMS      , 10002)
-    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER        , 10003)
+//    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER        , 10003)
 //    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE     , 10004)
     DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL        , 10005)
 //    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT        , 10006)
@@ -89,7 +90,7 @@ END_DECLARE_EVENT_TYPES()
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS        )
 DEFINE_EVENT_TYPE(wxEVT_RENDER_PARAMS        )
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_PARAMS        )
-DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER          )
+//DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER          )
 //DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE       )
 DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL          )
 //DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT          )
@@ -504,7 +505,7 @@ void TpdPost::addFont(const std::string& fname)
 void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 {
    if (NULL == _topBrowsers) return;
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
    eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
    if (threadExecution)
@@ -519,7 +520,7 @@ void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 void TpdPost::addGDStab(bool threadExecution)
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDGDS_TAB);
    if (threadExecution)
       wxPostEvent(_topBrowsers, eventADDTAB);
@@ -533,7 +534,7 @@ void TpdPost::addGDStab(bool threadExecution)
 void TpdPost::addCIFtab(bool threadExecution)
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDCIF_TAB);
    if (threadExecution)
       wxPostEvent(_topBrowsers, eventADDTAB);
@@ -547,7 +548,7 @@ void TpdPost::addCIFtab(bool threadExecution)
 void TpdPost::addOAStab(bool threadExecution)
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDOAS_TAB);
    if (threadExecution)
       wxPostEvent(_topBrowsers, eventADDTAB);
@@ -561,7 +562,7 @@ void TpdPost::addOAStab(bool threadExecution)
 void TpdPost::addDRCtab(bool threadExecution)
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDDRC_TAB);
    if (threadExecution)
       wxPostEvent(_topBrowsers, eventADDTAB);
@@ -589,7 +590,7 @@ void TpdPost::addTextToCmd(const std::string& text)
 void TpdPost::clearGDStab()
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_CLEARGDS_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
@@ -597,7 +598,7 @@ void TpdPost::clearGDStab()
 void TpdPost::clearCIFtab()
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_CLEARCIF_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
@@ -605,7 +606,7 @@ void TpdPost::clearCIFtab()
 void TpdPost::clearOAStab()
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_CLEAROAS_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
@@ -613,7 +614,7 @@ void TpdPost::clearOAStab()
 void TpdPost::clearDRCtab()
 {
    assert(_topBrowsers);
-   wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventADDTAB(console::wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_CLEARDRC_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
@@ -621,7 +622,7 @@ void TpdPost::clearDRCtab()
 void TpdPost::layer_status(int btype, const LayerDef& laydef, const bool status)
 {
    if (NULL == _layBrowser) return;
-   wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventLAYER_STATUS(console::wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(btype);
    LayerDef *laydeftemp = DEBUG_NEW LayerDef(laydef);
@@ -632,7 +633,7 @@ void TpdPost::layer_status(int btype, const LayerDef& laydef, const bool status)
 void TpdPost::layer_add(const std::string name, const LayerDef& laydef)
 {
    if (NULL == _layBrowser) return;
-   wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventLAYER_ADD(console::wxEVT_CMD_BROWSER);
    LayerDef *laydeftemp = DEBUG_NEW LayerDef(laydef);
    eventLAYER_ADD.SetClientData(static_cast<void*> (laydeftemp));
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
@@ -643,7 +644,7 @@ void TpdPost::layer_add(const std::string name, const LayerDef& laydef)
 void TpdPost::layer_default(const LayerDef& newlaydef, const LayerDef& oldlaydef)
 {
    if (NULL == _layBrowser) return;
-   wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventLAYER_DEF(console::wxEVT_CMD_BROWSER);
    std::pair<LayerDef, LayerDef>* laydefs = DEBUG_NEW std::pair<LayerDef, LayerDef> (newlaydef,oldlaydef);
    eventLAYER_DEF.SetClientData(static_cast<void*> (laydefs));
    eventLAYER_DEF.SetInt(tui::BT_LAYER_DEFAULT);
@@ -653,7 +654,7 @@ void TpdPost::layer_default(const LayerDef& newlaydef, const LayerDef& oldlaydef
 void TpdPost::layers_state(const std::string& name, bool add)
 {
    if (NULL == _layBrowser) return;
-   wxCommandEvent eventLAYERS_STATE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventLAYERS_STATE(console::wxEVT_CMD_BROWSER);
    eventLAYERS_STATE.SetString(wxString(name.c_str(), wxConvUTF8));
    if (add)
       eventLAYERS_STATE.SetInt(tui::BT_LAYSTATE_SAVE);
@@ -665,7 +666,7 @@ void TpdPost::layers_state(const std::string& name, bool add)
 void TpdPost::resetTDTtab(const std::string dbName)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent resetTDTTab(wxEVT_CMD_BROWSER);
+   wxCommandEvent resetTDTTab(console::wxEVT_CMD_BROWSER);
    resetTDTTab.SetInt(tui::BT_NEWTDT_DB);
    resetTDTTab.SetString(wxString(dbName.c_str(), wxConvUTF8));
    wxPostEvent( _cllBrowser, resetTDTTab );
@@ -674,7 +675,7 @@ void TpdPost::resetTDTtab(const std::string dbName)
 void TpdPost::celltree_open(const std::string cname)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_OPEN);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
    wxPostEvent(_cllBrowser, eventCELLTREE);
@@ -683,7 +684,7 @@ void TpdPost::celltree_open(const std::string cname)
 void TpdPost::celltree_highlight(const std::string cname)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_HIGHLIGHT);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
    wxPostEvent(_cllBrowser, eventCELLTREE);
@@ -692,7 +693,7 @@ void TpdPost::celltree_highlight(const std::string cname)
 void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_ADD);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(action);
@@ -704,7 +705,7 @@ void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(action);
@@ -716,7 +717,7 @@ void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_RENAME);
    eventCELLTREE.SetString(wxString(oldName, wxConvUTF8));
    wxString* prnt = DEBUG_NEW wxString(newName, wxConvUTF8);
@@ -727,7 +728,7 @@ void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 void TpdPost::treeMarkGrcMember(const char* cell, bool error)
 {
    if (NULL == _cllBrowser) return;
-   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   wxCommandEvent eventCELLTREE(console::wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_MARK_GRC);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
    eventCELLTREE.SetExtraLong(error);

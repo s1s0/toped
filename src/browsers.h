@@ -131,7 +131,6 @@ namespace browsers
          wxColor           _listColor;
          wxColor           _editColor;
          wxString          _cellFilter;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -290,7 +289,6 @@ namespace browsers
          LayerButton*         checkDefined(const LayerDef&);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -310,7 +308,6 @@ namespace browsers
          wxString             getAllSelected();
          LayerPanel*          _layerPanel;
          wxBoxSizer*          _thesizer;
-         wxDECLARE_EVENT_TABLE();
    };
  //===========================================================================
    class ErrorBrowser: public wxTreeCtrl
@@ -392,7 +389,6 @@ namespace browsers
 //         int                 _gdsPageIndex;
 //         int                 _cifPageIndex;
          LayerBrowser*       _layers;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //type of wxTreeItem for DRC browser

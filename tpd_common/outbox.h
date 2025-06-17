@@ -145,6 +145,7 @@ namespace console {
       op_dwire
    } ACTIVE_OP;
 
+   wxDECLARE_EVENT(wxEVT_CMD_BROWSER   , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_TPDSTATUS     , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_FUNC_BROWSER  , wxCommandEvent);
