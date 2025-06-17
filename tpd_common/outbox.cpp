@@ -47,71 +47,44 @@
 #include <sys/time.h>
 #endif
 
-wxDEFINE_EVENT(console::wxEVT_CMD_BROWSER   , wxCommandEvent);
-wxDEFINE_EVENT(console::wxEVT_LOG_ERRMESSAGE, wxCommandEvent);
 
-wxDEFINE_EVENT(console::wxEVT_MOUSE_INPUT   , wxCommandEvent);
-wxDEFINE_EVENT(console::wxEVT_CANVAS_ZOOM   , wxCommandEvent);
-wxDEFINE_EVENT(console::wxEVT_FUNC_BROWSER  , wxCommandEvent);
-wxDEFINE_EVENT(console::wxEVT_TPDSTATUS     , wxCommandEvent);
-wxDEFINE_EVENT(console::wxEVT_CANVAS_CURSOR , wxCommandEvent);
 
-wxDEFINE_EVENT(console::wxEVT_DRCDRAWPREP   , wxCommandEvent);
+
+wxDEFINE_EVENT(console::wxEVT_CANVAS_STATUS     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_RENDER_PARAMS     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CANVAS_PARAMS     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CMD_BROWSER       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_LOG_ERRMESSAGE    , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_MOUSE_ACCEL       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_MOUSE_INPUT       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CANVAS_ZOOM       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_FUNC_BROWSER      , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_TPDSTATUS         , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CANVAS_CURSOR     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CONSOLE_PARSE     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_CURRENT_LAYER     , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_TOOLBARSIZE       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_TOOLBARADDITEM    , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_TOOLBARDELETEITEM , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_AUI_RESTORE       , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_EDITLAYER         , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_EXITAPP           , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_EXECEXT           , wxCommandEvent);
+wxDEFINE_EVENT(console::wxEVT_EXECEXTPIPE       , wxCommandEvent);
+
+wxDEFINE_EVENT(console::wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
+
+wxDEFINE_EVENT(console::wxEVT_DRCDRAWPREP       , wxCommandEvent);
+
 
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS      , 10000)
-    DECLARE_EVENT_TYPE(wxEVT_RENDER_PARAMS      , 10001)
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_PARAMS      , 10002)
-//    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER        , 10003)
-//    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE     , 10004)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL        , 10005)
-//    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT        , 10006)
-//    DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM        , 10007)
-//    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER       , 10008)
-//    DECLARE_EVENT_TYPE(wxEVT_TPDSTATUS          , 10009)
-//    DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR      , 10010)
-    DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE      , 10011)
-    DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER      , 10012)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE        , 10013)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM     , 10014)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM  , 10015)
-    DECLARE_EVENT_TYPE(wxEVT_AUI_RESTORE        , 10016)
-    DECLARE_EVENT_TYPE(wxEVT_EDITLAYER          , 10017)
-    DECLARE_EVENT_TYPE(wxEVT_EXITAPP            , 10018)
-    DECLARE_EVENT_TYPE(wxEVT_EXECEXT            , 10019)
-    DECLARE_EVENT_TYPE(wxEVT_EXECEXTPIPE        , 10020)
     DECLARE_EVENT_TYPE(wxEVT_EXECEXTDONE        , 10021)
-    DECLARE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS    , 10022)
     DECLARE_EVENT_TYPE(wxEVT_TECHEDITUPDATE     , 10023)
-//    DECLARE_EVENT_TYPE(wxEVT_DRCDRAWPREP        , 10024)
 END_DECLARE_EVENT_TYPES()
 
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS        )
-DEFINE_EVENT_TYPE(wxEVT_RENDER_PARAMS        )
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_PARAMS        )
-//DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER          )
-//DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE       )
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL          )
-//DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT          )
-//DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM          )
-//DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER         )
-//DEFINE_EVENT_TYPE(wxEVT_TPDSTATUS            )
-//DEFINE_EVENT_TYPE(wxEVT_CANVAS_CURSOR        )
-DEFINE_EVENT_TYPE(wxEVT_CONSOLE_PARSE        )
-DEFINE_EVENT_TYPE(wxEVT_CURRENT_LAYER        )
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARSIZE          )
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM       )
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM    )
-DEFINE_EVENT_TYPE(wxEVT_AUI_RESTORE          )
-DEFINE_EVENT_TYPE(wxEVT_EDITLAYER            )
-DEFINE_EVENT_TYPE(wxEVT_EXITAPP              )
-DEFINE_EVENT_TYPE(wxEVT_EXECEXT              )
-DEFINE_EVENT_TYPE(wxEVT_EXECEXTPIPE          )
 DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE          )
-DEFINE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS      )
 DEFINE_EVENT_TYPE(wxEVT_TECHEDITUPDATE       )
-//DEFINE_EVENT_TYPE(wxEVT_DRCDRAWPREP          )
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -496,7 +469,7 @@ void TpdPost::render_status(bool on_off)
 
 void TpdPost::addFont(const std::string& fname)
 {
-   wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
+   wxCommandEvent eventLoadFont(console::wxEVT_RENDER_PARAMS);
    eventLoadFont.SetId(tui::RPS_LD_FONT);
    eventLoadFont.SetString(wxString(fname.c_str(), wxConvUTF8));
    wxPostEvent(_mainWindow, eventLoadFont);
@@ -739,7 +712,7 @@ void TpdPost::parseCommand(const wxString cmd)
 {
 //   assert(_cmdLine);
    assert(_mainWindow);
-   wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
+   wxCommandEvent eventPARSE(console::wxEVT_CONSOLE_PARSE);
    eventPARSE.SetString(cmd);
 //   wxPostEvent(_cmdLine, eventPARSE);
    wxPostEvent(_mainWindow, eventPARSE);
@@ -748,7 +721,7 @@ void TpdPost::parseCommand(const wxString cmd)
 void TpdPost::restoreAuiState(const wxString state)
 {
    assert(_mainWindow);
-   wxCommandEvent eventAUI(wxEVT_AUI_RESTORE);
+   wxCommandEvent eventAUI(console::wxEVT_AUI_RESTORE);
    eventAUI.SetString(state);
    wxPostEvent(_mainWindow,eventAUI);
 }
@@ -772,20 +745,20 @@ void TpdPost::tellFnSort()
 void TpdPost::reloadTellFuncs()
 {
    assert(_mainWindow);
-   wxCommandEvent eventRELOADTELLFUNC(wxEVT_RELOADTELLFUNCS);
+   wxCommandEvent eventRELOADTELLFUNC(console::wxEVT_RELOADTELLFUNCS);
    wxPostEvent(_mainWindow, eventRELOADTELLFUNC);
 }
 
 void TpdPost::execExt(const wxString extCmd)
 {
-   wxCommandEvent eventEXEXEXT(wxEVT_EXECEXT);
+   wxCommandEvent eventEXEXEXT(console::wxEVT_EXECEXT);
    eventEXEXEXT.SetString(extCmd);
    wxPostEvent(_mainWindow, eventEXEXEXT);
 }
 
 void TpdPost::execPipe(const wxString extCmd)
 {
-   wxCommandEvent eventExecExPipe(wxEVT_EXECEXTPIPE);
+   wxCommandEvent eventExecExPipe(console::wxEVT_EXECEXTPIPE);
    eventExecExPipe.SetString(extCmd);
    wxPostEvent(_mainWindow, eventExecExPipe);
 }
@@ -810,7 +783,7 @@ void TpdPost::drcDrawPrep(int type, const wxString name)
 
 void TpdPost::quitApp(int exitType)
 {
-   wxCommandEvent eventQUITAPP(wxEVT_EXITAPP);
+   wxCommandEvent eventQUITAPP(console::wxEVT_EXITAPP);
    eventQUITAPP.SetInt(exitType);
    wxPostEvent(_mainWindow, eventQUITAPP);
 //   ::wxSafeYield(_mainWindow);

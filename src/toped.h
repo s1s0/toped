@@ -287,8 +287,6 @@ namespace tui {
       void OnIconize             (wxIconizeEvent&);
       void onReloadTellFuncs     (wxCommandEvent& WXUNUSED(evt));
       void onParseCommand        (wxCommandEvent&);
-      // The declaration of the associated event table
-      wxDECLARE_EVENT_TABLE();
    };
 }
 

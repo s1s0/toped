@@ -55,7 +55,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern const wxEventType         wxEVT_EDITLAYER;
 
 //==============================================================================
 //
@@ -1754,7 +1753,7 @@ void browsers::LayerButton::onRightClick(wxMouseEvent& /*event*/)
 
 void  browsers::LayerButton::OnEditLayer(wxCommandEvent&)
 {
-   wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
+   wxCommandEvent eventEditLayer(console::wxEVT_EDITLAYER);
    LayerDef* laydef = DEBUG_NEW LayerDef(_layer->laydef());
    eventEditLayer.SetClientData(static_cast<void*>(laydef));
    // This is supposed to work according to the wx documentation, but compiler

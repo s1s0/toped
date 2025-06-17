@@ -43,9 +43,6 @@ extern console::TllCmdLine*      Console;
 extern wxFrame*                  TopedMainW;
 extern wxWindow*                 TopedCanvasW;
 
-
-extern const wxEventType         wxEVT_CANVAS_PARAMS;
-
 //=============================================================================
 int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap, bool& strict)
 {
@@ -280,7 +277,7 @@ int tellstdfunc::stdLONGCURSOR::execute()
 {
    bool        longcur  = getBoolValue();
 
-   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
+   wxCommandEvent eventGRIDUPD(console::wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::CPS_LONG_CURSOR);
    eventGRIDUPD.SetInt((longcur ? 1 : 0));
    wxPostEvent(TopedMainW, eventGRIDUPD);
