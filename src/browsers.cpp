@@ -55,7 +55,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_EDITLAYER;
 
 //==============================================================================
@@ -63,14 +62,6 @@ extern const wxEventType         wxEVT_EDITLAYER;
 // CellBrowser
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::CellBrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_CELLS, browsers::CellBrowser::onItemRightClick)/*wxID_ANY*/
-   //EVT_RIGHT_UP(browsers::CellBrowser::onBlankRMouseUp)
-   EVT_LEFT_DCLICK(browsers::CellBrowser::onLMouseDblClk)
-   EVT_MENU(CELLTREEOPENCELL, browsers::CellBrowser::onWxOpenCell)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::CellBrowser::onCommand)
-wxEND_EVENT_TABLE()
-
 browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
                            const wxPoint& pos, const wxSize& size, long style) :
       wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT )
@@ -81,6 +72,11 @@ browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
    _corrupted        = false;
    wxColour bgnd = GetBackgroundColour();
    SetBackgroundColour(*wxLIGHT_GREY);
+   Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::CellBrowser::onItemRightClick, this, tui::ID_PNL_CELLS);
+//   Bind(wxEVT_RIGHT_UP             , &browsers::CellBrowser::onBlankRMouseUp , this);
+   Bind(wxEVT_LEFT_DCLICK          , &browsers::CellBrowser::onLMouseDblClk  , this);
+   Bind(wxEVT_MENU                 , &browsers::CellBrowser::onWxOpenCell    , this, tui::ID_PNL_CELLS);
+   Bind(console::wxEVT_CMD_BROWSER , &browsers::CellBrowser::onCommand       , this);
 }
 
 void browsers::CellBrowser::initialize()
@@ -1403,9 +1399,9 @@ void browsers::XdbBrowser::onHierView(wxCommandEvent& /*event*/)
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::browserTAB, wxAuiNotebook)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::onCommand)
-wxEND_EVENT_TABLE()
+//
+// browserTAB
+//
 //==============================================================================
 browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const wxPoint& pos, const wxSize& size, long style) :
    wxAuiNotebook( parent, id, pos, size, style),
@@ -1420,7 +1416,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const wxPoint& 
    AddPage(_tdtStruct, wxT("Cells"));
    _layers = DEBUG_NEW LayerBrowser(this,  tui::ID_TPD_LAYERS);
    AddPage(_layers, wxT("Layers"));
-
+   Bind(console::wxEVT_CMD_BROWSER, &browsers::browserTAB::onCommand, this);
 }
 
 browsers::browserTAB::~browserTAB()
@@ -1801,13 +1797,10 @@ browsers::LayerButton::~LayerButton()
 }
 
 //====================================================================
-wxBEGIN_EVENT_TABLE(browsers::LayerPanel, wxScrolledWindow)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerPanel::onCommand)
-   EVT_PAINT(browsers::LayerPanel::onPaint)
-wxEND_EVENT_TABLE()
+//
+//  Layer Panel
+//
 //====================================================================
-//
-//
 browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos,
                               const wxSize& size,
@@ -1815,6 +1808,8 @@ browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
                               :wxScrolledWindow(parent, id, pos, size, style, name)
 {
    _buttonCount = 0;
+   Bind(console::wxEVT_CMD_BROWSER, &browsers::LayerPanel::onCommand, this);
+   Bind(wxEVT_PAINT               , &browsers::LayerPanel::onPaint  , this);
 }
 
 browsers::LayerPanel::~LayerPanel()
@@ -1941,23 +1936,23 @@ wxString browsers::LayerPanel::getAllSelected()
 }
 
 //====================================================================
-wxBEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
-   EVT_BUTTON(tui::BT_LAYER_SHOW_ALL  , browsers::LayerBrowser::onShowAll)
-   EVT_BUTTON(tui::BT_LAYER_HIDE_ALL  , browsers::LayerBrowser::onHideAll)
-   EVT_BUTTON(tui::BT_LAYER_LOCK_ALL  , browsers::LayerBrowser::onLockAll)
-   EVT_BUTTON(tui::BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::onUnlockAll)
-   EVT_BUTTON(tui::BT_LAYER_SAVE_ST   , browsers::LayerBrowser::onSaveState)
-   EVT_BUTTON(tui::BT_LAYER_LOAD_ST   , browsers::LayerBrowser::onLoadState)
-   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerBrowser::onCommand)
-wxEND_EVENT_TABLE()
+//
+// Layer Browser
+//
 //====================================================================
-
-
 browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
    :wxPanel(parent, id, wxDefaultPosition, wxDefaultSize),
    _layerPanel(NULL),
    _thesizer(NULL)
 {
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onShowAll   , this, tui::BT_LAYER_SHOW_ALL  );
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onHideAll   , this, tui::BT_LAYER_HIDE_ALL  );
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onLockAll   , this, tui::BT_LAYER_LOCK_ALL  );
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onUnlockAll , this, tui::BT_LAYER_UNLOCK_ALL);
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onSaveState , this, tui::BT_LAYER_SAVE_ST   );
+   Bind(wxEVT_BUTTON              , &browsers::LayerBrowser::onLoadState , this, tui::BT_LAYER_LOAD_ST   );
+   Bind(console::wxEVT_CMD_BROWSER, &browsers::LayerBrowser::onCommand   , this);
+
    _thesizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
 
    wxBoxSizer* sizer1 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
