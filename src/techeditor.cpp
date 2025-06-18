@@ -41,34 +41,28 @@
 extern layprop::PropertyCenter*        PROPC;
 extern tui::TopedFrame*                Toped;
 extern console::TllCmdLine*            Console;
-extern const wxEventType               wxEVT_TECHEDITUPDATE;
 tui::LayerListPanel*                   layerListPtr = NULL; //!Required by SortItem callback
-///////////////////////////////////////////////////////////////////////////
-//extern const wxEventType         wxEVT_CMD_BROWSER;
 
-wxBEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
-   EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayerSelected  )
-   EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayListSort    )
-   EVT_CHECKBOX         ( DTE_NEWLAYER     , tui::TechEditorDialog::OnNewLayer       )
-   EVT_BUTTON           ( DTE_NEWCOLOR     , tui::TechEditorDialog::OnColorEditor    )
-   EVT_BUTTON           ( DTE_NEWFILL      , tui::TechEditorDialog::OnFillEditor     )
-   EVT_BUTTON           ( DTE_NEWSTYLE     , tui::TechEditorDialog::OnStyleEditor    )
-   EVT_COMBOBOX         ( DTE_FILL_COMBO   , tui::TechEditorDialog::OnChangeProperty )
-   EVT_COMBOBOX         ( DTE_LINE_COMBO   , tui::TechEditorDialog::OnChangeProperty )
-   EVT_COMBOBOX         ( DTE_COLOR_COMBO  , tui::TechEditorDialog::OnChangeProperty )
-   EVT_TEXT             ( DTE_LAYER_NUM    , tui::TechEditorDialog::OnChangeLayNum   )
-   EVT_TEXT             ( DTE_LAYER_TYPE   , tui::TechEditorDialog::OnChangeLayType  )
-   EVT_TEXT             ( DTE_LAYER_NAME   , tui::TechEditorDialog::OnChangeProperty )
-   EVT_BUTTON           ( DTE_APPLY        , tui::TechEditorDialog::OnApply          )
-wxEND_EVENT_TABLE()
-
+//==================================================================================================
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const LayerDef laydef) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
    _curSelect ( wxNOT_FOUND )
 {
-   Connect(-1, wxEVT_TECHEDITUPDATE,
-           (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&TechEditorDialog::OnRemotePropUpdate);
+
+   Bind(wxEVT_LIST_ITEM_FOCUSED      , &TechEditorDialog::OnLayerSelected   , this,  DTE_LAYERS_LIST );
+   Bind(wxEVT_LIST_COL_CLICK         , &TechEditorDialog::OnLayListSort     , this,  DTE_LAYERS_LIST );
+   Bind(wxEVT_CHECKBOX               , &TechEditorDialog::OnNewLayer        , this,  DTE_NEWLAYER    );
+   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnColorEditor     , this,  DTE_NEWCOLOR    );
+   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnFillEditor      , this,  DTE_NEWFILL     );
+   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnStyleEditor     , this,  DTE_NEWSTYLE    );
+   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_FILL_COMBO  );
+   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_LINE_COMBO  );
+   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_COLOR_COMBO );
+   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeLayNum    , this,  DTE_LAYER_NUM   );
+   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeLayType   , this,  DTE_LAYER_TYPE  );
+   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeProperty  , this,  DTE_LAYER_NAME  );
+   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnApply           , this,  DTE_APPLY       );
+   Bind(console::wxEVT_TECHEDITUPDATE, &TechEditorDialog::OnRemotePropUpdate, this);
 
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -156,7 +150,6 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const 
 
 tui::TechEditorDialog::~TechEditorDialog()
 {
-   Disconnect(-1, wxEVT_TECHEDITUPDATE);
    layerListPtr = NULL;
 }
 
