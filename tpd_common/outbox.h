@@ -166,9 +166,9 @@ namespace console {
    wxDECLARE_EVENT(wxEVT_EXITAPP           , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_EXECEXT           , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_EXECEXTPIPE       , wxCommandEvent);
-
+   wxDECLARE_EVENT(wxEVT_EXECEXTDONE       , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
-
+   wxDECLARE_EVENT(wxEVT_TECHEDITUPDATE    , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_DRCDRAWPREP       , wxCommandEvent);
 
    

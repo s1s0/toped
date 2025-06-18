@@ -165,7 +165,6 @@ namespace tui
          wxString                _layerDtypeString;
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
-         DECLARE_EVENT_TABLE()
    };
 
 

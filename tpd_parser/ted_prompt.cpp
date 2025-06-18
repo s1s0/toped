@@ -65,8 +65,6 @@ extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
 
 console::TllCmdLine*        Console = NULL;
-extern const wxEventType    wxEVT_EXECEXTDONE;
-
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str)
@@ -589,15 +587,12 @@ console::TllCmdLine::~TllCmdLine()
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE( console::TedCmdLine, wxEvtHandler )
-   EVT_TEXT_ENTER(tui::ID_CMD_LINE, console::TedCmdLine::onGetCommand)
-   EVT_CHAR(console::TedCmdLine::onChar)
-wxEND_EVENT_TABLE()
-
 console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       TllCmdLine  ( canvas      ),
       _cmdLineWnd ( cmdLineWnd  )
 {
+   Bind(wxEVT_TEXT_ENTER, &console::TedCmdLine::onGetCommand, this, tui::ID_CMD_LINE);
+   Bind(wxEVT_CHAR      , &console::TedCmdLine::onChar      , this);
    // _cmdline inherits only wxEvtHandler and the line below is required to get the
    // wxEvents rolling for the class instances.
    _cmdLineWnd->PushEventHandler(this);
@@ -652,7 +647,6 @@ void console::TedCmdLine::onGetCommand(wxCommandEvent& WXUNUSED(event))
 
 void console::TedCmdLine::onChar(wxKeyEvent& event)
 {
-
    switch(event.GetKeyCode())
    {
       case WXK_UP   : if (_cmd_history.begin() == _history_position)
@@ -696,9 +690,7 @@ void console::TedCmdLine::waitGUInput(telldata::operandSTACK *clst, console::ACT
    _mouseIN_OK = true;
    _guinput.Clear();
    tell_log(MT_GUIPROMPT);
-   Connect(-1, wxEVT_COMMAND_ENTER,
-           (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&TedCmdLine::onGUInput);
+   Bind(wxEVT_COMMAND_ENTER, &TedCmdLine::onGUInput, this);
 
    TpdPost::toped_status(TSTS_THREADWAIT);
 }
@@ -716,7 +708,7 @@ void console::TedCmdLine::getGUInput(bool from_keyboard)
    //parse the data from the prompt
    if (_puc->getGUInput(command)) {
       //if the proper pattern was found
-      Disconnect(-1, wxEVT_COMMAND_ENTER);
+      Unbind(wxEVT_COMMAND_ENTER, &TedCmdLine::onGUInput, this);
       delete _puc; _puc = NULL;
       _mouseIN_OK = true;
       // wake-up the thread expecting this data
@@ -738,7 +730,7 @@ void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
       case -3: _translation.Rotate(90.0);break;
       case -2: cancelLastPoint();break;
       case -1:   // abort current  mouse input
-         Disconnect(-1, wxEVT_COMMAND_ENTER);
+         Unbind(wxEVT_COMMAND_ENTER, &TedCmdLine::onGUInput, this);
          delete _puc; _puc = NULL;
          _mouseIN_OK = false;
          tell_log(MT_WARNING, "input aborted");
@@ -764,9 +756,7 @@ void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
 
 void console::TedCmdLine::waitExternal(wxString cmdExt)
 {
-   Connect(-1, wxEVT_EXECEXTDONE,
-           (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&TedCmdLine::onExternalDone);
+   Bind(wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
    _execExternal = true;
    TpdPost::toped_status(TSTS_THREADWAIT);
    TpdPost::execExt(cmdExt);
@@ -774,7 +764,8 @@ void console::TedCmdLine::waitExternal(wxString cmdExt)
 
 void console::TedCmdLine::onExternalDone(wxCommandEvent& /*event*/)
 {
-   Disconnect(-1, wxEVT_EXECEXTDONE);
+   
+   Unbind(wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
    _execExternal = false;
    _threadWaits4->Signal();
 }

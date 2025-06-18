@@ -71,20 +71,10 @@ wxDEFINE_EVENT(console::wxEVT_EDITLAYER         , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_EXITAPP           , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_EXECEXT           , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_EXECEXTPIPE       , wxCommandEvent);
-
+wxDEFINE_EVENT(console::wxEVT_EXECEXTDONE       , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
-
+wxDEFINE_EVENT(console::wxEVT_TECHEDITUPDATE    , wxCommandEvent);
 wxDEFINE_EVENT(console::wxEVT_DRCDRAWPREP       , wxCommandEvent);
-
-
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_EXECEXTDONE        , 10021)
-    DECLARE_EVENT_TYPE(wxEVT_TECHEDITUPDATE     , 10023)
-END_DECLARE_EVENT_TYPES()
-
-DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE          )
-DEFINE_EVENT_TYPE(wxEVT_TECHEDITUPDATE       )
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -767,7 +757,7 @@ void TpdPost::techEditUpdate(console::TECHEDIT_UPDATE_EVT_ENUMS id)
 {
    if (NULL != (_techEditor))
    {
-      wxCommandEvent eventUPDATE(wxEVT_TECHEDITUPDATE);
+      wxCommandEvent eventUPDATE(console::wxEVT_TECHEDITUPDATE);
       eventUPDATE.SetId(id);
       wxPostEvent(_techEditor, eventUPDATE);
    }
