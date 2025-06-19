@@ -75,16 +75,13 @@ void  tui::sgSpinButton::OnSpin(wxSpinEvent&) {
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::sgSliderControl, wxPanel)
-   EVT_SCROLL(tui::sgSliderControl::OnScroll)
-   EVT_TEXT_ENTER(wxID_ANY, sgSliderControl::OnTextEnter)
-wxEND_EVENT_TABLE()
-
 tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int max, int init)
   : wxPanel(parent, wId)
 {
    // 
-//   Bind(wxEVT_SCROLL, &tui::sgSliderControl::OnScroll, this);
+   Bind(wxEVT_SCROLL_THUMBRELEASE, &tui::sgSliderControl::OnScrollRelease, this);
+   Bind(wxEVT_SLIDER             , &tui::sgSliderControl::OnScroll       , this);
+   Bind(wxEVT_TEXT_ENTER         , &tui::sgSliderControl::OnTextEnter    , this);
 
    wxBoxSizer *controlSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
    _slider = DEBUG_NEW wxSlider(this, wxID_ANY, init, min, max);
@@ -111,18 +108,18 @@ int  tui::sgSliderControl::getValue()
    return _slider->GetValue();
 }
 
-void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
+void  tui::sgSliderControl::OnScroll(wxCommandEvent&)
 {
    wxString ws;
    ws.sprintf(wxT("%i"), _slider->GetValue());
    _text->SetValue(ws);
-   int eventID = event.GetEventType();
-   if (wxEVT_SCROLL_THUMBRELEASE == eventID)
-   {
-      wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
-      sliderEvent.SetInt(_slider->GetValue());
-      wxPostEvent(GetParent(), sliderEvent);
-   }
+}
+
+void  tui::sgSliderControl::OnScrollRelease(wxScrollEvent&)
+{
+   wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
+   sliderEvent.SetInt(_slider->GetValue());
+   wxPostEvent(GetParent(), sliderEvent);
 }
 
 void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
