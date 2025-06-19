@@ -234,9 +234,9 @@ namespace tui {
    private:
       wxTextCtrl*       _text;
       wxSlider*         _slider;
-      void              OnScroll(wxScrollEvent&);
+      void              OnScroll(wxCommandEvent&);
+      void              OnScrollRelease(wxScrollEvent&);
       void              OnTextEnter(wxCommandEvent& WXUNUSED(event));
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
