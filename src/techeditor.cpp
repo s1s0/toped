@@ -49,20 +49,20 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const 
    _curSelect ( wxNOT_FOUND )
 {
 
-   Bind(wxEVT_LIST_ITEM_FOCUSED      , &TechEditorDialog::OnLayerSelected   , this,  DTE_LAYERS_LIST );
-   Bind(wxEVT_LIST_COL_CLICK         , &TechEditorDialog::OnLayListSort     , this,  DTE_LAYERS_LIST );
-   Bind(wxEVT_CHECKBOX               , &TechEditorDialog::OnNewLayer        , this,  DTE_NEWLAYER    );
-   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnColorEditor     , this,  DTE_NEWCOLOR    );
-   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnFillEditor      , this,  DTE_NEWFILL     );
-   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnStyleEditor     , this,  DTE_NEWSTYLE    );
-   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_FILL_COMBO  );
-   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_LINE_COMBO  );
-   Bind(wxEVT_COMBOBOX               , &TechEditorDialog::OnChangeProperty  , this,  DTE_COLOR_COMBO );
-   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeLayNum    , this,  DTE_LAYER_NUM   );
-   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeLayType   , this,  DTE_LAYER_TYPE  );
-   Bind(wxEVT_TEXT                   , &TechEditorDialog::OnChangeProperty  , this,  DTE_LAYER_NAME  );
-   Bind(wxEVT_BUTTON                 , &TechEditorDialog::OnApply           , this,  DTE_APPLY       );
-   Bind(console::wxEVT_TECHEDITUPDATE, &TechEditorDialog::OnRemotePropUpdate, this);
+   Bind(wxEVT_LIST_ITEM_FOCUSED  , &TechEditorDialog::OnLayerSelected   , this,  DTE_LAYERS_LIST );
+   Bind(wxEVT_LIST_COL_CLICK     , &TechEditorDialog::OnLayListSort     , this,  DTE_LAYERS_LIST );
+   Bind(wxEVT_CHECKBOX           , &TechEditorDialog::OnNewLayer        , this,  DTE_NEWLAYER    );
+   Bind(wxEVT_BUTTON             , &TechEditorDialog::OnColorEditor     , this,  DTE_NEWCOLOR    );
+   Bind(wxEVT_BUTTON             , &TechEditorDialog::OnFillEditor      , this,  DTE_NEWFILL     );
+   Bind(wxEVT_BUTTON             , &TechEditorDialog::OnStyleEditor     , this,  DTE_NEWSTYLE    );
+   Bind(wxEVT_COMBOBOX           , &TechEditorDialog::OnChangeProperty  , this,  DTE_FILL_COMBO  );
+   Bind(wxEVT_COMBOBOX           , &TechEditorDialog::OnChangeProperty  , this,  DTE_LINE_COMBO  );
+   Bind(wxEVT_COMBOBOX           , &TechEditorDialog::OnChangeProperty  , this,  DTE_COLOR_COMBO );
+   Bind(wxEVT_TEXT               , &TechEditorDialog::OnChangeLayNum    , this,  DTE_LAYER_NUM   );
+   Bind(wxEVT_TEXT               , &TechEditorDialog::OnChangeLayType   , this,  DTE_LAYER_TYPE  );
+   Bind(wxEVT_TEXT               , &TechEditorDialog::OnChangeProperty  , this,  DTE_LAYER_NAME  );
+   Bind(wxEVT_BUTTON             , &TechEditorDialog::OnApply           , this,  DTE_APPLY       );
+   Bind(tui::wxEVT_TECHEDITUPDATE, &TechEditorDialog::OnRemotePropUpdate, this);
 
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -368,7 +368,7 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 
    Console->parseCommand(ost);
    //Refresh layout
-   wxCommandEvent eventZoom(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZoom(tui::wxEVT_CANVAS_ZOOM);
    eventZoom.SetInt(tui::ZOOM_REFRESH);
    wxPostEvent(Toped->view(), eventZoom);
 

@@ -318,7 +318,7 @@ void TopedApp::loadGlfFonts()
    }
    else
    {
-      wxCommandEvent eventLoadFont(console::wxEVT_RENDER_PARAMS);
+      wxCommandEvent eventLoadFont(tui::wxEVT_RENDER_PARAMS);
       eventLoadFont.SetId(tui::RPS_SLCT_FONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);

@@ -262,34 +262,32 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
   ,_xVisual         ( NULL  )
 #endif
 {
-   Bind(wxEVT_PAINT            ,&tui::LayoutCanvas::OnpaintGL         , this);
-   Bind(wxEVT_SIZE             ,&tui::LayoutCanvas::OnresizeGL        , this);
-   Bind(wxEVT_MOTION           ,&tui::LayoutCanvas::OnMouseMotion     , this);
-   Bind(wxEVT_RIGHT_DOWN       ,&tui::LayoutCanvas::OnMouseRightDown  , this);
-   Bind(wxEVT_RIGHT_UP         ,&tui::LayoutCanvas::OnMouseRightUp    , this);
-   Bind(wxEVT_LEFT_UP          ,&tui::LayoutCanvas::OnMouseLeftUp     , this);
-   Bind(wxEVT_LEFT_DCLICK      ,&tui::LayoutCanvas::OnMouseLeftDClick , this);
-   Bind(wxEVT_MIDDLE_UP        ,&tui::LayoutCanvas::OnMouseMiddleUp   , this);
-   Bind(wxEVT_MOUSEWHEEL       ,&tui::LayoutCanvas::OnMouseWheel      , this);
-   Bind(wxEVT_CHAR             ,&tui::LayoutCanvas::OnChar            , this);
-   Bind(wxEVT_ERASE_BACKGROUND ,&tui::LayoutCanvas::OnEraseBackground , this);
-   Bind(wxEVT_TIMER            ,&tui::LayoutCanvas::OnTimer           , this);
-
-   Bind(console::wxEVT_CANVAS_ZOOM      ,&tui::LayoutCanvas::OnZoom            , this);
-   Bind(console::wxEVT_MOUSE_INPUT      ,&tui::LayoutCanvas::OnMouseIN         , this);
-   Bind(console::wxEVT_CANVAS_CURSOR    ,&tui::LayoutCanvas::OnCursorType      , this);
-   Bind(console::wxEVT_DRCDRAWPREP      ,&tui::LayoutCanvas::OnDrcCollect      , this);
-
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMrulerState         ,this ,          CM_RULER);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMchangeLayer        ,this ,          CM_CHLAY);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMcontinue           ,this ,       CM_CONTINUE);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMabort              ,this ,          CM_ABORT);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMcancel             ,this ,    CM_CANCEL_LAST);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMclose              ,this ,          CM_CLOSE);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnRepeatLastCmd        ,this ,          CM_AGAIN);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMFlip               ,this ,           CM_FLIP);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnCMRotate             ,this ,         CM_ROTATE);
-   Bind(wxEVT_MENU             ,&LayoutCanvas::OnPanCenter            ,this ,  TMVIEW_PANCENTER);
+   Bind(wxEVT_PAINT              ,&tui::LayoutCanvas::OnpaintGL         , this);
+   Bind(wxEVT_SIZE               ,&tui::LayoutCanvas::OnresizeGL        , this);
+   Bind(wxEVT_MOTION             ,&tui::LayoutCanvas::OnMouseMotion     , this);
+   Bind(wxEVT_RIGHT_DOWN         ,&tui::LayoutCanvas::OnMouseRightDown  , this);
+   Bind(wxEVT_RIGHT_UP           ,&tui::LayoutCanvas::OnMouseRightUp    , this);
+   Bind(wxEVT_LEFT_UP            ,&tui::LayoutCanvas::OnMouseLeftUp     , this);
+   Bind(wxEVT_LEFT_DCLICK        ,&tui::LayoutCanvas::OnMouseLeftDClick , this);
+   Bind(wxEVT_MIDDLE_UP          ,&tui::LayoutCanvas::OnMouseMiddleUp   , this);
+   Bind(wxEVT_MOUSEWHEEL         ,&tui::LayoutCanvas::OnMouseWheel      , this);
+   Bind(wxEVT_CHAR               ,&tui::LayoutCanvas::OnChar            , this);
+   Bind(wxEVT_ERASE_BACKGROUND   ,&tui::LayoutCanvas::OnEraseBackground , this);
+   Bind(wxEVT_TIMER              ,&tui::LayoutCanvas::OnTimer           , this);
+   Bind(tui::wxEVT_CANVAS_ZOOM   ,&tui::LayoutCanvas::OnZoom            , this);
+   Bind(tui::wxEVT_MOUSE_INPUT   ,&tui::LayoutCanvas::OnMouseIN         , this);
+   Bind(tui::wxEVT_CANVAS_CURSOR ,&tui::LayoutCanvas::OnCursorType      , this);
+   Bind(tui::wxEVT_DRCDRAWPREP   ,&tui::LayoutCanvas::OnDrcCollect      , this);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMrulerState         ,this ,          CM_RULER);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMchangeLayer        ,this ,          CM_CHLAY);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMcontinue           ,this ,       CM_CONTINUE);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMabort              ,this ,          CM_ABORT);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMcancel             ,this ,    CM_CANCEL_LAST);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMclose              ,this ,          CM_CLOSE);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnRepeatLastCmd        ,this ,          CM_AGAIN);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMFlip               ,this ,           CM_FLIP);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMRotate             ,this ,         CM_ROTATE);
+   Bind(wxEVT_MENU               ,&LayoutCanvas::OnPanCenter            ,this ,  TMVIEW_PANCENTER);
 
 //   Bind(EVT_MENU               ,&TopedFrame::OnCurrentLayer           ,this ,          CM_CHLAY);
 //   Bind(wxEVT_LEFT_DOWN        ,&tui::LayoutCanvas::OnMouseLeftDown   ,this );
@@ -579,7 +577,7 @@ void tui::LayoutCanvas::cursorControl(bool shift, bool ctl)
 
 void tui::LayoutCanvas::updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype) {
    wxString ws;
-   wxCommandEvent eventPOSITION(console::wxEVT_CANVAS_STATUS);
+   wxCommandEvent eventPOSITION(tui::wxEVT_CANVAS_STATUS);
    ws.sprintf(wxT("%9.3f"),coord*PROPC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
@@ -644,7 +642,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       TP nsp;
       if      (abs(s_ScrMARK.x() - sp_BL.x()) < _apTrigger)
       {// move view window left
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_LEFT);
          OnZoom(eventZOOM);
          nsp = _scrMark * _layCTM.Reversed();
@@ -652,7 +650,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       }
       else  if(abs(sp_TR.x() - s_ScrMARK.x()) < _apTrigger)
       {// move view window right
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_RIGHT);
          OnZoom(eventZOOM);
          nsp = _scrMark * _layCTM.Reversed();
@@ -660,7 +658,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       }
       else  if(abs(sp_BL.y() - s_ScrMARK.y()) < _apTrigger)
       {// move view window up
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_UP);
          OnZoom(eventZOOM);
          nsp = _scrMark * _layCTM.Reversed();
@@ -668,7 +666,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       }
       else  if(abs(s_ScrMARK.y() - sp_TR.y()) < _apTrigger)
       {// move view window down
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_DOWN);
          OnZoom(eventZOOM);
          nsp = _scrMark * _layCTM.Reversed();
@@ -703,7 +701,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
    if ((abs(_pressPoint.x() - _scrMark.x())  > stepDB) ||
        (abs(_pressPoint.y() - _scrMark.y())  > stepDB))   {
       // if dragging ...
-      wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(ZOOM_WINDOWM);
       OnZoom(eventZOOM);
    }
@@ -848,7 +846,7 @@ void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
 void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
 {
    wxString ws;
-   wxCommandEvent eventMOUSEACCEL(console::wxEVT_MOUSE_ACCEL);
+   wxCommandEvent eventMOUSEACCEL(tui::wxEVT_MOUSE_ACCEL);
    ws.sprintf(wxT("{%3.2f,%3.2f}"),_scrMark.x()*PROPC->UU(), _scrMark.y()*PROPC->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
@@ -873,7 +871,7 @@ void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
    int delta    = event.GetWheelDelta();
    int fulldist = event.GetWheelRotation();
    double scroll = fulldist / delta;
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    if (event.ShiftDown())
    {
       if      ( 1 <= scroll) eventZOOM.SetInt(ZOOM_UP);
@@ -905,7 +903,7 @@ void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
 
 void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
 {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    switch(event.GetKeyCode())
    {
       case WXK_LEFT : eventZOOM.SetInt(ZOOM_LEFT ); break;
@@ -1024,7 +1022,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
          _reperX = _longCursor;
          _reperY = _longCursor;
          drawProp->setCurrentOp(console::op_none);
-         wxCommandEvent eventPOSITION(console::wxEVT_CANVAS_STATUS);
+         wxCommandEvent eventPOSITION(tui::wxEVT_CANVAS_STATUS);
          eventPOSITION.SetString(wxT(""));
          eventPOSITION.SetInt(CNVS_DEL_Y);
          wxPostEvent(this, eventPOSITION);
@@ -1044,7 +1042,7 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
    tmpmtrx.Translate(_scrMark - center);
    DBbox* box = DEBUG_NEW DBbox( _lpBL, _lpTR );
    (*box) = (*box) * tmpmtrx;
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
    OnZoom(eventZOOM);
@@ -1072,7 +1070,7 @@ void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))
 void tui::LayoutCanvas::OnCMchangeLayer(wxCommandEvent& WXUNUSED(event))
 {
    // post an event to the toped.cpp
-   wxCommandEvent eventCurLay(console::wxEVT_CURRENT_LAYER);
+   wxCommandEvent eventCurLay(tui::wxEVT_CURRENT_LAYER);
    wxPostEvent(this, eventCurLay);
 }
 
