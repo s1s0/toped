@@ -144,7 +144,6 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -158,7 +157,6 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -172,7 +170,6 @@ namespace browsers
          virtual void      collectInfo(bool);
       private:
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -196,7 +193,6 @@ namespace browsers
          wxTextCtrl*       _cellFilter;
          CellBrowser*      _cellBrowser;
          bool              _hierarchy_view;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -216,7 +212,6 @@ namespace browsers
          wxButton*         _flatButton;
          CellBrowser*      _cellBrowser;
          bool              _hierarchy_view;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -266,8 +261,6 @@ namespace browsers
          bool                 _hidden;
          bool                 _locked;
          bool                 _filled;
-
-      wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -330,7 +323,6 @@ namespace browsers
       wxString                _cluster;
       //wxString               _cell;
       wxTreeItemId            _rbCellID;
-      wxDECLARE_EVENT_TABLE();
    };
 
   //===========================================================================
@@ -355,7 +347,6 @@ namespace browsers
 //      wxButton*               _explainButton;
       wxButton*               _rulesButton;
       wxButton*               _cellsButton;
-      wxDECLARE_EVENT_TABLE();
    };
 
    //===========================================================================

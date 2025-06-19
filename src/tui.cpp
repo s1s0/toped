@@ -55,14 +55,12 @@ extern tui::TopedFrame*          Toped;
 #endif
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::sgSpinButton, wxSpinButton)
-   EVT_SPIN(-1, tui::sgSpinButton::OnSpin)
-wxEND_EVENT_TABLE()
-
 tui::sgSpinButton::sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step,
    const float min, const float max, const float init, const int prec)
   : wxSpinButton(parent, -1, wxDefaultPosition, wxDefaultSize), _wxText(textW),
-    _step(step), _prec(prec) {
+    _step(step), _prec(prec)
+{
+   Bind(wxEVT_SPIN, &tui::sgSpinButton::OnSpin, this);
    SetRange((int) rint(min / _step),(int) rint(max / _step));
    SetValue((int) rint(init / _step));
    wxString ws;
@@ -85,6 +83,9 @@ wxEND_EVENT_TABLE()
 tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int max, int init)
   : wxPanel(parent, wId)
 {
+   // 
+//   Bind(wxEVT_SCROLL, &tui::sgSliderControl::OnScroll, this);
+
    wxBoxSizer *controlSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
    _slider = DEBUG_NEW wxSlider(this, wxID_ANY, init, min, max);
    wxString ws;
@@ -116,7 +117,7 @@ void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
    ws.sprintf(wxT("%i"), _slider->GetValue());
    _text->SetValue(ws);
    int eventID = event.GetEventType();
-   if (wxEVT_SCROLL_CHANGED == eventID)
+   if (wxEVT_SCROLL_THUMBRELEASE == eventID)
    {
       wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
       sliderEvent.SetInt(_slider->GetValue());
@@ -752,13 +753,10 @@ tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::ColorSample, wxWindow)
-   EVT_PAINT(tui::ColorSample::OnPaint)
-wxEND_EVENT_TABLE()
-
 tui::ColorSample::ColorSample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
+   Bind(wxEVT_PAINT, &tui::ColorSample::OnPaint, this);
    _color.Set(0,0,0);
 }
 
@@ -780,20 +778,18 @@ void tui::ColorSample::OnPaint(wxPaintEvent&)
    dc.DrawRectangle(0, 0, w, h);
 }
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::DefineColor, wxDialog)
-   EVT_LISTBOX(ID_ITEMLIST , tui::DefineColor::OnColorSelected    )
-   EVT_BUTTON(ID_BTNEDIT   , tui::DefineColor::OnDefineColor      )
-   EVT_BUTTON(ID_NEWITEM   , tui::DefineColor::OnColorNameAdded   )
-   EVT_BUTTON(ID_BTNAPPLY  , tui::DefineColor::OnApply            )
-   EVT_TEXT(ID_REDVAL      , tui::DefineColor::OnColorPropChanged )
-   EVT_TEXT(ID_GREENVAL    , tui::DefineColor::OnColorPropChanged )
-   EVT_TEXT(ID_BLUEVAL     , tui::DefineColor::OnColorPropChanged )
-   EVT_TEXT(ID_ALPHAVAL    , tui::DefineColor::OnColorPropChanged )
-wxEND_EVENT_TABLE()
-
 tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE), _drawProp(drawProp)
 {
+   Bind(wxEVT_LISTBOX, &tui::DefineColor::OnColorSelected    , this, ID_ITEMLIST );
+   Bind(wxEVT_BUTTON , &tui::DefineColor::OnDefineColor      , this, ID_BTNEDIT  );
+   Bind(wxEVT_BUTTON , &tui::DefineColor::OnColorNameAdded   , this, ID_NEWITEM  );
+   Bind(wxEVT_BUTTON , &tui::DefineColor::OnApply            , this, ID_BTNAPPLY );
+   Bind(wxEVT_TEXT   , &tui::DefineColor::OnColorPropChanged , this, ID_REDVAL   );
+   Bind(wxEVT_TEXT   , &tui::DefineColor::OnColorPropChanged , this, ID_GREENVAL );
+   Bind(wxEVT_TEXT   , &tui::DefineColor::OnColorPropChanged , this, ID_BLUEVAL  );
+   Bind(wxEVT_TEXT   , &tui::DefineColor::OnColorPropChanged , this, ID_ALPHAVAL );
+
    NameList all_names;
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    _drawProp->allColors(all_names);
@@ -1035,15 +1031,12 @@ void tui::DefineColor::OnApply(wxCommandEvent& WXUNUSED(event))
 
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::PatternCanvas, wxWindow)
-   EVT_PAINT(tui::PatternCanvas::OnPaint)
-   EVT_LEFT_UP (tui::PatternCanvas::OnMouseLeftUp)
-   EVT_RIGHT_UP(tui::PatternCanvas::OnMouseRightUp)
-wxEND_EVENT_TABLE()
-
 tui::PatternCanvas::PatternCanvas(wxWindow *parent, wxWindowID id, wxPoint pos,
       wxSize size, const byte* init) :  wxWindow(parent, id, pos, size, wxNO_BORDER)
 {
+   Bind(wxEVT_PAINT   , &tui::PatternCanvas::OnPaint       , this);
+   Bind(wxEVT_LEFT_UP , &tui::PatternCanvas::OnMouseLeftUp , this);
+   Bind(wxEVT_RIGHT_UP, &tui::PatternCanvas::OnMouseRightUp, this);
    if (NULL != init)
       for(byte i = 0; i < 128; i++)
          _pattern[i] = init[i];
@@ -1141,15 +1134,12 @@ void tui::PatternCanvas::OnMouseRightUp(wxMouseEvent& event)
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::DrawFillDef, wxDialog)
-   EVT_BUTTON( ID_BTNCLEAR    , tui::DrawFillDef::OnClear)
-   EVT_BUTTON( ID_BTNFILL     , tui::DrawFillDef::OnFill )
-   EVT_RADIOBOX(ID_RADIOBSIZE , tui::DrawFillDef::OnBrushSize)
-wxEND_EVENT_TABLE()
-
 tui::DrawFillDef::DrawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
    wxPoint pos, const byte* init): wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
+   Bind(wxEVT_BUTTON  , &tui::DrawFillDef::OnClear    , this, ID_BTNCLEAR   );
+   Bind(wxEVT_BUTTON  , &tui::DrawFillDef::OnFill     , this, ID_BTNFILL    );
+   Bind(wxEVT_RADIOBOX, &tui::DrawFillDef::OnBrushSize, this, ID_RADIOBSIZE );
     static const wxString brushsize[] =
     {
         wxT("1"),
@@ -1222,13 +1212,10 @@ tui::DrawFillDef::~DrawFillDef()
 
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::FillSample, wxWindow)
-   EVT_PAINT(tui::FillSample::OnPaint)
-wxEND_EVENT_TABLE()
-
 tui::FillSample::FillSample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
+   Bind(wxEVT_PAINT, &tui::FillSample::OnPaint, this);
    setFill(NULL);
 }
 
@@ -1264,15 +1251,12 @@ void tui::FillSample::OnPaint(wxPaintEvent&)
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::DefineFill, wxDialog)
-   EVT_LISTBOX(ID_ITEMLIST    , tui::DefineFill::OnFillSelected   )
-   EVT_BUTTON(ID_BTNEDIT      , tui::DefineFill::OnDefineFill     )
-   EVT_BUTTON(ID_NEWITEM      , tui::DefineFill::OnFillNameAdded  )
-wxEND_EVENT_TABLE()
-
 tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
+   Bind(wxEVT_LISTBOX, &tui::DefineFill::OnFillSelected , this, ID_ITEMLIST );
+   Bind(wxEVT_BUTTON , &tui::DefineFill::OnDefineFill   , this, ID_BTNEDIT  );
+   Bind(wxEVT_BUTTON , &tui::DefineFill::OnFillNameAdded, this, ID_NEWITEM  );
    NameList all_names;
    drawProp->allFills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
@@ -1430,14 +1414,11 @@ tui::DefineFill::~DefineFill()
 
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::LineStyleSample, wxWindow)
-   EVT_PAINT(tui::LineStyleSample::OnPaint)
-wxEND_EVENT_TABLE()
-
 tui::LineStyleSample::LineStyleSample(wxWindow *parent, wxWindowID id , std::string init, const layprop::DrawProperties* drawProp) :
    wxControl(parent, id),
    _pen(wxT("black"), 3, wxPENSTYLE_USER_DASH)
 {
+   Bind(wxEVT_PAINT, &tui::LineStyleSample::OnPaint, this);
    SetSizeHints(50,25,-1,25);
    LineStyleRecord initStyle;
    initStyle.pattern = drawProp->getLine(init)->pattern();
@@ -1505,13 +1486,11 @@ tui::LineStyleSample::~LineStyleSample()
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::StyleBinaryView, wxTextCtrl)
-      EVT_CHAR(                  tui::StyleBinaryView::OnKey)
-wxEND_EVENT_TABLE()
-
 tui::StyleBinaryView::StyleBinaryView(wxWindow *parent,  wxWindowID id) :
    wxTextCtrl(parent, id, wxT("Pattern:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT)
 {
+   Bind(wxEVT_CHAR, &tui::StyleBinaryView::OnKey, this);
+
    // Calculate the window width
    wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -1579,16 +1558,6 @@ word tui::StyleBinaryView::GetWordValue()
 }
 
 //==============================================================================
-wxBEGIN_EVENT_TABLE(tui::DefineLineStyle, wxDialog)
-      EVT_LISTBOX(IDLS_ITEMLIST      , tui::DefineLineStyle::OnStyleSelected    )
-      EVT_BUTTON (IDLS_NEWITEM       , tui::DefineLineStyle::OnStyleNameAdded   )
-      EVT_BUTTON (IDLS_BTNAPPLY      , tui::DefineLineStyle::OnStyleApply       )
-      EVT_TEXT   (IDLS_NEWSTYLE      , tui::DefineLineStyle::OnStyleNameChanged )
-      EVT_TEXT   (IDLS_PATVAL        , tui::DefineLineStyle::OnStylePropChanged )
-      EVT_TEXT   (IDLS_WIDTHVAL      , tui::DefineLineStyle::OnStylePropChanged )
-      EVT_TEXT   (IDLS_PATSCALEVAL   , tui::DefineLineStyle::OnStylePropChanged )
-wxEND_EVENT_TABLE()
-
 tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
                               wxPoint pos, const layprop::DrawProperties* drawProp) :
    wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE),
@@ -1600,6 +1569,13 @@ tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxSt
    _patscale      (NULL)
 
 {
+   Bind(wxEVT_LISTBOX, &tui::DefineLineStyle::OnStyleSelected    , this, IDLS_ITEMLIST    );
+   Bind(wxEVT_BUTTON , &tui::DefineLineStyle::OnStyleNameAdded   , this, IDLS_NEWITEM     );
+   Bind(wxEVT_BUTTON , &tui::DefineLineStyle::OnStyleApply       , this, IDLS_BTNAPPLY    );
+   Bind(wxEVT_TEXT   , &tui::DefineLineStyle::OnStyleNameChanged , this, IDLS_NEWSTYLE    );
+   Bind(wxEVT_TEXT   , &tui::DefineLineStyle::OnStylePropChanged , this, IDLS_PATVAL      );
+   Bind(wxEVT_TEXT   , &tui::DefineLineStyle::OnStylePropChanged , this, IDLS_WIDTHVAL    );
+   Bind(wxEVT_TEXT   , &tui::DefineLineStyle::OnStylePropChanged , this, IDLS_PATSCALEVAL );
    NameList all_names;
    drawProp->allLines(all_names);
    _styleList = DEBUG_NEW wxListBox(this, IDLS_ITEMLIST, wxDefaultPosition, wxSize(150,100), 0, NULL, wxLB_SORT);
@@ -1951,13 +1927,10 @@ ExpLayMap* tui::NameCbox3Records::getTheFullMap()
 }
 
 //==========================================================================
-wxBEGIN_EVENT_TABLE(tui::NameCboxList, wxScrolledWindow)
-      EVT_SIZE( tui::NameCboxList::OnSize )
-wxEND_EVENT_TABLE()
-
 tui::NameCboxList::NameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const SIMap& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
+   Bind(wxEVT_SIZE, &tui::NameCboxList::OnSize, this );
    // collect all defined layers
    NameList all_names;
    drawProp->allLayers(all_names);
@@ -1994,14 +1967,11 @@ void tui::NameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-wxBEGIN_EVENT_TABLE(tui::NameCbox3List, wxScrolledWindow)
-      EVT_SIZE( tui::NameCbox3List::OnSize )
-wxEND_EVENT_TABLE()
-
 tui::NameCbox3List::NameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz,
       const ExtLayers& inlays, const layprop::DrawProperties* drawProp, wxString inName) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
+   Bind(wxEVT_SIZE, &tui::NameCbox3List::OnSize, this );
    // collect all defined layers
    NameList all_names;
    drawProp->allLayers(all_names);
@@ -2088,13 +2058,10 @@ ExpLayMap* tui::NameEboxRecords::getTheFullMap()
 }
 
 //--------------------------------------------------------------------------
-wxBEGIN_EVENT_TABLE(tui::NameEboxList, wxScrolledWindow)
-      EVT_SIZE( tui::NameEboxList::OnSize )
-wxEND_EVENT_TABLE()
-
 tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
+   Bind(wxEVT_SIZE, &tui::NameEboxList::OnSize, this );
    // collect all defined layers
    NameList all_names;
    drawProp->allLayers(all_names);
@@ -2190,13 +2157,10 @@ ExpLayMap* tui::NameEbox3Records::getTheFullMap()
 }
 
 //--------------------------------------------------------------------------
-wxBEGIN_EVENT_TABLE(tui::nameEbox3List, wxScrolledWindow)
-      EVT_SIZE( tui::nameEbox3List::OnSize )
-wxEND_EVENT_TABLE()
-
 tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
+   Bind(wxEVT_SIZE, &tui::nameEbox3List::OnSize, this );
    // collect all defined layers
    NameList all_names;
    drawProp->allLayers(all_names);
@@ -2234,16 +2198,15 @@ void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
    AdjustScrollbars();
 }
 
-wxBEGIN_EVENT_TABLE(tui::cadenceConvert, wxDialog)
-   EVT_BUTTON(ID_BTNDISPLAYADD, tui::cadenceConvert::onDisplayAdd)
-   EVT_BUTTON(ID_BTNTECHADD, tui::cadenceConvert::onTechAdd)
-   EVT_BUTTON(ID_BTNOUTFILE, tui::cadenceConvert::onOutputFile)
-   EVT_BUTTON(ID_BTNCONVERT, tui::cadenceConvert::onConvert)
-wxEND_EVENT_TABLE()
-
+//=============================================================================
 tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos):
    wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
+   Bind(wxEVT_BUTTON, &tui::cadenceConvert::onDisplayAdd, this, ID_BTNDISPLAYADD );
+   Bind(wxEVT_BUTTON, &tui::cadenceConvert::onTechAdd   , this, ID_BTNTECHADD    );
+   Bind(wxEVT_BUTTON, &tui::cadenceConvert::onOutputFile, this, ID_BTNOUTFILE    );
+   Bind(wxEVT_BUTTON, &tui::cadenceConvert::onConvert   , this, ID_BTNCONVERT    );
+
    _displayList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
    _techList = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
    _outputFile = DEBUG_NEW wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxSize(200, -1));
@@ -2388,23 +2351,23 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 }
 
 //=============================================================================
-wxBEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
-    EVT_CHECKBOX(PDCELL_CHECKDOV      , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov  )
-    EVT_CHECKBOX(PDSET_CELLBOX        , tui::TopedPropertySheets::RenderingPSheet::OnCellBox       )
-    EVT_CHECKBOX(PDSET_CELLMARK       , tui::TopedPropertySheets::RenderingPSheet::OnCellMark      )
-    EVT_CHECKBOX(PDSET_TEXTBOX        , tui::TopedPropertySheets::RenderingPSheet::OnTextBox       )
-    EVT_CHECKBOX(PDSET_TEXTMARK       , tui::TopedPropertySheets::RenderingPSheet::OnTextMark      )
-    EVT_CHECKBOX(PDSET_TEXTORI        , tui::TopedPropertySheets::RenderingPSheet::OnTextOri       )
-    EVT_CHECKBOX(PDGRC_BLINKON        , tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn    )
-    EVT_COMBOBOX(PDSET_TEXTFONTS      , tui::TopedPropertySheets::RenderingPSheet::OnTextFont      )
-    EVT_COMMAND_ENTER(PDIMG_DETAIL    , tui::TopedPropertySheets::RenderingPSheet::OnImageDetail   )
-    EVT_COMMAND_ENTER(PDCELL_DOV      , tui::TopedPropertySheets::RenderingPSheet::OnCellDov       )
-    EVT_COMMAND_ENTER(PDCELL_DAB      , tui::TopedPropertySheets::RenderingPSheet::OnCellDab       )
-    EVT_COMMAND_ENTER(PDGRC_BLINKFREQ , tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkFreq  )
-wxEND_EVENT_TABLE()
-
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
 {
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov, this, PDCELL_CHECKDOV );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnCellBox     , this, PDSET_CELLBOX   );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnCellMark    , this, PDSET_CELLMARK  );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnTextBox     , this, PDSET_TEXTBOX   );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnTextMark    , this, PDSET_TEXTMARK  );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnTextOri     , this, PDSET_TEXTORI   );
+   Bind(wxEVT_CHECKBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn  , this, PDGRC_BLINKON   );
+   Bind(wxEVT_COMBOBOX     , &tui::TopedPropertySheets::RenderingPSheet::OnTextFont    , this, PDSET_TEXTFONTS );
+   Bind(wxEVT_COMMAND_ENTER, &tui::TopedPropertySheets::RenderingPSheet::OnImageDetail , this, PDIMG_DETAIL    );
+   Bind(wxEVT_COMMAND_ENTER, &tui::TopedPropertySheets::RenderingPSheet::OnCellDov     , this, PDCELL_DOV      );
+   Bind(wxEVT_COMMAND_ENTER, &tui::TopedPropertySheets::RenderingPSheet::OnCellDab     , this, PDCELL_DAB      );
+   Bind(wxEVT_COMMAND_ENTER, &tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkFreq, this, PDGRC_BLINKFREQ );
+
+
+
    wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
@@ -2660,29 +2623,26 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
 }
 
 //=============================================================================
-wxBEGIN_EVENT_TABLE(tui::TopedPropertySheets::CanvasPSheet, wxPanel)
-    EVT_TEXT_ENTER(CDMARKER_STEP    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
-    EVT_BUTTON    (CDMARKER_STEP_SET,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
-    EVT_RADIOBOX(CDMARKER_MOTION    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion  )
-    EVT_RADIOBOX(CDRECOVER_POLY     ,tui::TopedPropertySheets::CanvasPSheet::OnRecoverPoly   )
-    EVT_RADIOBOX(CDRECOVER_WIRE     ,tui::TopedPropertySheets::CanvasPSheet::OnRecoverWire   )
-    EVT_CHECKBOX(CDGRID_CBOX1       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn1       )
-    EVT_CHECKBOX(CDGRID_CBOX2       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn2       )
-    EVT_CHECKBOX(CDGRID_CBOX3       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn3       )
-    EVT_CHECKBOX(CDMISC_LONGCURSOR  ,tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor    )
-    EVT_CHECKBOX(CDMISC_AUTOPAN     ,tui::TopedPropertySheets::CanvasPSheet::OnAutoPan       )
-    EVT_CHECKBOX(CDMISC_BOLDONHOOVER,tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover  )
-    EVT_CHECKBOX(CDMISC_ZEROCROSS   ,tui::TopedPropertySheets::CanvasPSheet::OnZeroCross     )
-    EVT_TEXT_ENTER(CDGRID_SET1      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1      )
-    EVT_TEXT_ENTER(CDGRID_SET2      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2      )
-    EVT_TEXT_ENTER(CDGRID_SET3      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3      )
-    EVT_BUTTON    (CDGRID_ENTER1    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1      )
-    EVT_BUTTON    (CDGRID_ENTER2    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2      )
-    EVT_BUTTON    (CDGRID_ENTER3    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3      )
-wxEND_EVENT_TABLE()
-
 tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
 {
+   Bind(wxEVT_TEXT_ENTER, &tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep  , this, CDMARKER_STEP      );
+   Bind(wxEVT_BUTTON    , &tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep  , this, CDMARKER_STEP_SET  );
+   Bind(wxEVT_RADIOBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion, this, CDMARKER_MOTION    );
+   Bind(wxEVT_RADIOBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnRecoverPoly , this, CDRECOVER_POLY     );
+   Bind(wxEVT_RADIOBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnRecoverWire , this, CDRECOVER_WIRE     );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnGridOn1     , this, CDGRID_CBOX1       );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnGridOn2     , this, CDGRID_CBOX2       );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnGridOn3     , this, CDGRID_CBOX3       );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor  , this, CDMISC_LONGCURSOR  );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnAutoPan     , this, CDMISC_AUTOPAN     );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover, this, CDMISC_BOLDONHOOVER);
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnZeroCross   , this, CDMISC_ZEROCROSS   );
+   Bind(wxEVT_TEXT_ENTER, &tui::TopedPropertySheets::CanvasPSheet::OnGridSet1    , this, CDGRID_SET1        );
+   Bind(wxEVT_TEXT_ENTER, &tui::TopedPropertySheets::CanvasPSheet::OnGridSet2    , this, CDGRID_SET2        );
+   Bind(wxEVT_TEXT_ENTER, &tui::TopedPropertySheets::CanvasPSheet::OnGridSet3    , this, CDGRID_SET3        );
+   Bind(wxEVT_BUTTON    , &tui::TopedPropertySheets::CanvasPSheet::OnGridSet1    , this, CDGRID_ENTER1      );
+   Bind(wxEVT_BUTTON    , &tui::TopedPropertySheets::CanvasPSheet::OnGridSet2    , this, CDGRID_ENTER2      );
+   Bind(wxEVT_BUTTON    , &tui::TopedPropertySheets::CanvasPSheet::OnGridSet3    , this, CDGRID_ENTER3      );
    wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
       // Image details (Quality)
       wxBoxSizer *markerSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Marker"));
