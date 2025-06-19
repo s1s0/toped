@@ -81,7 +81,6 @@ namespace tui {
          wxTimer              _idleTimer;
 //         wxTextInputStream*   _tes;
 //         wxTextInputStream*   _tis;
-         wxDECLARE_EVENT_TABLE();
    };
    //-----------------------------------------------------------------------------
    class CommandPanel : public wxPanel {

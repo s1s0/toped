@@ -992,15 +992,13 @@ bool browsers::CellBrowser::checkCorrupted(bool iresult)
 // GDSCellBrowser
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE, browsers::GDSCellBrowser::onItemRightClick)
-   EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::onReportlay)
-wxEND_EVENT_TABLE()
-
 browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
                                        CellBrowser(parent, id, pos, size, style )
-{}
+{
+   Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::GDSCellBrowser::onItemRightClick, this,      tui::ID_GDS_CELLTREE );
+   Bind(wxEVT_MENU                 , &browsers::GDSCellBrowser::onReportlay     , this, browsers::GDSTREEREPORTLAY);
+}
 
 void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -1052,15 +1050,13 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
 // CIFCellBrowser
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::CIFCellBrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE, browsers::CIFCellBrowser::onItemRightClick)
-   EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::onReportlay)
-wxEND_EVENT_TABLE()
-
 browsers::CIFCellBrowser::CIFCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       CellBrowser(parent, id, pos, size, style )
-{ }
+{
+   Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::CIFCellBrowser::onItemRightClick, this,      tui::ID_CIF_CELLTREE );
+   Bind(wxEVT_MENU                 , &browsers::CIFCellBrowser::onReportlay     , this, browsers::CIFTREEREPORTLAY);
+}
 
 void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -1115,15 +1111,13 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
 // OASCellBrowser
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::OASCellBrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_OAS_CELLTREE, browsers::OASCellBrowser::onItemRightClick)
-   EVT_MENU(OASTREEREPORTLAY, browsers::OASCellBrowser::onReportlay)
-wxEND_EVENT_TABLE()
-
 browsers::OASCellBrowser::OASCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       CellBrowser(parent, id, pos, size, style )
-{ }
+{
+   Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::OASCellBrowser::onItemRightClick, this,      tui::ID_OAS_CELLTREE );
+   Bind(wxEVT_MENU                 , &browsers::OASCellBrowser::onReportlay     , this, browsers::OASTREEREPORTLAY);
+}
 
 void browsers::OASCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -1178,17 +1172,15 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
 // TDTbrowser
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::TDTbrowser, wxPanel)
-   EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::onReportUsedLayers)
-   EVT_BUTTON(tui::BT_CELLS_HIER, browsers::TDTbrowser::onHierView)
-   EVT_BUTTON(tui::BT_CELLS_FLAT, browsers::TDTbrowser::onFlatView)
-   EVT_TEXT(tui::ID_CELL_FILTER, browsers::TDTbrowser::onFlatView)
-wxEND_EVENT_TABLE()
-
 browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
                               const wxPoint& pos, const wxSize& size, long style) :
       wxPanel(parent, id, pos, size)
 {
+   Bind(wxEVT_MENU  , &browsers::TDTbrowser::onReportUsedLayers, this, tui::TMCELL_REPORTLAY);
+   Bind(wxEVT_BUTTON, &browsers::TDTbrowser::onHierView        , this, tui::BT_CELLS_HIER   );
+   Bind(wxEVT_BUTTON, &browsers::TDTbrowser::onFlatView        , this, tui::BT_CELLS_FLAT   );
+   Bind(wxEVT_TEXT  , &browsers::TDTbrowser::onFlatView        , this, tui::ID_CELL_FILTER  );
+
    _hierarchy_view = true;
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
@@ -1315,11 +1307,6 @@ browsers::TDTbrowser::~TDTbrowser()
 // XdbBrowser (External Data base browser)
 //
 //==============================================================================
-wxBEGIN_EVENT_TABLE(browsers::XdbBrowser, wxPanel)
-   EVT_BUTTON(tui::BT_CELLS_HIER2, browsers::XdbBrowser::onHierView)
-   EVT_BUTTON(tui::BT_CELLS_FLAT2, browsers::XdbBrowser::onFlatView)
-wxEND_EVENT_TABLE()
-//==============================================================================
 browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
                                     wxWindowID id,
                                     const wxPoint& pos ,
@@ -1327,6 +1314,9 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
                                     long style ):
       wxPanel(parent, id, pos, size, style)
 {
+   Bind(wxEVT_BUTTON, &browsers::XdbBrowser::onHierView, this, tui::BT_CELLS_HIER2);
+   Bind(wxEVT_BUTTON, &browsers::XdbBrowser::onFlatView, this, tui::BT_CELLS_FLAT2);
+
    _hierarchy_view = true;
    switch (id)
    {
@@ -1573,21 +1563,15 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const LayerDef& laydef) 
 {}
 
 //====================================================================
-wxBEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
-   EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
-   EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
-   EVT_RIGHT_DOWN (LayerButton::onRightClick )
-   EVT_PAINT      (LayerButton::onPaint      )
-   EVT_MENU( LAYERCURRENTEDIT,LayerButton::OnEditLayer )
-
-wxEND_EVENT_TABLE()
-//====================================================================
-//
-//
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
                                    const wxSize& size, long style , const wxValidator& /*validator*/ ,
                                    const wxString& name, LayerInfo* layer):wxPanel()
 {
+   Bind(wxEVT_LEFT_DOWN  ,&LayerButton::onLeftClick  , this);
+   Bind(wxEVT_MIDDLE_DOWN,&LayerButton::onMiddleClick, this);
+   Bind(wxEVT_RIGHT_DOWN ,&LayerButton::onRightClick , this);
+   Bind(wxEVT_PAINT      ,&LayerButton::onPaint      , this);
+
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
@@ -2097,21 +2081,18 @@ wxString browsers::LayerBrowser::getAllSelected()
 }
 
 //====================================================================
-wxBEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
-   EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_DRC, browsers::ErrorBrowser::onItemRightClick)
-   //EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
-   EVT_MENU(tui::TMDRC_OPEN_CELL, browsers::ErrorBrowser::onOpenCell)
-   EVT_MENU(tui::TMDRC_SHOW_ERR, browsers::ErrorBrowser::onShowError)
-   EVT_MENU(tui::TMDRC_SHOW_CLUSTER, browsers::ErrorBrowser::onShowCluster)
-wxEND_EVENT_TABLE()
-//====================================================================
 browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos,
                               const wxSize& size,
                               long style):
                      wxTreeCtrl(parent, id, pos, size, style |/*wxTR_HIDE_ROOT|*/ wxTR_FULL_ROW_HIGHLIGHT )
 {
+   Bind(wxEVT_LEFT_DCLICK          ,&browsers::ErrorBrowser::onLMouseDblClk  ,this );
+//   Bind(wxEVT_RIGHT_UP             ,&browsers::ErrorBrowser::onBlankRMouseUp ,this );
+   Bind(wxEVT_TREE_ITEM_RIGHT_CLICK,&browsers::ErrorBrowser::onItemRightClick,this, tui::ID_PNL_DRC        );
+   Bind(wxEVT_MENU                 ,&browsers::ErrorBrowser::onOpenCell      ,this, tui::TMDRC_OPEN_CELL   );
+   Bind(wxEVT_MENU                 ,&browsers::ErrorBrowser::onShowError     ,this, tui::TMDRC_SHOW_ERR    );
+   Bind(wxEVT_MENU                 ,&browsers::ErrorBrowser::onShowCluster   ,this, tui::TMDRC_SHOW_CLUSTER);
 }
 
 
@@ -2262,16 +2243,14 @@ bool browsers::ErrorBrowser::checkCellName(const std::string &str)
 }
 
 //====================================================================
-wxBEGIN_EVENT_TABLE(browsers::DRCBrowser, wxPanel)
-   EVT_BUTTON(tui::BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
-   EVT_BUTTON(tui::BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
-   EVT_BUTTON(tui::BT_DRC_RULES_HIER, browsers::DRCBrowser::onRulesHierarchy)
-   EVT_BUTTON(tui::BT_DRC_CELLS_HIER, browsers::DRCBrowser::onCellsHierarchy)
-wxEND_EVENT_TABLE()
-//====================================================================
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
    :wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
 {
+   Bind(wxEVT_BUTTON, &browsers::DRCBrowser::onShowAll       , this, tui::BT_DRC_SHOW_ALL  );
+   Bind(wxEVT_BUTTON, &browsers::DRCBrowser::onHideAll       , this, tui::BT_DRC_HIDE_ALL  );
+   Bind(wxEVT_BUTTON, &browsers::DRCBrowser::onRulesHierarchy, this, tui::BT_DRC_RULES_HIER);
+   Bind(wxEVT_BUTTON, &browsers::DRCBrowser::onCellsHierarchy, this, tui::BT_DRC_CELLS_HIER);
+
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *sizer2   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );

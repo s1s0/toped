@@ -223,7 +223,6 @@ namespace tui {
       float _step;
       int   _prec;
       void  OnSpin(wxSpinEvent&);
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -345,7 +344,6 @@ namespace tui {
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameCboxRecords*   _laypanel;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -357,7 +355,6 @@ namespace tui {
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameCbox3Records*   _laypanel;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -369,7 +366,6 @@ namespace tui {
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameEboxRecords* _laypanel;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -381,7 +377,6 @@ namespace tui {
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameEbox3Records* _laypanel;
-         wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -489,7 +484,6 @@ namespace tui {
       void           OnPaint(wxPaintEvent&);
    protected:
       wxColour             _color;
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -520,8 +514,6 @@ namespace tui {
       wxString                _blue;
       wxString                _alpha;
       const layprop::DrawProperties*  _drawProp;
-
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -539,7 +531,6 @@ namespace tui {
    private:
       byte           _pattern[128];
       byte           _brushsize;
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -555,7 +546,6 @@ namespace tui {
       void              OnBrushSize(wxCommandEvent&);
       PatternCanvas*   _sampleDraw;
       wxRadioBox*       _radioBrushSize;
-      wxDECLARE_EVENT_TABLE();
    };
 
    class FillSample : public wxWindow {
@@ -565,7 +555,6 @@ namespace tui {
       void           OnPaint(wxPaintEvent&);
    protected:
       wxBrush        _brush;
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -591,8 +580,6 @@ namespace tui {
       FillSample*    _fillsample;
       wxString       _filname;
       byte           _current_pattern[128];
-
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -614,8 +601,6 @@ namespace tui {
    private:
       wxString       _patternString;
       static const wxTextPos   _pattern_size = 16;
-      wxDECLARE_EVENT_TABLE();
-
    };
    //--------------------------------------------------------------------------
    class LineStyleSample : public wxControl {
@@ -627,7 +612,6 @@ namespace tui {
    protected:
       wxBrush        _brush;
       wxPen          _pen;
-      wxDECLARE_EVENT_TABLE();
    };
 
    typedef  std::map<std::string, LineStyleRecord >  LineStyleMap;
@@ -658,7 +642,6 @@ namespace tui {
       wxString          _widthString;
       wxTextCtrl*       _patscale;
       wxString          _patscaleString;
-      wxDECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
@@ -675,7 +658,6 @@ namespace tui {
       void  onTechAdd(wxCommandEvent&);
       void  onOutputFile(wxCommandEvent&);
       void  onConvert(wxCommandEvent&);
-      wxDECLARE_EVENT_TABLE();
    };
 
    class TopedPropertySheets : public wxPropertySheetDialog {
@@ -707,7 +689,6 @@ namespace tui {
          sgSliderControl*       _cellDepthEbb;
          sgSliderControl*       _imageDetail;
          sgSliderControl*       _cbGrcBlinkFreq;
-         wxDECLARE_EVENT_TABLE();
       };
       class CanvasPSheet : public wxPanel {
       public:
@@ -728,7 +709,6 @@ namespace tui {
          void                   OnAutoPan     (wxCommandEvent&);
          void                   OnBoldOnHoover(wxCommandEvent&);
          void                   OnZeroCross   (wxCommandEvent&);
-         wxDECLARE_EVENT_TABLE();
       };
       RenderingPSheet*          _renderingSheet;
       CanvasPSheet*             _canvasSheet;
