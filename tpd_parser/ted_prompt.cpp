@@ -323,7 +323,7 @@ void* console::parse_thread::Entry()
       }
       else if (Console->canvas_invalid())
       {
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_REFRESH);
          wxPostEvent(_canvas_wnd, eventZOOM);
          Console->set_canvas_invalid(false);
@@ -756,7 +756,7 @@ void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
 
 void console::TedCmdLine::waitExternal(wxString cmdExt)
 {
-   Bind(wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
+   Bind(tui::wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
    _execExternal = true;
    TpdPost::toped_status(TSTS_THREADWAIT);
    TpdPost::execExt(cmdExt);
@@ -765,7 +765,7 @@ void console::TedCmdLine::waitExternal(wxString cmdExt)
 void console::TedCmdLine::onExternalDone(wxCommandEvent& /*event*/)
 {
    
-   Unbind(wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
+   Unbind(tui::wxEVT_EXECEXTDONE,&TedCmdLine::onExternalDone, this);
    _execExternal = false;
    _threadWaits4->Signal();
 }

@@ -277,12 +277,12 @@ int tellstdfunc::stdLONGCURSOR::execute()
 {
    bool        longcur  = getBoolValue();
 
-   wxCommandEvent eventGRIDUPD(console::wxEVT_CANVAS_PARAMS);
+   wxCommandEvent eventGRIDUPD(tui::wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::CPS_LONG_CURSOR);
    eventGRIDUPD.SetInt((longcur ? 1 : 0));
    wxPostEvent(TopedMainW, eventGRIDUPD);
 
-   wxCommandEvent eventCNVS(console::wxEVT_CANVAS_CURSOR);
+   wxCommandEvent eventCNVS(tui::wxEVT_CANVAS_CURSOR);
    eventCNVS.SetInt((longcur ? 1 : 0));
    wxPostEvent(TopedCanvasW, eventCNVS);
 
@@ -333,7 +333,7 @@ int tellstdfunc::stdZOOMWIN::execute() {
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale),
                           TP(p2->x(), p2->y(), DBscale));
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
    wxPostEvent(TopedCanvasW, eventZOOM);
@@ -352,7 +352,7 @@ int tellstdfunc::stdZOOMWINb::execute() {
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale),
                           TP(w->p2().x(), w->p2().y(), DBscale));
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
    wxPostEvent(TopedCanvasW, eventZOOM);
@@ -370,7 +370,7 @@ int tellstdfunc::stdZOOMALL::execute() {
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
-      wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(tui::ZOOM_WINDOW);
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(TopedCanvasW, eventZOOM);
@@ -394,7 +394,7 @@ int tellstdfunc::stdZOOMVISIBLE::execute()
       if (PROPC->lockDrawProp(drawProp))
       {
          DBbox* ovl  = DEBUG_NEW DBbox(tDesign->getVisibleOverlap(*drawProp));
-         wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+         wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
          wxPostEvent(TopedCanvasW, eventZOOM);
@@ -416,7 +416,7 @@ int tellstdfunc::getPOINT::execute() {
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_point, CTM());
    //
-   wxCommandEvent eventMOUSEIN(console::wxEVT_MOUSE_INPUT);
+   wxCommandEvent eventMOUSEIN(tui::wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
@@ -439,7 +439,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_dpoly, CTM());
    //
-   wxCommandEvent eventMOUSEIN(console::wxEVT_MOUSE_INPUT);
+   wxCommandEvent eventMOUSEIN(tui::wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);

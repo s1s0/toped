@@ -94,7 +94,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    // the operand stack
    Console->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);
    // flag the canvas that a mouse input will be required
-   wxCommandEvent eventMOUSEIN(console::wxEVT_MOUSE_INPUT);
+   wxCommandEvent eventMOUSEIN(tui::wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(input_type);
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
@@ -393,7 +393,7 @@ void tellstdfunc::UpdateLV(unsigned int numSel)
 {
    wxString ws;
    ws.sprintf(wxT("%d"),numSel);
-   wxCommandEvent eventUPDATESEL(console::wxEVT_CANVAS_STATUS);
+   wxCommandEvent eventUPDATESEL(tui::wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);
    wxPostEvent(TopedCanvasW, eventUPDATESEL);
@@ -421,7 +421,7 @@ void tellstdfunc::RefreshGL()
 //=============================================================================
 void tellstdfunc::gridON(byte No, bool status)
 {
-   wxCommandEvent eventGRIDUPD(console::wxEVT_CANVAS_PARAMS);
+   wxCommandEvent eventGRIDUPD(tui::wxEVT_CANVAS_PARAMS);
    status = PROPC->viewGrid(No, status);
    switch (No)
    {

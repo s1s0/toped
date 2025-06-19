@@ -175,7 +175,7 @@ void tui::ExternalProcess::OnTerminate(int /*pid*/, int /*status*/)
    }
    _idleTimer.Stop();
    //Post an event to notify the console, that the external command has exited
-   wxCommandEvent eventExecExDone(console::wxEVT_EXECEXTPIPE);
+   wxCommandEvent eventExecExDone(tui::wxEVT_EXECEXTPIPE);
    wxPostEvent(Console, eventExecExDone);
 
    delete this;
@@ -345,21 +345,21 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    Bind(wxEVT_COMMAND_ENTER,&tui::TopedFrame::OnUncapturedMouseClick, this);
    Bind(wxEVT_TEXT_MAXLEN, &tui::TopedFrame::OnTextLogOverflow, this, ID_WIN_TXT_LOG);
 
-   Bind(console::wxEVT_CANVAS_STATUS      , &tui::TopedFrame::OnCanvasStatus       , this);
-   Bind(console::wxEVT_RENDER_PARAMS      , &tui::TopedFrame::OnUpdateRenderParams , this);
-   Bind(console::wxEVT_CANVAS_PARAMS      , &tui::TopedFrame::OnUpdateCanvasParams , this);
-   Bind(console::wxEVT_MOUSE_ACCEL        , &tui::TopedFrame::OnMouseAccel         , this);
-   Bind(console::wxEVT_CURRENT_LAYER      , &tui::TopedFrame::OnCurrentLayer       , this);
-   Bind(console::wxEVT_TOOLBARSIZE        , &tui::TopedFrame::OnToolBarSize        , this);
-   Bind(console::wxEVT_TOOLBARADDITEM     , &tui::TopedFrame::OnToolBarAddItem     , this);
-   Bind(console::wxEVT_TOOLBARDELETEITEM  , &tui::TopedFrame::OnToolBarDeleteItem  , this);
-   Bind(console::wxEVT_AUI_RESTORE        , &tui::TopedFrame::OnAuiManagerRestore  , this);
-   Bind(console::wxEVT_EDITLAYER          , &tui::TopedFrame::OnEditLayer          , this);
-   Bind(console::wxEVT_EXITAPP            , &tui::TopedFrame::OnExitRequest        , this);
-   Bind(console::wxEVT_EXECEXT            , &tui::TopedFrame::OnExecExt            , this);
-   Bind(console::wxEVT_EXECEXTPIPE        , &tui::TopedFrame::OnExecExtTextEnter   , this);
-   Bind(console::wxEVT_RELOADTELLFUNCS    , &tui::TopedFrame::onReloadTellFuncs    , this);
-   Bind(console::wxEVT_CONSOLE_PARSE      , &tui::TopedFrame::onParseCommand       , this);
+   Bind(tui::wxEVT_CANVAS_STATUS      , &tui::TopedFrame::OnCanvasStatus       , this);
+   Bind(tui::wxEVT_RENDER_PARAMS      , &tui::TopedFrame::OnUpdateRenderParams , this);
+   Bind(tui::wxEVT_CANVAS_PARAMS      , &tui::TopedFrame::OnUpdateCanvasParams , this);
+   Bind(tui::wxEVT_MOUSE_ACCEL        , &tui::TopedFrame::OnMouseAccel         , this);
+   Bind(tui::wxEVT_CURRENT_LAYER      , &tui::TopedFrame::OnCurrentLayer       , this);
+   Bind(tui::wxEVT_TOOLBARSIZE        , &tui::TopedFrame::OnToolBarSize        , this);
+   Bind(tui::wxEVT_TOOLBARADDITEM     , &tui::TopedFrame::OnToolBarAddItem     , this);
+   Bind(tui::wxEVT_TOOLBARDELETEITEM  , &tui::TopedFrame::OnToolBarDeleteItem  , this);
+   Bind(tui::wxEVT_AUI_RESTORE        , &tui::TopedFrame::OnAuiManagerRestore  , this);
+   Bind(tui::wxEVT_EDITLAYER          , &tui::TopedFrame::OnEditLayer          , this);
+   Bind(tui::wxEVT_EXITAPP            , &tui::TopedFrame::OnExitRequest        , this);
+   Bind(tui::wxEVT_EXECEXT            , &tui::TopedFrame::OnExecExt            , this);
+   Bind(tui::wxEVT_EXECEXTPIPE        , &tui::TopedFrame::OnExecExtTextEnter   , this);
+   Bind(tui::wxEVT_RELOADTELLFUNCS    , &tui::TopedFrame::onReloadTellFuncs    , this);
+   Bind(tui::wxEVT_CONSOLE_PARSE      , &tui::TopedFrame::onParseCommand       , this);
 
    SetIcon(wxIcon( toped16x16_xpm ));
    initView();
@@ -816,7 +816,7 @@ void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
    if ( 0 == returnCode )
    {
       //Post an event to notify the console, that the external command has exited
-      wxCommandEvent eventExecExDone(console::wxEVT_EXECEXTPIPE);
+      wxCommandEvent eventExecExDone(tui::wxEVT_EXECEXTPIPE);
       wxPostEvent(Console, eventExecExDone);
    }
 }
@@ -2207,7 +2207,7 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
-      wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(tui::ZOOM_WINDOW);
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(_canvas, eventZOOM);
@@ -2221,43 +2221,43 @@ void tui::TopedFrame::OnUndo(wxCommandEvent& WXUNUSED(event))
 }
 
 void tui::TopedFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnzoomEmpty(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_EMPTY);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanLeft(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_LEFT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanRight(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_RIGHT);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanUp(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_UP);
    wxPostEvent(_canvas, eventZOOM);
 }
 
 void tui::TopedFrame::OnpanDown(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventZOOM(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_DOWN);
    wxPostEvent(_canvas, eventZOOM);
 }
@@ -2324,7 +2324,7 @@ void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)
 {
    wxString wxsAuiMagicString(evt.GetString());
    _winManager.LoadPerspective(wxsAuiMagicString, true);
-   wxCommandEvent eventREFRESH(console::wxEVT_CANVAS_ZOOM);
+   wxCommandEvent eventREFRESH(tui::wxEVT_CANVAS_ZOOM);
    eventREFRESH.SetInt(ZOOM_REFRESH);
    wxPostEvent(_canvas, eventREFRESH);
 //   Refresh(true); //-> doesn't make any difference!
@@ -2357,7 +2357,7 @@ void tui::TopedFrame::OnIconize(wxIconizeEvent& evt)
    if (!evt.Iconized())
 #endif
    {
-      wxCommandEvent eventREFRESH(console::wxEVT_CANVAS_ZOOM);
+      wxCommandEvent eventREFRESH(tui::wxEVT_CANVAS_ZOOM);
       eventREFRESH.SetInt(ZOOM_REFRESH);
       wxPostEvent(_canvas, eventREFRESH);
    }

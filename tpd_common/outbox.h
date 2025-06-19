@@ -145,34 +145,6 @@ namespace console {
       op_dwire
    } ACTIVE_OP;
 
-   wxDECLARE_EVENT(wxEVT_CANVAS_STATUS     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_RENDER_PARAMS     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CANVAS_PARAMS     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CMD_BROWSER       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_LOG_ERRMESSAGE    , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_MOUSE_ACCEL       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_MOUSE_INPUT       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CANVAS_ZOOM       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_FUNC_BROWSER      , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_TPDSTATUS         , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CANVAS_CURSOR     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CONSOLE_PARSE     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_CURRENT_LAYER     , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_TOOLBARSIZE       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_TOOLBARADDITEM    , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_TOOLBARDELETEITEM , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_AUI_RESTORE       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_EDITLAYER         , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_EXITAPP           , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_EXECEXT           , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_EXECEXTPIPE       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_EXECEXTDONE       , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_TECHEDITUPDATE    , wxCommandEvent);
-   wxDECLARE_EVENT(wxEVT_DRCDRAWPREP       , wxCommandEvent);
-
-   
-//
    //===========================================================================
    class ted_log : public wxTextCtrl  {
    public:
