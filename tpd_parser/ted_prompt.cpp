@@ -592,7 +592,7 @@ console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       _cmdLineWnd ( cmdLineWnd  )
 {
    Bind(wxEVT_TEXT_ENTER, &console::TedCmdLine::onGetCommand, this, tui::ID_CMD_LINE);
-   Bind(wxEVT_CHAR      , &console::TedCmdLine::onChar      , this);
+   Bind(wxEVT_KEY_UP    , &console::TedCmdLine::onEvtKeyUp  , this);
    // _cmdline inherits only wxEvtHandler and the line below is required to get the
    // wxEvents rolling for the class instances.
    _cmdLineWnd->PushEventHandler(this);
@@ -645,7 +645,7 @@ void console::TedCmdLine::onGetCommand(wxCommandEvent& WXUNUSED(event))
    }
 }
 
-void console::TedCmdLine::onChar(wxKeyEvent& event)
+void console::TedCmdLine::onEvtKeyUp(wxKeyEvent & event)
 {
    switch(event.GetKeyCode())
    {

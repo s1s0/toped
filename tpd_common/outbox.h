@@ -185,10 +185,10 @@ namespace console {
    class TELLFuncList : public wxListView
    {
       public:
-         TELLFuncList(wxWindow* parent, wxWindowID id = -1,
-                      const wxPoint& pos = wxDefaultPosition,
-                      const wxSize& size = wxDefaultSize,
-                      long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
+                              TELLFuncList(wxWindow* parent, wxWindowID id = wxID_ANY,
+                                          const wxPoint& pos = wxDefaultPosition,
+                                          const wxSize& size = wxDefaultSize,
+                                          long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
          virtual             ~TELLFuncList();
          void                 addFunc(wxString, void*);
          void                 setHelpObject(HelpObject *helpObject) {_helpObject = helpObject;};
