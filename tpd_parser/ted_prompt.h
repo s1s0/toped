@@ -138,7 +138,7 @@ namespace console {
       virtual void            waitExternal(wxString);
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
-      void                    onChar(wxKeyEvent&);
+      void                    onEvtKeyUp(wxKeyEvent&);
       wxTextCtrl*             getWidget()                 {return _cmdLineWnd;}
    protected:
       virtual wxString        getString();

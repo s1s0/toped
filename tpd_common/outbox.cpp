@@ -831,6 +831,7 @@ console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    InsertColumn(0, wxT("type"));
    InsertColumn(1, wxT("name"));
    InsertColumn(2, wxT("arguments"));
+   InsertColumn(3, wxT("description"));
    Bind(wxEVT_MOTION           , &TELLFuncList::onMouseMove    , this);
    Bind(wxEVT_LEFT_DCLICK      , &TELLFuncList::onLMouseDblClk , this);
    Bind(tui::wxEVT_FUNC_BROWSER, &TELLFuncList::OnCommand      , this);
@@ -869,12 +870,12 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
    _funcItems[(TmpWxIntPtr)curItemNum] = name.mb_str(wxConvUTF8);
    if((_helpObject->getHelp(name)).IsEmpty())
    {
-      //if help for function already exists 
-      /*wxString errMessage(wxT("Help for function "));
-      errMessage += name;
-      errMessage += wxT(" doesn't exist.\n");
-      errMessage += wxT("Add description to file $TPD_GLOBAL\\funchelp.txt");
-      wxMessageBox(errMessage);*/
+      //if help for function doesn't exists
+//      wxString errMessage(wxT("Help for function "));
+//      errMessage += name;
+//      errMessage += wxT(" doesn't exist.\n");
+//      errMessage += wxT("Add description to file $TPD_GLOBAL\\ui\\funchelp.txt");
+//      wxMessageBox(errMessage);
    }
    //
    wxString strlist(wxT("( "));
