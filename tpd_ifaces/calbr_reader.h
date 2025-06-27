@@ -56,7 +56,7 @@ namespace auxdata {
       private:
          int4b*            _pdata   ;
          unsigned          _psize   ;
-         unsigned          _ordinal ;
+//         unsigned          _ordinal ;
          TessellPoly       _teseldata;
 
    };
@@ -76,7 +76,7 @@ namespace auxdata {
       private:
          int4b*            _sdata   ; //!Segment data
          unsigned          _ssize   ; //!Number of Segments
-         unsigned          _ordinal ;
+//         unsigned          _ordinal ;
    };
 
 }
