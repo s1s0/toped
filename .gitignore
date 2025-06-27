@@ -1,6 +1,7 @@
 #
 # build directories
 build/
+toped.xcodeproj/
 .DS_Store
 */.DS_Store
 #
