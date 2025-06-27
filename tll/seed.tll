@@ -475,3 +475,15 @@ screenSetup();
 newdesign("seed");
 newcell("crop");
 opencell("crop");
+
+usinglayer({6, 0});
+addbox({ { -2 , 12.5 } , { 20.5 , 0.5 } });
+usinglayer({2,0});
+addbox({ { 0 , 10 } , { 18 , 2 } });
+usinglayer({8,0});
+addbox({ { 2 , 8 } , { 16 , 4 } });
+addpoly({{10,16},{22,16},{22,10},{24,10},{24,18},{10,18}});
+addwire({ { -5 , 10 } , { -5 , 17 } , { 7 , 17 } , { 7 , 13.5}}, 2);
+//addwire({{-2,8},{-2,-2},{14,-2}},3,{8,0});
+//select_all();
+

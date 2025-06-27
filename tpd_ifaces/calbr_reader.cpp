@@ -48,8 +48,8 @@
 auxdata::DrcPoly::DrcPoly(int4b* pdata, unsigned psize, unsigned ordinal) :
    AuxData     ( sh_drc    ),
    _pdata      ( pdata     ),
-   _psize      ( psize     ),
-   _ordinal    ( ordinal   )
+   _psize      ( psize     )
+//   _ordinal    ( ordinal   )
 {
    _teseldata.tessellate(_pdata, _psize);
 }
@@ -131,8 +131,8 @@ bool auxdata::DrcPoly::pointInside(const TP pnt)const
 auxdata::DrcSeg::DrcSeg(int4b* sdata, unsigned ssize, unsigned ordinal) :
    AuxData     ( sh_drc    ),
    _sdata      ( sdata     ),
-   _ssize      ( ssize     ),
-   _ordinal    ( ordinal   )
+   _ssize      ( ssize     )
+//   _ordinal    ( ordinal   )
 {}
 
 auxdata::DrcSeg::~DrcSeg()

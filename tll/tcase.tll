@@ -477,6 +477,8 @@ cellref("cell_1",{  0,  0},  0,false,1);
 cellref("cell_1",{120,-20},/*inserted comment*/  180,false ,1);
 cellref("cell_1",{  0,-20},  0,true ,1);
 cellref("allLayTypes", {100,70}, 0, false, 1);
+hidecellbox(false);
+hidecellmarks(false);
 zoomall();
 /*
 echo("Error below must be reported @ line 375 col 8");
