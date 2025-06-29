@@ -74,7 +74,7 @@ browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
    Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::CellBrowser::onItemRightClick, this, tui::ID_PNL_CELLS);
 //   Bind(wxEVT_RIGHT_UP             , &browsers::CellBrowser::onBlankRMouseUp , this);
    Bind(wxEVT_LEFT_DCLICK          , &browsers::CellBrowser::onLMouseDblClk  , this);
-   Bind(wxEVT_MENU                 , &browsers::CellBrowser::onWxOpenCell    , this, tui::ID_PNL_CELLS);
+   Bind(wxEVT_MENU                 , &browsers::CellBrowser::onWxOpenCell    , this, CELLTREEOPENCELL);
    Bind(tui::wxEVT_CMD_BROWSER     , &browsers::CellBrowser::onCommand       , this);
 }
 

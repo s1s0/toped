@@ -88,8 +88,8 @@ tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int ma
    wxString ws;
    ws.sprintf(wxT("%i"), init);
    _text = DEBUG_NEW wxTextCtrl(this, wxID_ANY, ws, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxTextValidator(wxFILTER_NUMERIC));
-   controlSizer->Add(_slider, 2, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
-   controlSizer->Add(  _text, 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+   controlSizer->Add(_slider, 2, wxALL | wxEXPAND);
+   controlSizer->Add(  _text, 1, wxALL | wxEXPAND);
    SetSizer(controlSizer);
    controlSizer->Fit(this);
 //  _wxText->SetValue(ws);
@@ -159,7 +159,7 @@ tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
    // TOP sizer
    topsizer->Add(10,10,0);
    topsizer->Add(spin_sizer, 0, wxEXPAND ); // no border and centre horizontally
-   topsizer->Add(button_sizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
    SetSizer( topsizer );
    topsizer->SetSizeHints( this );
 }
@@ -254,7 +254,7 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -460,7 +460,7 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -528,8 +528,8 @@ tui::GetCIFimport::GetCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer , 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -583,8 +583,8 @@ tui::GetCIFexport::GetCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer , 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -636,8 +636,8 @@ tui::GetGDSimport::GetGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND /*| wxALIGN_CENTER*/ );
-   topsizer->Add(button_sizer, 0, wxEXPAND /*| wxALIGN_CENTER*/ );
+   topsizer->Add(lists_sizer , 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -689,8 +689,8 @@ tui::GetOASimport::GetOASimport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer , 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -741,8 +741,8 @@ tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer , 1, wxEXPAND );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
