@@ -192,6 +192,7 @@ namespace trend {
                        , glslu_in_Alpha
                        , glslu_in_Stipple
                        , glslu_in_LStipple
+                       , glslu_in_LWidth
                        , glslu_in_StippleEn
                        , glslu_in_LStippleEn
                        , glslu_in_MStippleEn

@@ -520,6 +520,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VG][glslu_in_Alpha]      = "in_Alpha";
    _glslUniVarNames[glslp_VG][glslu_in_Stipple]    = "in_Stipple";
    _glslUniVarNames[glslp_VG][glslu_in_LStipple]   = "in_LStipple";
+   _glslUniVarNames[glslp_VG][glslu_in_LWidth]     = "in_LWidth";
    _glslUniVarNames[glslp_VG][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_VG][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_VG][glslu_in_ScreenSize] = "in_ScreenSize";

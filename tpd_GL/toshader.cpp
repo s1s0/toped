@@ -331,7 +331,8 @@ void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool sele
 {
    layprop::LineSettings curLine;
    drawprop->getCurrentLine(curLine, selected);
-   DBGL_CALL(glLineWidth,curLine.width())
+   GLfloat clw = selected ? static_cast<GLfloat>(curLine.width()) : 1.0;
+   DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LWidth), clw)
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -558,7 +559,8 @@ void trend::Toshader::setLine(bool selected)
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
    GLfloat clnw = static_cast<GLfloat>(curLine.width());
-   DBGL_CALL(glLineWidth,clnw)
+   if (selected)
+      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LWidth), clnw)
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -673,8 +675,6 @@ void trend::Toshader::rlrDraw()
    oglColor[3] = 0.7f ;
    DBGL_CALL(glUniform3fv, TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
    DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
-   //Line width
-   DBGL_CALL(glLineWidth,1)
 
    //draw
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])
