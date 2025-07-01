@@ -955,7 +955,7 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
             case trend::rtTolder  : tell_log(console::MT_INFO,"Using basic rendering."); break;
             case trend::rtTenderer: tell_log(console::MT_INFO,"Using VBO rendering.");break;
             case trend::rtToshader: tell_log(console::MT_INFO,"Using shader rendering.");break;
-            default: assert(false); break;
+            default: tell_log(console::MT_ERROR, "Graphic rendering is not available! (see the log above). Nothing will be drawn."); break;//assert(false); break;
          }
          break;
       }
@@ -978,7 +978,7 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
       {
          wxLogDebug("Falling back to VBO rendering because of the errors above");
          tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
-         _renderType = trend::rtTenderer;
+         _renderType = trend::rtTBD;//trend::rtTenderer;
       }
    }
 }
@@ -1236,8 +1236,10 @@ void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 
 void trend::TrendCenter::getStringBounds(const std::string& text, DBbox* overlap)
 {
-   assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialised
-   _oglFont[_activeFontName]->getStringBounds(text, overlap);
+   if (NULL != _oglFont[_activeFontName])
+      _oglFont[_activeFontName]->getStringBounds(text, overlap);
+   else // in case the fonts are not initialized for whatever reason (shader issue for example)
+      *overlap = {{0,0},{0,0}};
 
 }
 

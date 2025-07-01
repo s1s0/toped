@@ -286,6 +286,7 @@ bool TopedApp::getOGLLogFileName()
 //=============================================================================
 void TopedApp::loadGlfFonts()
 {
+   if (!TRENDC->shaderAvailable()) return;
    wxDir fontDirectory(_tpdFontDir);
    if (fontDirectory.IsOpened())
    {

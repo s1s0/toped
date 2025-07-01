@@ -475,7 +475,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          else
             tell_log( console::MT_ERROR, "Can't execute the drawing in a separate thread");
       }
-      else
+      else if (TRENDC->shaderAvailable())
       {
          _blinkTimer.Stop();
          wxPaintDC dc(this);

@@ -249,6 +249,7 @@ namespace trend {
          GLint                  getUniformLoc(const glsl_Uniforms) const;
          void                   setGlslProg(const glsl_Programs) const;
          void                   drawFrameBuffer();
+         bool                   shaderAvailable() const {return _cShaders->status();}
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
