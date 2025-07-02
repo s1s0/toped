@@ -334,7 +334,7 @@ int tellstdfunc::stdOPENCELL::execute()
          DBbox* ovl  = tDesign->getLastViewPort();
          if (NULL == ovl)
             ovl = DEBUG_NEW DBbox(tDesign->activeOverlap());
-         if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
+//         if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          TpdPost::celltree_open(nm);
          wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(tui::ZOOM_WINDOW);

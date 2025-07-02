@@ -920,6 +920,40 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
    pointUpdate(event.GetX(), event.GetY());
 }
 
+void tui::LayoutCanvas::setScrCTM(const DBbox& box)
+{
+   int Wcl, Hcl;
+   GetClientSize(&Wcl,&Hcl);
+   // To prevent a loss of precision in the following lines - don't use
+   // integer variables (Wcl & Hcl) directly
+   double W = Wcl;
+   double H = Hcl;
+   double w = fabs((double)box.p1().x() - (double)box.p2().x());
+   double h = fabs((double)box.p1().y() - (double)box.p2().y());
+   if (w > (double) MAX_INT4B)
+   {
+      tell_log(console::MT_WARNING, "Can't zoom any further");
+      w = MAX_INT4B;
+   }
+   if (h > (double) MAX_INT4B)
+   {
+      tell_log(console::MT_WARNING, "Can't zoom any further");
+      h = MAX_INT4B;
+   }
+   double sc =  ((W/H < w/h) ? w/W : h/H);
+//   sc = (0 == sc) ? 1.0 : sc;
+   double tx = (((double)box.p1().x() + (double)box.p2().x()) - W*sc) / 2;
+   double ty = (((double)box.p1().y() + (double)box.p2().y()) - H*sc) / 2;
+   _layCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
+   _layCTM.FlipX(((double)box.p1().y() + (double)box.p2().y())/2);  // flip Y coord towards the center
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setScrCTM(_layCTM.Reversed());
+   }
+   PROPC->unlockDrawProp(drawProp, false);
+}
+
 void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    DBbox* box = NULL;
    switch (evt.GetInt())
@@ -938,36 +972,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_REFRESH: _invalidWindow = true; Refresh(); return;
       default: assert(false); break;
    }
-   int Wcl, Hcl;
-   GetClientSize(&Wcl,&Hcl);
-   // To prevent a loss of precision in the following lines - don't use
-   // integer variables (Wcl & Hcl) directly
-   double W = Wcl;
-   double H = Hcl;
-   double w = fabs((double)box->p1().x() - (double)box->p2().x());
-   double h = fabs((double)box->p1().y() - (double)box->p2().y());
-   if (w > (double) MAX_INT4B)
-   {
-      tell_log(console::MT_WARNING, "Can't zoom any further");
-      w = MAX_INT4B;
-   }
-   if (h > (double) MAX_INT4B)
-   {
-      tell_log(console::MT_WARNING, "Can't zoom any further");
-      h = MAX_INT4B;
-   }
-   double sc =  ((W/H < w/h) ? w/W : h/H);
-//   sc = (0 == sc) ? 1.0 : sc;
-   double tx = (((double)box->p1().x() + (double)box->p2().x()) - W*sc) / 2;
-   double ty = (((double)box->p1().y() + (double)box->p2().y()) - H*sc) / 2;
-   _layCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
-   _layCTM.FlipX(((double)box->p1().y() + (double)box->p2().y())/2);  // flip Y coord towards the center
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      drawProp->setScrCTM(_layCTM.Reversed());
-   }
-   PROPC->unlockDrawProp(drawProp, false);
+   setScrCTM(*box);
    delete box;
    _invalidWindow = true;
    Refresh();

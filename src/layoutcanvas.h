@@ -92,7 +92,7 @@ namespace tui {
       void           showInfo();
       void           setOglThread(bool /*val*/) {_oglThread = true;}
       TpdOglContext* glRC() { return _glRC;}
-      void           glewContext() {_glRC->glewContext(this);_initialised = true;}
+      void           glewContext() {_glRC->glewContext(this);setScrCTM(DEFAULT_ZOOM_BOX);_initialised = true;}
 
       bool           initStatus() {
 #ifdef __WXGTK__
@@ -147,6 +147,7 @@ namespace tui {
       void           drawZeroMark();
       void           updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
       void           eventMouseClick(int button);
+      void           setScrCTM(const DBbox&);
       DBbox*         zoomIn();
       DBbox*         zoomOut();
       DBbox*         zoomLeft();
