@@ -547,7 +547,7 @@ void laydata::TdtCell::motionDraw(trend::TrendBase& rend, const CTM& trans, bool
          else
          {
             if (REF_LAY_DEF != llst())
-               rend.setLayer(llst(), false);
+               rend.setLayer(llst(), true);
             for (dlst = llst->begin(); dlst != llst->end(); dlst++)
                if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
                   dlst->first->motionDraw(rend, &(dlst->second));

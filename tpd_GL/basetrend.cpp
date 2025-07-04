@@ -829,9 +829,36 @@ void trend::reportOGLStatus(std::string loc)
       OGLLogFile.flush();
    }
 //   else {
-//      OGLLogFile << " OK";
+//      OGLLogFile << loc << " OK";
+//      OGLLogFile.flush();
 //   }
 }
+
+//void trend::dumpOGLArrayFloat(const GLfloat* cindex_array, unsigned size)
+//{
+//   OGLLogFile << "DATA:";
+//   OGLLogFile.flush();
+//   for(unsigned i = 0; i < 2*size; i += 2)
+//   {
+//      char buffer[100];
+//      std::sprintf(buffer, "(%f,%f) ", cindex_array[i], cindex_array[i+1]);
+//      OGLLogFile << buffer;
+//   }
+//   OGLLogFile.flush();
+//}
+//
+//void trend::dumpOGLArrayUint(const unsigned* cindex_array, unsigned size)
+//{
+//   OGLLogFile << "INDEX:";
+//   OGLLogFile.flush();
+//   for(unsigned i = 0; i < size; i++)
+//   {
+//      char buffer[100];
+//      std::sprintf(buffer, "%d ", cindex_array[i]);
+//      OGLLogFile << buffer;
+//   }
+//   OGLLogFile.flush();
+//}
 
 TFPTR_DrawElementsOffset tpd_glDrawElements = (TFPTR_DrawElementsOffset)glDrawElements;
 

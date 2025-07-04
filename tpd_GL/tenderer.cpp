@@ -438,10 +438,11 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       (*TLAY)->collect(cpoint_array, cindex_array);
    // Unmap the buffers
+//   trend::dumpOGLArrayFloat(cpoint_array, _num_total_points );
    DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
    if (0 != _ibuffer)
    {
+//      trend::dumpOGLArrayUint(cindex_array, _num_total_indexs);
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 //      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    }
@@ -977,7 +978,9 @@ bool trend::Tenderer::collect()
          if (0 == CLAY->total_slctdx())
             continue;
          CLAY->collectSelected(sindex_array);
+//         trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );
       }
+//      trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );
       DBGL_CALL(glUnmapBuffer, GL_ELEMENT_ARRAY_BUFFER)
    }
 

@@ -772,6 +772,8 @@ namespace trend {
 
    void checkOGLError(std::string);
    void reportOGLStatus(std::string loc);
+//   void dumpOGLArrayFloat(const GLfloat* cindex_array, unsigned);
+//   void dumpOGLArrayUint(const unsigned* cindex_array, unsigned);
 
    template <typename result_t, typename... gl_args_t, typename... args_t>
    result_t dbgl_call(char* fname, int lineNo, char* varName, result_t (*fun)(gl_args_t...), args_t... args) {
