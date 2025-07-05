@@ -556,6 +556,8 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
       GLfloat vport[4];
       DBGL_CALL(glGetFloatv,GL_VIEWPORT, vport)
       DBGL_CALL(glUniform2fv, getUniformLoc(glslu_in_ScreenSize), 1, &vport[2])
+      if (glslp_VG == _curProgram)
+         DBGL_CALL(glUniform1f, getUniformLoc(glslu_in_LWidth), 1)
    }
 }
 

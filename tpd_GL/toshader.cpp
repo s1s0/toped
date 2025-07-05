@@ -612,6 +612,8 @@ void trend::Toshader::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
+      TRENDC->setGlslProg(glslp_VG);
+      _drawprop->resetCurrentColor();
       setLayColor(REF_LAY_DEF);
       setLine(false);
       float mtrxOrtho [16];
