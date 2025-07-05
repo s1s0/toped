@@ -189,7 +189,6 @@ namespace trend {
    enum glsl_Uniforms {  glslu_in_CTM
                        , glslu_in_Z
                        , glslu_in_Color
-                       , glslu_in_Alpha
                        , glslu_in_Stipple
                        , glslu_in_LStipple
                        , glslu_in_LWidth

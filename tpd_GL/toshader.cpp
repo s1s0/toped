@@ -38,7 +38,7 @@ void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrxCellRef* re
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-   DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
 }
        
 //=============================================================================
@@ -62,9 +62,9 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset))
    // ... and here we go ...
    drawTriQuads();
-   DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
    drawLines();
-   DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
+   TRENDC->setUniVarui(glslu_in_StippleEn, 1);
    // Switch the vertex buffers OFF in the openGL engine ...
    DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
    // ... and finally restore the openGL translation matrix
@@ -89,7 +89,7 @@ void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
       drawprop->pushCtm(ctm * drawprop->topCtm());
       float mtrxOrtho[16];
       drawprop->topCtm().oglForm(mtrxOrtho);
-      DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
       (*TSTR)->draw(_filled, drawprop);
       drawprop->popCtm();
    }
@@ -179,8 +179,9 @@ void trend::ToshaderTV::setAlpha(layprop::DrawProperties* drawprop)
    layprop::tellRGB tellColor;
    if (drawprop->getAlpha(_refCell->alphaDepth() - 1, tellColor))
    {
-      float alpha = (float)tellColor.alpha() / 255.0f;
-      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), alpha)
+      float* color = tellColor.getOGLcolor();
+      TRENDC->setUniColor(color);
+      delete[] color;
    }
 }
 
@@ -332,15 +333,15 @@ void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool sele
    layprop::LineSettings curLine;
    drawprop->getCurrentLine(curLine, selected);
    GLfloat clw = selected ? static_cast<GLfloat>(curLine.width()) : 1.0;
-   DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LWidth), clw)
+   TRENDC->setUniVarf(glslu_in_LWidth, clw);
    if (0xffff == curLine.pattern())
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
+      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
    else
    {
       GLuint lPattern = curLine.pattern();
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStipple), lPattern)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale())
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 1)
+      TRENDC->setUniVarui(glslu_in_LStipple, lPattern);
+      TRENDC->setUniVarui(glslu_in_PatScale, curLine.patscale());
+      TRENDC->setUniVarui(glslu_in_LStippleEn, 1);
    }
 }
 
@@ -402,7 +403,7 @@ void trend::ToshaderMarks::setStipple(const byte* markStipple)
                        | ((GLuint)(markStipple[2*i + 1]) << 8*0);
    for (unsigned i = 16; i < 32; i++)
       shdrStipple[i+1] = 0;
-   DBGL_CALL(glUniform1uiv, TRENDC->getUniformLoc(glslu_in_Stipple), 33, shdrStipple)
+   TRENDC->setUniStipple(shdrStipple);
 }
 
 //=============================================================================
@@ -481,11 +482,11 @@ void trend::Toshader::setHvrLayer(const LayerDef& laydef)
 void trend::Toshader::grdDraw()
 {
    TRENDC->setGlslProg(glslp_VF);
-   DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
    _drawprop->initCtmStack();
    float mtrxOrtho [16];
    _drawprop->topCtm().oglForm(mtrxOrtho);
-   DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
 
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
 
@@ -495,13 +496,9 @@ void trend::Toshader::grdDraw()
    {
       // color
       layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
-      float oglColor[4];
-      oglColor[0] = (float)theColor.red()   / 255.0f ;
-      oglColor[1] = (float)theColor.green() / 255.0f ;
-      oglColor[2] = (float)theColor.blue()  / 255.0f ;
-      oglColor[3] = (float)theColor.alpha() / 255.0f ;
-      DBGL_CALL(glUniform3fv,TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor)
-      DBGL_CALL(glUniform1f,TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3])
+      float* oglColor = theColor.getOGLcolor();
+      TRENDC->setUniColor(oglColor);
+      delete[] oglColor;
       //draw
       DBGL_CALL(glVertexAttribPointer,TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
       DBGL_CALL(glDrawArrays,GL_POINTS, startP, (*CG)->asize())
@@ -517,13 +514,9 @@ void trend::Toshader::setLayColor(const LayerDef& layer)
    layprop::tellRGB tellColor;
    if (_drawprop->setCurrentColor(layer, tellColor))
    {
-      float oglColor[4];
-      oglColor[0] = (float)tellColor.red()   / 255.0f ;
-      oglColor[1] = (float)tellColor.green() / 255.0f ;
-      oglColor[2] = (float)tellColor.blue()  / 255.0f ;
-      oglColor[3] = (float)tellColor.alpha() / 255.0f ;
-      DBGL_CALL(glUniform3fv, TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor)
-      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3])
+      float* oglColor = tellColor.getOGLcolor();
+      TRENDC->setUniColor(oglColor);
+      delete[] oglColor;
    }
 }
 
@@ -531,9 +524,7 @@ void trend::Toshader::setStipple()
 {
    const byte* tellStipple = _drawprop->getCurrentFill();
    if (NULL == tellStipple)
-   {
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
-   }
+      TRENDC->setUniVarui(glslu_in_StippleEn, 0);
    else
    {
       // the matrix above must be converted to something suitable by the shader
@@ -549,8 +540,8 @@ void trend::Toshader::setStipple()
                           | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
                           | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
                           | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
-      DBGL_CALL(glUniform1uiv, TRENDC->getUniformLoc(glslu_in_Stipple), 33, shdrStipple)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
+      TRENDC->setUniStipple(shdrStipple);
+      TRENDC->setUniVarui(glslu_in_StippleEn, 1);
    }
 }
 
@@ -560,15 +551,15 @@ void trend::Toshader::setLine(bool selected)
    _drawprop->getCurrentLine(curLine, selected);
    GLfloat clnw = static_cast<GLfloat>(curLine.width());
    if (selected)
-      DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_LWidth), clnw)
+      TRENDC->setUniVarf(glslu_in_LWidth, clnw);
    if (0xffff == curLine.pattern())
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
+      TRENDC->setUniVarf(glslu_in_LStippleEn, 0);
    else
    {
       GLuint lPattern = curLine.pattern();
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStipple), lPattern)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale())
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 1)
+      TRENDC->setUniVarui(glslu_in_LStipple, lPattern);
+      TRENDC->setUniVarui(glslu_in_PatScale, curLine.patscale());
+      TRENDC->setUniVarui(glslu_in_LStippleEn, 1);
    }
 }
 
@@ -595,7 +586,7 @@ void trend::Toshader::draw()
    // Lines with stipples
    TRENDC->setGlslProg(glslp_VG);
    _drawprop->resetCurrentColor();
-   DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       if (0 != CLAY->total_slctdx())
@@ -618,9 +609,9 @@ void trend::Toshader::draw()
       setLine(false);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
-      DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
       _refLayer->draw(_drawprop);
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
+      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
    }
    // draw reference marks
    if (0 < _marks->total_points())
@@ -628,12 +619,12 @@ void trend::Toshader::draw()
       TRENDC->setGlslProg(glslp_PS);
       _drawprop->resetCurrentColor(); // required after changing the renderer
       setLayColor(REF_LAY_DEF);
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn) , 0)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
-      DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_MStippleEn), 1)
+      TRENDC->setUniVarui(glslu_in_StippleEn , 0);
+      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
+      TRENDC->setUniVarui(glslu_in_MStippleEn, 1);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
-      DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
       _marks->draw(_drawprop);
    }
 
@@ -660,12 +651,12 @@ void trend::Toshader::grcDraw()
 void trend::Toshader::rlrDraw()
 {
    TRENDC->setGlslProg(glslp_VF);
-   DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
 
    _drawprop->initCtmStack();
    float mtrxOrtho [16];
    _drawprop->topCtm().oglForm(mtrxOrtho);
-   DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
 
    DBGL_CALL(glEnableVertexAttribArray, TSHDR_LOC_VERTEX)
 
@@ -675,8 +666,7 @@ void trend::Toshader::rlrDraw()
    oglColor[1] = 1.0f ;
    oglColor[2] = 1.0f ;
    oglColor[3] = 0.7f ;
-   DBGL_CALL(glUniform3fv, TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
-   DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
+   TRENDC->setUniColor(oglColor);
 
    //draw
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])
@@ -694,7 +684,7 @@ void trend::Toshader::rlrDraw()
    {
       _drawprop->pushCtm((*TSTR)->ctm() * _drawprop->topCtm());
       _drawprop->topCtm().oglForm(mtrxOrtho);
-      DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
       (*TSTR)->draw(false, _drawprop);
       _drawprop->popCtm();
    }

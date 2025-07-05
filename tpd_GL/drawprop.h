@@ -162,6 +162,7 @@ namespace layprop {
          byte              green() const {return _green;   };
          byte              blue()  const {return _blue;    };
          byte              alpha() const {return _alpha;   };
+         float*            getOGLcolor();
          void              setAlpha(byte alpha) {_alpha = alpha;}
       private:
          byte              _red;

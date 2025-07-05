@@ -143,6 +143,16 @@ CTM layprop::SDLine::getFtmtrx(const DBline& text_bp, const double scaledpix) co
    ftmtrx.Translate(TP(central_elevation.p2().x(), central_elevation.p2().y()));
    return ftmtrx;
 }
+
+float* layprop::tellRGB::getOGLcolor()
+{
+   float* result = DEBUG_NEW float[4];
+   result[0] = (float)_red   / 255.0f ;
+   result[1] = (float)_green / 255.0f ;
+   result[2] = (float)_blue  / 255.0f ;
+   result[3] = (float)_alpha / 255.0f ;
+   return result;
+}
 //=============================================================================
 /*!
  * The main troubles here are with the precision of the calculations. They are

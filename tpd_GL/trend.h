@@ -182,7 +182,11 @@ namespace trend {
          void                   loadShadersCode(const std::string&);
          bool                   status() const { return _status;}
          void                   useProgram(const glsl_Programs);
-         GLint                  getUniformLoc(const glsl_Uniforms) const;
+         void                   setUniVarf(const glsl_Uniforms, GLfloat) const;
+         void                   setUniMtrx4fv(const glsl_Uniforms, GLfloat*) const;
+         void                   setUniColor(GLfloat*) const;
+         void                   setUniStipple(GLuint*) const;
+         void                   setUniVarui(const glsl_Uniforms, GLuint) const;
          bool                   setFrameBuffer(int W, int H);
          void                   drawFrameBuffer();
          void                   clearFrameBuffer();
@@ -194,6 +198,7 @@ namespace trend {
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);
          void                   windowVAO();
+         GLint                  getUniformLoc(const glsl_Uniforms) const;
          std::string            _fnShdrVertex;
          std::string            _fnShdrGeometry;
          std::string            _fnShdrGeSprite;
@@ -246,7 +251,11 @@ namespace trend {
          void                   bindFont();
          void                   unbindFont();
          //Shader handling
-         GLint                  getUniformLoc(const glsl_Uniforms) const;
+         void                   setUniVarf(const glsl_Uniforms, GLfloat) const;
+         void                   setUniMtrx4fv(const glsl_Uniforms, GLfloat*) const;
+         void                   setUniColor(GLfloat*) const;
+         void                   setUniStipple(GLuint*) const;
+         void                   setUniVarui(const glsl_Uniforms, GLuint) const;
          void                   setGlslProg(const glsl_Programs) const;
          void                   drawFrameBuffer();
          bool                   shaderAvailable() const {return _cShaders->status();}

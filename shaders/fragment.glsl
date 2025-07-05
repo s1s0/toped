@@ -27,8 +27,7 @@
 
 #version 330
 
-uniform vec3  in_Color                        ;
-uniform float in_Alpha                        ;
+uniform vec4  in_Color                        ;
 uniform uint  in_Stipple[33]                  ;
 uniform uint  in_LStipple   = uint(0x00000ff0);
 uniform bool  in_StippleEn  = false           ;
@@ -66,5 +65,5 @@ void main(void)
    if (dropThePixel)
       discard;
    else
-      out_Color = vec4(in_Color,in_Alpha);
+      out_Color = vec4(in_Color);
 }

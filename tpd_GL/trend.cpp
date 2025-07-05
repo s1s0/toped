@@ -466,7 +466,7 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
          ctm *= drawprop->topCtm();
          float mtrxOrtho[16];
          ctm.oglForm(mtrxOrtho);
-         DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
+         TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
       }
       if ((0x20 == text[i]) || (_symbols.end() == CSI))
       {
@@ -474,9 +474,9 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
       }
       else
       {
-         DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
+         TRENDC->setUniVarui(glslu_in_StippleEn, 0);
          CSI->second->drawWired();
-         DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
+         TRENDC->setUniVarui(glslu_in_StippleEn, 1);
          if (fill)
             CSI->second->drawSolid();
          right_of += CSI->second->maxX();
@@ -507,7 +507,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VF][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_VF][glslu_in_Color]      = "in_Color";
-   _glslUniVarNames[glslp_VF][glslu_in_Alpha]      = "in_Alpha";
+//   _glslUniVarNames[glslp_VF][glslu_in_Alpha]      = "in_Alpha";
    _glslUniVarNames[glslp_VF][glslu_in_Stipple]    = "in_Stipple";
    _glslUniVarNames[glslp_VF][glslu_in_LStipple]   = "in_LStipple";
    _glslUniVarNames[glslp_VF][glslu_in_StippleEn]  = "in_StippleEn";
@@ -517,7 +517,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_VG][glslu_in_Color]      = "in_Color";
-   _glslUniVarNames[glslp_VG][glslu_in_Alpha]      = "in_Alpha";
+//   _glslUniVarNames[glslp_VG][glslu_in_Alpha]      = "in_Alpha";
    _glslUniVarNames[glslp_VG][glslu_in_Stipple]    = "in_Stipple";
    _glslUniVarNames[glslp_VG][glslu_in_LStipple]   = "in_LStipple";
    _glslUniVarNames[glslp_VG][glslu_in_LWidth]     = "in_LWidth";
@@ -530,7 +530,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_PS][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_PS][glslu_in_Color]      = "in_Color";
-   _glslUniVarNames[glslp_PS][glslu_in_Alpha]      = "in_Alpha";
+//   _glslUniVarNames[glslp_PS][glslu_in_Alpha]      = "in_Alpha";
    _glslUniVarNames[glslp_PS][glslu_in_Stipple]    = "in_Stipple";
    _glslUniVarNames[glslp_PS][glslu_in_LStipple]   = "in_LStipple";
    _glslUniVarNames[glslp_PS][glslu_in_StippleEn]  = "in_StippleEn";
@@ -557,7 +557,7 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
       DBGL_CALL(glGetFloatv,GL_VIEWPORT, vport)
       DBGL_CALL(glUniform2fv, getUniformLoc(glslu_in_ScreenSize), 1, &vport[2])
       if (glslp_VG == _curProgram)
-         DBGL_CALL(glUniform1f, getUniformLoc(glslu_in_LWidth), 1)
+         setUniVarf(glslu_in_LWidth, 1);
    }
 }
 
@@ -570,6 +570,31 @@ GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
    GlslUniVarLoc::const_iterator varLoc    = varSet->second.find(var);
    assert(varSet->second.end() != varLoc);
    return varLoc->second;
+}
+
+void trend::Shaders::setUniVarf(const glsl_Uniforms varName, GLfloat varValue) const
+{
+   DBGL_CALL(glUniform1f, getUniformLoc(varName), varValue)
+}
+
+void trend::Shaders::setUniMtrx4fv(const glsl_Uniforms varName, GLfloat* varValue) const
+{
+   DBGL_CALL(glUniformMatrix4fv,getUniformLoc(varName), 1, GL_FALSE, varValue)
+}
+
+void trend::Shaders::setUniColor(/*const glsl_Uniforms varName, */GLfloat* varValue) const
+{
+   DBGL_CALL(glUniform4fv,getUniformLoc(glslu_in_Color), 1, varValue)
+}
+
+void trend::Shaders::setUniVarui(const glsl_Uniforms varName, GLuint varValue) const
+{
+   DBGL_CALL(glUniform1ui, getUniformLoc(varName), varValue)
+}
+
+void trend::Shaders::setUniStipple(/*const glsl_Uniforms varName,*/ GLuint* varValue) const
+{
+   DBGL_CALL(glUniform1uiv, getUniformLoc(glslu_in_Stipple), 33, varValue)
 }
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
@@ -1295,11 +1320,36 @@ void trend::TrendCenter::unbindFont()
    DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
 }
 
-GLint trend::TrendCenter::getUniformLoc(const glsl_Uniforms var) const
+void trend::TrendCenter::setUniVarf(const glsl_Uniforms varName, GLfloat varValue) const
 {
    assert(_cShaders);
-   return _cShaders->getUniformLoc(var);
+   return _cShaders->setUniVarf(varName, varValue);
 }
+
+void trend::TrendCenter::setUniMtrx4fv(const glsl_Uniforms varName, GLfloat* varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniMtrx4fv(varName, varValue);
+}
+
+void trend::TrendCenter::setUniColor(/*const glsl_Uniforms varName,*/ GLfloat* varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniColor(varValue);
+}
+
+void trend::TrendCenter::setUniStipple(/*const glsl_Uniforms varName,*/ GLuint* varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniStipple(varValue);
+}
+
+void trend::TrendCenter::setUniVarui(const glsl_Uniforms varName, GLuint varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniVarui(varName, varValue);
+}
+
 
 void trend::TrendCenter::setGlslProg(const glsl_Programs prog) const
 {
