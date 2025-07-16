@@ -1,6 +1,8 @@
 #
 # build directories
 build/
+doc/
+doxygen.log
 toped.xcodeproj/
 .DS_Store
 */.DS_Store
