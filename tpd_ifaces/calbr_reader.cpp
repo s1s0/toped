@@ -45,7 +45,7 @@
 #endif
 
 //=============================================================================
-auxdata::DrcPoly::DrcPoly(int4b* pdata, unsigned psize, unsigned ordinal) :
+auxdata::DrcPoly::DrcPoly(int4b* pdata, unsigned psize, unsigned /*ordinal*/) :
    AuxData     ( sh_drc    ),
    _pdata      ( pdata     ),
    _psize      ( psize     )
@@ -128,7 +128,7 @@ bool auxdata::DrcPoly::pointInside(const TP pnt)const
    return (cc & 0x01) ? true : false;
 }
 //=============================================================================
-auxdata::DrcSeg::DrcSeg(int4b* sdata, unsigned ssize, unsigned ordinal) :
+auxdata::DrcSeg::DrcSeg(int4b* sdata, unsigned ssize, unsigned /*ordinal*/) :
    AuxData     ( sh_drc    ),
    _sdata      ( sdata     ),
    _ssize      ( ssize     )
@@ -548,13 +548,15 @@ void clbr::ClbrFile::ruleMetaData()
    assert(_cRule);
    if (moreData()) _cRule->setCurResCount(_textStream->Read32());
    if (moreData()) _cRule->setOrigResCount(_textStream->Read32());
-   unsigned int numInfoLines;
-   if (moreData()) numInfoLines = _textStream->Read32();
-   _cRule->setTimeStamp(getTextLine());
-
-   for (unsigned int i = 0; i < numInfoLines; i++)
+   if (moreData())
    {
-      _cRule->addDescrString(getTextLine());
+      unsigned int numInfoLines = _textStream->Read32();
+      _cRule->setTimeStamp(getTextLine());
+      
+      for (unsigned int i = 0; i < numInfoLines; i++)
+      {
+         _cRule->addDescrString(getTextLine());
+      }
    }
 }
 
@@ -612,29 +614,34 @@ auxdata::DrcSeg* clbr::ClbrFile::drcEdge()
 
 bool clbr::ClbrFile::checkCNnP()
 {
-   int nextChar;
-   std::string cnLine;
-   if (moreData()) nextChar = _inStream->GetC();
-   if (isdigit(nextChar) || ('-' == (char) nextChar))
+   if (moreData())
    {
-      _inStream->Ungetch((char) nextChar);
-      return true;
-   }
-   else if ('C' != (char) nextChar)
-   {
-      _inStream->Ungetch((char) nextChar);// - should be a property!
-   }
-   else
-   {
-      if (moreData()) nextChar = _inStream->GetC();
-      if ('N' != (char) nextChar)
+      std::string cnLine;
+      int nextChar = _inStream->GetC();
+      if (isdigit(nextChar) || ('-' == (char) nextChar))
+      {
+         _inStream->Ungetch((char) nextChar);
+         return true;
+      }
+      else if ('C' != (char) nextChar)
       {
          _inStream->Ungetch((char) nextChar);// - should be a property!
       }
       else
       {
-         readCN();
-         return true;
+         if (moreData())
+         {
+            nextChar = _inStream->GetC();
+            if ('N' != (char) nextChar)
+            {
+               _inStream->Ungetch((char) nextChar);// - should be a property!
+            }
+            else
+            {
+               readCN();
+               return true;
+            }
+         }
       }
    }
    std::string property = getTextLine();// TODO parse a property
