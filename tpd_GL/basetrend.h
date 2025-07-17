@@ -359,12 +359,16 @@ namespace trend {
       public:
          typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
-                           TrendTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
+                           TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
          void              registerBox   (TrxCnvx*);
          void              registerPoly  (TrxNcvx*, const TessellPoly*);
          void              registerWire  (TrxWire*);
          void              registerText  (TrxText*, TrxTextOvlBox*);
+
+         void              register3DBox   (Trx3DBox*);
+         void              register3DPoly  (Trx3DPoly*, const TessellPoly*);
+         void              register3DWire  (Trx3DWire*);
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*)  {assert(false);}
          virtual void      draw(layprop::DrawProperties*) = 0;
@@ -397,7 +401,7 @@ namespace trend {
          unsigned          _num_total_strings;
          bool              _filled;
          bool              _reusable;
-         bool              _rend3D;
+//         bool              _rend3D;
    };
 
    /**
@@ -444,7 +448,7 @@ namespace trend {
    };
 
    /**
-      Toper RENDering LAYer represents a DB layer in the rendering view. It
+      Toped RENDering LAYer represents a DB layer in the rendering view. It
       generates and stores all the TrendTV objects (one per DB cell).
 
       A new TederTV object is created by the newSlice() method during the DB
@@ -525,6 +529,7 @@ namespace trend {
       traversing in the field _stv_array_offset. Having done that, the drawing is
       now trivial
 
+    \verbatim
       ----------------------------------------------------------------
       |      |                                        |       VBO      |
       | data |            openGL function             |----------------|
@@ -536,6 +541,7 @@ namespace trend {
       |------|----------------------------------------|--------|-------|
       | lnes | glMultiDrawElements(GL_LINES      ...) |    x   |   x   |
       ----------------------------------------------------------------
+    \endverbatim
    */
    class TrendLay {
       public:

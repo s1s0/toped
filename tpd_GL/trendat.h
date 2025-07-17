@@ -48,7 +48,9 @@
 
 class TeselChunk {
    public:
-                        TeselChunk(const TeselChunk&); //copy constructor
+                        TeselChunk(const TeselChunk&);                        //copy constructor
+                        TeselChunk(const TeselChunk& tcobj, unsigned offset); //copy the sequence and add offset
+                        TeselChunk(unsigned offset);                          //generate a sequence (i / i+offset)
                         TeselChunk(const WordList&, GLenum, unsigned);
                         TeselChunk(const int*, unsigned, unsigned);
                        ~TeselChunk();
@@ -121,7 +123,10 @@ class EarClipping {
 class TessellPoly {
    public:
                         TessellPoly();
+                        TessellPoly(const TessellPoly*);//deep copy constructor
       void              tessellate(const int4b* pdata, unsigned psize);
+      void              tessellate3DBox();
+      void              tessellate3DPoly(const unsigned idxShift);
       bool              valid() const    { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
       word              num_ftrs() const { return _all_ftrs;}
       word              num_ftfs() const { return _all_ftfs;}
@@ -220,9 +225,9 @@ namespace trend {
    */
    class TrxWire : public TrxNcvx {
       public:
-                           TrxWire(int4b*, unsigned, WireWidth, bool);
+                           TrxWire(const int4b*, unsigned, WireWidth, bool);
          virtual          ~TrxWire();
-         void              Tesselate();
+         virtual void      Tesselate();
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawFill();
          virtual void      drctDrawCLine();
@@ -231,12 +236,40 @@ namespace trend {
          virtual const TeselChain* tdata()               {return _tdata;}
       protected:
                            TrxWire(unsigned, const WireWidth, bool);
-         int4b*            _ldata; //! the vertexes of the wires central line
+         const int4b*      _ldata; //! the vertexes of the wires central line
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
          TeselChain*       _tdata; //! wire tesselation data
    };
+   
+   class Trx3DBox : public TrxNcvx { // Remove? not quite... the difference with TrxNcvx is the destructor!
+      public:
+                           Trx3DBox(const int4b* pdata) : TrxNcvx(pdata, 4) {};
+         virtual          ~Trx3DBox() {delete _tdata;}
+         virtual void      drctDrawFill() {assert(false);}
+      virtual const TeselChain* tdata() {return _tdata->tdata(); assert(false); /*CHECK!*/}
+      private:
+         TessellPoly*      _tdata; //! polygon tesselation data
+   };
 
+   class Trx3DPoly : public TrxNcvx {
+      public:
+                           Trx3DPoly(const int4b* pdata, unsigned psize) : TrxNcvx(pdata, psize) {};
+         virtual          ~Trx3DPoly() {delete _tdata;}
+         virtual void      drctDrawFill() {assert(false);}
+      virtual const TeselChain* tdata() {return _tdata->tdata(); assert(false); /*CHECK!*/}
+      private:
+         TessellPoly*      _tdata; //! polygon tesselation data
+   };
+
+   class Trx3DWire : public TrxWire {
+      public:
+                           Trx3DWire(const int4b* pdata, unsigned psize, WireWidth ww);
+//         virtual          ~Trx3DWire() {};
+         virtual void      Tesselate();
+         virtual void      drctDrawFill() {assert(false);}
+   };
+   
    //==========================================================================
    //
    // Text objects from the DB

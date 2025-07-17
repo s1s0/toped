@@ -34,7 +34,7 @@ namespace trend {
 
    class TenderTV : public TrendTV {
       public:
-                           TenderTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
+                           TenderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TenderTV();
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*);

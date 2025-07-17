@@ -39,12 +39,11 @@ trend::ogl_logfile     OGLLogFile;
 // class TrendTV
 //
 trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
-                   bool rend3D, unsigned /*parray_offset*/, unsigned /*iarray_offset*/) :
+                        unsigned /*parray_offset*/, unsigned /*iarray_offset*/) :
    _refCell             ( refCell         ),
    _num_total_strings   ( 0u              ),
    _filled              ( filled          ),
-   _reusable            ( reusable        ),
-   _rend3D              ( rend3D          )
+   _reusable            ( reusable        )
 {
    for (int i = fqss; i <= ftss; i++)
    {
@@ -60,89 +59,119 @@ trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
 
 void trend::TrendTV::registerBox (TrxCnvx* cobj)
 {
-   if (_rend3D)
+   unsigned allpoints = cobj->csize();
+   if (_filled)
    {
-      bool TODO = true;
+      _cnvx_data.push_back(cobj);
+      _alvrtxs[cnvx] += allpoints;
+      _alobjvx[cnvx]++;
    }
    else
    {
-      unsigned allpoints = cobj->csize();
-      if (_filled)
-      {
-         _cnvx_data.push_back(cobj);
-         _alvrtxs[cnvx] += allpoints;
-         _alobjvx[cnvx]++;
-      }
-      else
-      {
-         _cont_data.push_back(cobj);
-         _alvrtxs[cont] += allpoints;
-         _alobjvx[cont]++;
-      }
+      _cont_data.push_back(cobj);
+      _alvrtxs[cont] += allpoints;
+      _alobjvx[cont]++;
    }
+}
+
+void trend::TrendTV::register3DBox(Trx3DBox* cobj)
+{
+   // a generic tesselation object for all boxes
+   TessellPoly* tdata = DEBUG_NEW TessellPoly();
+   tdata->tessellate3DBox();
+   cobj->setTeselData(tdata);
+
+   _ncvx_data.push_back(cobj);
+   _alvrtxs[ncvx] += 2 * cobj->csize();
+   _alobjix[ftrs] += tdata->num_ftrs();
+   _alobjix[ftfs] += tdata->num_ftfs();
+   _alobjix[ftss] += tdata->num_ftss();
+   tdata->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
+   _alobjvx[ncvx]++;
 }
 
 void trend::TrendTV::registerPoly (TrxNcvx* cobj, const TessellPoly* tchain)
 {
-   if (_rend3D)
+   unsigned allpoints = cobj->csize();
+   if (_filled && tchain && tchain->valid())
    {
-      bool TODO = true;
+      cobj->setTeselData(tchain);
+      _ncvx_data.push_back(cobj);
+      _alvrtxs[ncvx] += allpoints;
+      _alobjix[ftrs] += tchain->num_ftrs();
+      _alobjix[ftfs] += tchain->num_ftfs();
+      _alobjix[ftss] += tchain->num_ftss();
+      tchain->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
+      _alobjvx[ncvx]++;
    }
    else
    {
-      unsigned allpoints = cobj->csize();
-      if (_filled && tchain && tchain->valid())
-      {
-         cobj->setTeselData(tchain);
-         _ncvx_data.push_back(cobj);
-         _alvrtxs[ncvx] += allpoints;
-         _alobjix[ftrs] += tchain->num_ftrs();
-         _alobjix[ftfs] += tchain->num_ftfs();
-         _alobjix[ftss] += tchain->num_ftss();
-         tchain->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-         _alobjvx[ncvx]++;
-      }
-      else
-      {
-         _cont_data.push_back(cobj);
-         _alvrtxs[cont] += allpoints;
-         _alobjvx[cont]++;
-      }
+      _cont_data.push_back(cobj);
+      _alvrtxs[cont] += allpoints;
+      _alobjvx[cont]++;
    }
+}
+
+void trend::TrendTV::register3DPoly(Trx3DPoly* cobj, const TessellPoly* tchain)
+{
+   TessellPoly* tdata = DEBUG_NEW TessellPoly(tchain);
+   tdata->tessellate3DPoly(cobj->csize());
+   cobj->setTeselData(tdata);
+
+   _ncvx_data.push_back(cobj);
+   _alvrtxs[ncvx] += 2 * cobj->csize();
+   _alobjix[ftrs] += tdata->num_ftrs();
+   _alobjix[ftfs] += tdata->num_ftfs();
+   _alobjix[ftss] += tdata->num_ftss();
+   tdata->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
+   _alobjvx[ncvx]++;
 }
 
 void trend::TrendTV::registerWire (TrxWire* cobj)
 {
-   if (_rend3D)
+   unsigned allpoints = cobj->csize();
+   _line_data.push_back(cobj);
+   _alvrtxs[line] += cobj->lsize();
+   _alobjvx[line]++;
+   if ( !cobj->center_line_only() )
    {
-      bool TODO = true;
-   }
-   else
-   {
-      unsigned allpoints = cobj->csize();
-      _line_data.push_back(cobj);
-      _alvrtxs[line] += cobj->lsize();
-      _alobjvx[line]++;
-      if ( !cobj->center_line_only() )
+      if (_filled)
       {
-         if (_filled)
-         {
-            cobj->Tesselate();
-            _ncvx_data.push_back(cobj);
-            _alvrtxs[ncvx] += allpoints;
-            _alindxs[fqss] += allpoints;
-            _alobjvx[ncvx]++;
-            _alobjix[fqss]++;
-         }
-         else
-         {
-            _cont_data.push_back(cobj);
-            _alobjvx[cont] ++;
-            _alvrtxs[cont] += allpoints;
-         }
+         cobj->Tesselate();
+         _ncvx_data.push_back(cobj);
+         _alvrtxs[ncvx] += allpoints;
+         _alindxs[fqss] += allpoints;
+         _alobjvx[ncvx]++;
+         _alobjix[fqss]++;
+      }
+      else
+      {
+         _cont_data.push_back(cobj);
+         _alobjvx[cont] ++;
+         _alvrtxs[cont] += allpoints;
       }
    }
 }
+
+void trend::TrendTV::register3DWire(Trx3DWire* cobj)
+{
+   cobj->Tesselate();
+   unsigned allpoints = cobj->csize();
+   _ncvx_data.push_back(cobj);
+   
+//   _alvrtxs[ncvx] += 2 * cobj->csize();
+//   _alobjix[ftrs] += cobj->tdata()->num_ftrs();
+//   _alobjix[ftfs] += tdata->num_ftfs();
+//   _alobjix[ftss] += tdata->num_ftss();
+//   tdata->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
+//   _alobjvx[ncvx]++;
+//
+//   _alvrtxs[ncvx] += 2 * allpoints;
+////   _alindxs[fqss] += allpoints;
+//   _alobjvx[ncvx]++;
+//   _alobjix[fqss]++;
+}
+
 
 void trend::TrendTV::registerText (TrxText* cobj, TrxTextOvlBox* oobj)
 {
@@ -263,7 +292,10 @@ void trend::TrendLay::ppSlice()
 
 void trend::TrendLay::box  (const int4b* pdata)
 {
-   _cslice->registerBox(DEBUG_NEW TrxBox(pdata));
+   if (_rend3D)
+      _cslice->register3DBox(DEBUG_NEW Trx3DBox(pdata));
+   else
+      _cslice->registerBox(DEBUG_NEW TrxBox(pdata));
 }
 
 void trend::TrendLay::box  (const TP& p1, const CTM& rmm)
@@ -287,7 +319,10 @@ void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss, const CTM& rm
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   _cslice->registerPoly(DEBUG_NEW TrxNcvx(pdata, psize), tpoly);
+   if (_rend3D)
+      _cslice->register3DPoly(DEBUG_NEW Trx3DPoly(pdata, psize), tpoly);
+   else
+      _cslice->registerPoly(DEBUG_NEW TrxNcvx(pdata, psize), tpoly);
 }
 
 void trend::TrendLay::poly (const PointVector& pdata, const CTM& rmm)
@@ -311,7 +346,10 @@ void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPol
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
-   _cslice->registerWire(DEBUG_NEW TrxWire(pdata, psize, width, center_only));
+   if (_rend3D)
+      _cslice->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width));
+   else
+      _cslice->registerWire(DEBUG_NEW TrxWire(pdata, psize, width, center_only));
 }
 
 void trend::TrendLay::wire (const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm)

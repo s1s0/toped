@@ -489,6 +489,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
          updateViewport();
          DATC->renderOGLBuffer(W, H);
+//         DATC->render3D(W, H);
          if (0 == _blinkInterval) DATC->grcDraw();
          _invalidWindow = false;
          drawOGLBuffer();

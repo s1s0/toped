@@ -127,7 +127,7 @@ void trend::TolderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusab
 
 void trend::TolderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW TolderTV(ctrans, fill, reusable, _rend3D, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW TolderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
 bool trend::TolderLay::chunkExists(TrxCellRef* const ctrans, bool filled)

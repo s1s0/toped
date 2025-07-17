@@ -46,8 +46,8 @@ void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrxCellRef* re
 // class ToshaderTV
 //
 trend::ToshaderTV::ToshaderTV(TrxCellRef* const refCell, bool filled, bool reusable,
-                              bool rend3D, unsigned parray_offset, unsigned iarray_offset) :
-   TenderTV(refCell, filled, reusable, rend3D, parray_offset, iarray_offset)
+                              unsigned parray_offset, unsigned iarray_offset) :
+   TenderTV(refCell, filled, reusable, parray_offset, iarray_offset)
 {}
 
 void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
@@ -228,7 +228,7 @@ void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reus
 
 void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, _rend3D, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
 bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)

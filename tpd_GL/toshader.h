@@ -37,7 +37,7 @@ namespace trend {
 
    class ToshaderTV : public TenderTV {
       public:
-                           ToshaderTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
+                           ToshaderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~ToshaderTV() {};
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
