@@ -504,7 +504,7 @@ void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
          case DRC_LAY: rend.setLayer(curLayDef, (NULL != dlist));
                        lay->openGlRender(rend, dlist); break;
          default     :
-         {
+         {// All editable layers
             short cltype = lay->clipType(rend);
             switch (cltype)
             {

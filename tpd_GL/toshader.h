@@ -37,7 +37,7 @@ namespace trend {
 
    class ToshaderTV : public TenderTV {
       public:
-                           ToshaderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
+                           ToshaderTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
          virtual          ~ToshaderTV() {};
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
@@ -57,7 +57,7 @@ namespace trend {
 
    class ToshaderLay : public TenderLay {
       public:
-                           ToshaderLay();
+                           ToshaderLay(bool rend3D);
          virtual          ~ToshaderLay() {}
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);

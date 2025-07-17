@@ -37,9 +37,9 @@ extern trend::TrendCenter*        TRENDC;
 //
 // class TenderTV
 //
-trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
+trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable, bool rend3D,
                    unsigned parray_offset, unsigned iarray_offset) :
-   TrendTV(refCell, filled, reusable, parray_offset, iarray_offset),
+   TrendTV(refCell, filled, reusable, rend3D, parray_offset, iarray_offset),
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   )
 {
@@ -365,8 +365,8 @@ void trend::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 // class TenderLay
 //
-trend::TenderLay::TenderLay():
-   TrendLay              (             ),
+trend::TenderLay::TenderLay(bool rend3D):
+   TrendLay              ( rend3D      ),
    _pbuffer              (          0u ),
    _ibuffer              (          0u ),
    _stv_array_offset     (          0u ),
@@ -394,7 +394,7 @@ void trend::TenderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusab
 
 void trend::TenderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, _rend3D, 2 * _num_total_points, _num_total_indexs);
 }
 
 bool trend::TenderLay::chunkExists(TrxCellRef* const ctrans, bool filled)

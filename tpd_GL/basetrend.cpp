@@ -39,11 +39,12 @@ trend::ogl_logfile     OGLLogFile;
 // class TrendTV
 //
 trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
-                   unsigned /*parray_offset*/, unsigned /*iarray_offset*/) :
+                   bool rend3D, unsigned /*parray_offset*/, unsigned /*iarray_offset*/) :
    _refCell             ( refCell         ),
    _num_total_strings   ( 0u              ),
    _filled              ( filled          ),
-   _reusable            ( reusable        )
+   _reusable            ( reusable        ),
+   _rend3D              ( rend3D          )
 {
    for (int i = fqss; i <= ftss; i++)
    {
@@ -59,66 +60,87 @@ trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
 
 void trend::TrendTV::registerBox (TrxCnvx* cobj)
 {
-   unsigned allpoints = cobj->csize();
-   if (_filled)
+   if (_rend3D)
    {
-      _cnvx_data.push_back(cobj);
-      _alvrtxs[cnvx] += allpoints;
-      _alobjvx[cnvx]++;
+      bool TODO = true;
    }
    else
    {
-      _cont_data.push_back(cobj);
-      _alvrtxs[cont] += allpoints;
-      _alobjvx[cont]++;
+      unsigned allpoints = cobj->csize();
+      if (_filled)
+      {
+         _cnvx_data.push_back(cobj);
+         _alvrtxs[cnvx] += allpoints;
+         _alobjvx[cnvx]++;
+      }
+      else
+      {
+         _cont_data.push_back(cobj);
+         _alvrtxs[cont] += allpoints;
+         _alobjvx[cont]++;
+      }
    }
 }
 
 void trend::TrendTV::registerPoly (TrxNcvx* cobj, const TessellPoly* tchain)
 {
-   unsigned allpoints = cobj->csize();
-   if (_filled && tchain && tchain->valid())
+   if (_rend3D)
    {
-      cobj->setTeselData(tchain);
-      _ncvx_data.push_back(cobj);
-      _alvrtxs[ncvx] += allpoints;
-      _alobjix[ftrs] += tchain->num_ftrs();
-      _alobjix[ftfs] += tchain->num_ftfs();
-      _alobjix[ftss] += tchain->num_ftss();
-      tchain->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-      _alobjvx[ncvx]++;
+      bool TODO = true;
    }
    else
    {
-      _cont_data.push_back(cobj);
-      _alvrtxs[cont] += allpoints;
-      _alobjvx[cont]++;
+      unsigned allpoints = cobj->csize();
+      if (_filled && tchain && tchain->valid())
+      {
+         cobj->setTeselData(tchain);
+         _ncvx_data.push_back(cobj);
+         _alvrtxs[ncvx] += allpoints;
+         _alobjix[ftrs] += tchain->num_ftrs();
+         _alobjix[ftfs] += tchain->num_ftfs();
+         _alobjix[ftss] += tchain->num_ftss();
+         tchain->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
+         _alobjvx[ncvx]++;
+      }
+      else
+      {
+         _cont_data.push_back(cobj);
+         _alvrtxs[cont] += allpoints;
+         _alobjvx[cont]++;
+      }
    }
 }
 
 void trend::TrendTV::registerWire (TrxWire* cobj)
 {
-   unsigned allpoints = cobj->csize();
-   _line_data.push_back(cobj);
-   _alvrtxs[line] += cobj->lsize();
-   _alobjvx[line]++;
-   if ( !cobj->center_line_only() )
+   if (_rend3D)
    {
-       if (_filled)
-       {
-         cobj->Tesselate();
-         _ncvx_data.push_back(cobj);
-         _alvrtxs[ncvx] += allpoints;
-         _alindxs[fqss] += allpoints;
-         _alobjvx[ncvx]++;
-         _alobjix[fqss]++;
-       }
-       else
-       {
-          _cont_data.push_back(cobj);
-          _alobjvx[cont] ++;
-          _alvrtxs[cont] += allpoints;
-       }
+      bool TODO = true;
+   }
+   else
+   {
+      unsigned allpoints = cobj->csize();
+      _line_data.push_back(cobj);
+      _alvrtxs[line] += cobj->lsize();
+      _alobjvx[line]++;
+      if ( !cobj->center_line_only() )
+      {
+         if (_filled)
+         {
+            cobj->Tesselate();
+            _ncvx_data.push_back(cobj);
+            _alvrtxs[ncvx] += allpoints;
+            _alindxs[fqss] += allpoints;
+            _alobjvx[ncvx]++;
+            _alobjix[fqss]++;
+         }
+         else
+         {
+            _cont_data.push_back(cobj);
+            _alobjvx[cont] ++;
+            _alvrtxs[cont] += allpoints;
+         }
+      }
    }
 }
 
@@ -189,12 +211,13 @@ trend::TrendTV::~TrendTV()
 //
 // class TrendLay
 //
-trend::TrendLay::TrendLay():
+trend::TrendLay::TrendLay(bool rend3D):
    _cslice               (        NULL ),
    _num_total_points     (          0u ),
    _num_total_indexs     (          0u ),
    _num_total_slctdx     (          0u ),
-   _num_total_strings    (          0u )
+   _num_total_strings    (          0u ),
+   _rend3D               ( rend3D      )
 {
    for (int i = lstr; i <= lnes; i++)
    {
@@ -485,7 +508,8 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _dovCorrection        (         0 ),
    _marks                (      NULL ),
    _rmm                  (      NULL ),
-   _num_grid_points      (        0u )
+   _num_grid_points      (        0u ),
+   _rend3D               (      false)
 
 {
    // Initialize the cell (CTM) stack
@@ -505,7 +529,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
                                           overlap,
                                           _cellStack.size()
                                          );
-   if (selected || (!_drawprop->cellBoxHidden()))
+   if (selected || (!_drawprop->cellBoxHidden()) || !_rend3D)
       _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
    else
       // This list is to keep track of the hidden cRefBox - so we can clean
@@ -522,7 +546,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
       assert(NULL == _activeCS);
       _activeCS = cRefBox;
    }
-   else if (!_drawprop->cellMarksHidden())
+   else if (!(_drawprop->cellMarksHidden() && _rend3D))
    {
       _marks->addRefMark(overlap.p1(), _cellStack.top()->ctm());
    }

@@ -231,6 +231,7 @@ namespace trend {
       during the construction. Each object is sorted in exactly one bin depending
       whether it's going to be filled or not. The exception as always is the wire
       object which also goes to the line bin because of its central line.
+    
       \verbatim
       ---------------------------------------------------------------
       | TrendBase |    not filled      |        filled      |        |
@@ -242,6 +243,25 @@ namespace trend {
       | convex    |      |      |      |  x   |      |      |  cnvx  |
       | non-convex|      |      |      |      |  x   |  x   |  ncvx  |
       --------------------------------------------------------------
+      \endverbatim
+
+      In case of 3D rendering however the bins described above are not necessary.
+      All objects will turn into 3D objects, all objects will be filled with
+      a texture, there will not be any contours or lines drawn. All objects will
+      be drawn in the same way - i.e. no matter convex or non-convex. All objects
+      will need at least 12 triangles out of 8 vertices (in case for a box). All of
+      them will use index buffer to save some bandwidth ti the graphic card. In
+      a way, this makes the things much easier. In result - we'll have
+      only one bin.
+
+      \verbatim
+      -------------------------------------------
+      | TrendBase |        filled      |        |
+      |   data    |--------------------|  enum  |
+      | (vertexes)|  box | poly | wire |        |
+      |-----------|------|------|------|--------|
+      | non-convex|  x   |  x   |  x   |  ncvx  |
+      -----------------------------------------
       \endverbatim
 
       The sorting step gathers also essential data statistics which will be used
@@ -339,7 +359,7 @@ namespace trend {
       public:
          typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
-                           TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
+                           TrendTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
          void              registerBox   (TrxCnvx*);
          void              registerPoly  (TrxNcvx*, const TessellPoly*);
@@ -377,6 +397,7 @@ namespace trend {
          unsigned          _num_total_strings;
          bool              _filled;
          bool              _reusable;
+         bool              _rend3D;
    };
 
    /**
@@ -522,7 +543,7 @@ namespace trend {
          typedef std::list<TrendReTV*>   TrendReTVList;
          typedef std::map<std::string, TrendTV*> ReusableTTVMap;
 
-                           TrendLay();
+                           TrendLay(bool);
          virtual          ~TrendLay();
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
@@ -570,6 +591,7 @@ namespace trend {
          // index related data for selected objects
          unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
          unsigned          _asobjix[3]; //! array with the total number of selected objects
+         bool              _rend3D;
    };
 
    /**
@@ -704,6 +726,8 @@ namespace trend {
          virtual void      grcDraw() = 0;
          virtual void      grdDraw() = 0;
          virtual void      rlrDraw()=0;
+         void              set3Drendering()              { _rend3D = true;}
+         bool              rend3D() const                { return _rend3D;}
       
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
@@ -753,6 +777,7 @@ namespace trend {
          unsigned          _num_grid_points; //! Number of all points in all grids
 //         TrendGrids        _grids;           //!All grid points
          TrendStrings      _rulerTexts;      //!The labels on all rulers
+         bool              _rend3D;
 
    };
 

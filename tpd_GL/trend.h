@@ -219,6 +219,9 @@ namespace trend {
          FrameBuffProps         _fbProps;
    };
 
+   
+   /// Toped Renderer Center
+   ///
    class TrendCenter {
       public:
                                 TrendCenter(bool, RenderType cmdLineReq=trend::rtTBD, bool sprtVbo=false, bool sprtShaders=false);

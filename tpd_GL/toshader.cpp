@@ -46,8 +46,8 @@ void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrxCellRef* re
 // class ToshaderTV
 //
 trend::ToshaderTV::ToshaderTV(TrxCellRef* const refCell, bool filled, bool reusable,
-                                    unsigned parray_offset, unsigned iarray_offset) :
-   TenderTV(refCell, filled, reusable, parray_offset, iarray_offset)
+                              bool rend3D, unsigned parray_offset, unsigned iarray_offset) :
+   TenderTV(refCell, filled, reusable, rend3D, parray_offset, iarray_offset)
 {}
 
 void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
@@ -208,8 +208,8 @@ void trend::ToshaderTV::setAlpha(layprop::DrawProperties* drawprop)
 //
 // class ToshaderLay
 //
-trend::ToshaderLay::ToshaderLay():
-   TenderLay           (             )
+trend::ToshaderLay::ToshaderLay(bool rend3D):
+   TenderLay           ( rend3D      )
 {
 }
 
@@ -228,7 +228,7 @@ void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reus
 
 void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, _rend3D, 2 * _num_total_points, _num_total_indexs);
 }
 
 bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
@@ -434,7 +434,7 @@ bool trend::Toshader::chunkExists(const LayerDef& laydef, bool has_selected)
    }
    else
    {
-      _clayer = DEBUG_NEW ToshaderLay();
+      _clayer = DEBUG_NEW ToshaderLay(_rend3D);
       _data.add(laydef, _clayer);
    }
    if (has_selected)
@@ -460,7 +460,7 @@ void trend::Toshader::setLayer(const LayerDef& laydef, bool has_selected)
    }
    else
    {
-      _clayer = DEBUG_NEW ToshaderLay();
+      _clayer = DEBUG_NEW ToshaderLay(_rend3D);
       _data.add(laydef, _clayer);
    }
    if (has_selected)
@@ -473,7 +473,7 @@ void trend::Toshader::setHvrLayer(const LayerDef& laydef)
 {
    if (REF_LAY_DEF != laydef)
    {
-      _clayer = DEBUG_NEW ToshaderLay();
+      _clayer = DEBUG_NEW ToshaderLay(false);
       _data.add(laydef, _clayer);
       _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
    }
@@ -703,7 +703,7 @@ void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
       }
       else
       {
-         _grcLayer = DEBUG_NEW ToshaderLay();
+         _grcLayer = DEBUG_NEW ToshaderLay(false);
          _grcData.add(laydef, _grcLayer);
       }
       _grcLayer->newSlice(_cellStack.top(), false, false);

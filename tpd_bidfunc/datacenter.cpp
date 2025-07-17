@@ -885,6 +885,49 @@ void DataCenter::renderOGLBuffer(int W, int H)
    }
 }
 
+void DataCenter::render3D(int W, int H)
+{
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+   DBGL_CALL(glEnable, GL_BLEND)
+   DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+   if (_TEDLIB())
+   {
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H);
+      if (NULL != cRenderer)
+      {
+         cRenderer->set3Drendering();
+         // TODO: grid using the shaders
+
+         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+         {
+            TpdPost::render_status(true);
+            RENTIMER_SET;
+            // There is no need to check for an active cell. If there isn't one
+            // the function will return silently.
+            _TEDLIB()->openGlRender(*cRenderer);
+            RENTIMER_REPORT("Time elapsed for data traversing: ");
+            if (cRenderer->collect())
+            {
+               RENTIMER_REPORT("Time elapsed for data copying   : ");
+               cRenderer->draw();
+               RENTIMER_REPORT("    Total elapsed rendering time: ");
+            }
+            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+            TpdPost::render_status(false);
+         }
+         else
+         {
+            // If DB is locked - skip the DB drawing, but draw all the property DB stuff
+            tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
+         }
+         // rulers & zero cross - don't bother
+
+         TRENDC->releaseCRenderer();// 3D option will be cleaned-up automatically
+
+         // Draw DRC data (if any) - don't bother
+      }
+   }
+}
 
 void DataCenter::motionDraw(const CTM& /*layCTM*/, TP base, TP newp, bool rubber, const DBlineList repers)
 {

@@ -34,7 +34,7 @@ namespace trend {
 
    class TenderTV : public TrendTV {
       public:
-                           TenderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
+                           TenderTV(TrxCellRef* const, bool, bool, bool, unsigned, unsigned);
          virtual          ~TenderTV();
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*);
@@ -61,7 +61,7 @@ namespace trend {
 
    class TenderLay : public TrendLay {
       public:
-                           TenderLay();
+                           TenderLay(bool rend3D = false);
          virtual          ~TenderLay();
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);
