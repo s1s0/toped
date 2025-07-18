@@ -125,6 +125,7 @@ class TessellPoly {
                         TessellPoly();
                         TessellPoly(const TessellPoly*);//deep copy constructor
       void              tessellate(const int4b* pdata, unsigned psize);
+      void              pushBackTChunk(TeselChunk chunk);
       void              tessellate3DBox();
       void              tessellate3DPoly(const unsigned idxShift);
       bool              valid() const    { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
@@ -204,10 +205,10 @@ namespace trend {
                            TrxNcvx(const int4b* pdata, unsigned psize) :
                                     TrxCnvx(pdata, psize), _tdata(NULL) {}
          virtual          ~TrxNcvx(){};
-         void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
+         virtual void      setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual void      drctDrawFill();
          virtual const TeselChain* tdata()              {return _tdata->tdata();}
-      private:
+      protected:
          const TessellPoly*    _tdata; //! polygon tesselation data
    };
 
@@ -218,56 +219,66 @@ namespace trend {
       non-convex polygon. The wire as a DB object is very specific though. Only the
       central line is stored. The contour is calculated if required on the fly from
       the build-in methods called from the constructor. Instead of using general
-      purpose tesselation (slow!), the tesselation data is extracted directly from
+      purpose tesselation (expensive), the tesselation data is extracted directly from
       the contour data virtually without calculations. This is one of the few classes
-      in the hierarchy which generates vertex and index data which means that it has
-      to be properly cleaned-up.
+      in the hierarchy which generates vertex and index data. In other words - _cdata
+      and _tdata fields belong to this object, they're not references. This means also
+      that they shall be cleaned by the destructor.
    */
    class TrxWire : public TrxNcvx {
       public:
                            TrxWire(const int4b*, unsigned, WireWidth, bool);
          virtual          ~TrxWire();
          virtual void      Tesselate();
+         virtual void      setTeselData(const TessellPoly*) {assert(false); /*if you hit this assert, use Tesselate method!*/}
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawFill();
          virtual void      drctDrawCLine();
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
-         virtual const TeselChain* tdata()               {return _tdata;}
       protected:
                            TrxWire(unsigned, const WireWidth, bool);
-         const int4b*      _ldata; //! the vertexes of the wires central line
+         const int4b*      _ldata; //! the vertexes of the wires central line. A link to TDT wire object data
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
-         TeselChain*       _tdata; //! wire tesselation data
    };
    
-   class Trx3DBox : public TrxNcvx { // Remove? not quite... the difference with TrxNcvx is the destructor!
+   /**
+    Object of this class are used to render boxes when rend3D mode is active. The difference
+    with TrxBox is that the field _tdata contains data which belongs to this object
+    NOTE! All 3D objects inherit TrxNcvx - i.e. they do have a tesselation data
+    */
+   class Trx3DBox : public TrxNcvx { // the difference with TrxNcvx is the destructor!
       public:
                            Trx3DBox(const int4b* pdata) : TrxNcvx(pdata, 4) {};
          virtual          ~Trx3DBox() {delete _tdata;}
          virtual void      drctDrawFill() {assert(false);}
-      virtual const TeselChain* tdata() {return _tdata->tdata(); assert(false); /*CHECK!*/}
-      private:
-         TessellPoly*      _tdata; //! polygon tesselation data
    };
 
+   /**
+    Used to render polygons when rend3D mode is active.
+    Unlike TrxNcvx, the tesselation data _tdata is not a reference to the
+    tessellation data in the TDT. It copies the original, and then expands it as needed for 3D rendering
+    */
    class Trx3DPoly : public TrxNcvx {
       public:
                            Trx3DPoly(const int4b* pdata, unsigned psize) : TrxNcvx(pdata, psize) {};
          virtual          ~Trx3DPoly() {delete _tdata;}
          virtual void      drctDrawFill() {assert(false);}
-      virtual const TeselChain* tdata() {return _tdata->tdata(); assert(false); /*CHECK!*/}
-      private:
-         TessellPoly*      _tdata; //! polygon tesselation data
    };
 
+   /**
+    Used to render wires when rend3D mode is active. Expands the TrxWire object Tesselate
+    method to accomodate the 3D requirements.
+    */
    class Trx3DWire : public TrxWire {
       public:
-                           Trx3DWire(const int4b* pdata, unsigned psize, WireWidth ww);
-//         virtual          ~Trx3DWire() {};
+                           Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width):
+                              TrxWire  (pdata, psize, width, false) {}
          virtual void      Tesselate();
-         virtual void      drctDrawFill() {assert(false);}
+         virtual void      drctDrawFill()  {assert(false);}
+         virtual void      drctDrawCLine() {assert(false);}
+         const TessellPoly* tpdata()       {return _tdata;}
    };
    
    //==========================================================================

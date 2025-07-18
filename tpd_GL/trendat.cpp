@@ -348,6 +348,7 @@ void TessellPoly::tessellate3DPoly(const unsigned idxShift)
          case GL_TRIANGLES      : _all_ftrs++   ; break;
          case GL_TRIANGLE_FAN   : _all_ftfs++   ; break;
          case GL_TRIANGLE_STRIP : _all_ftss++   ; break;
+         default: assert(0);break;
       }
       tchain++;
       listSize--;
@@ -379,6 +380,20 @@ void TessellPoly::clear() {
    _tdata.clear();
 }
 
+void TessellPoly::pushBackTChunk(TeselChunk chunk)
+{
+   _tdata.push_back(chunk);
+   switch (chunk.type())
+   {
+      case GL_TRIANGLES      : _all_ftrs++   ; break;
+      case GL_TRIANGLE_FAN   : _all_ftfs++   ; break;
+      case GL_TRIANGLE_STRIP : _all_ftss++   ; break;
+      case GL_QUAD_STRIP     : bool WTF_is_doing_this_here = true; break;
+//      default: assert(0);break; // FIXME!
+   }
+}
+
+
 
 //=============================================================================
 //
@@ -405,6 +420,7 @@ TeselChunk::TeselChunk(const WordList& data, GLenum type, unsigned offset)
 TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
 { // used for wire tesselation explicitly
    _size = size;
+//   _type = GL_TRIANGLE_STRIP;
    _type = GL_QUAD_STRIP;
    assert(0 ==(size % 2));
    _index_seq = DEBUG_NEW unsigned[_size];
@@ -539,12 +555,13 @@ void trend::TrxNcvx::drctDrawFill()
 // TrxWire
 //
 trend::TrxWire::TrxWire(const int4b* pdata, unsigned psize, WireWidth width, bool clo) :
-   TrxNcvx (NULL, 0),
-   _ldata    (pdata  ),
-   _lsize    (psize  ),
-   _celno    (clo    ),
-   _tdata    (NULL   )
+   TrxNcvx (NULL, 0)
+  ,_ldata    (pdata  )
+  ,_lsize    (psize  )
+  ,_celno    (clo    )
+//   _tdata    (NULL   )
 {
+   _tdata = DEBUG_NEW TessellPoly;
    if (!_celno)
    {
       laydata::WireContour wcontour(_ldata, _lsize, width);
@@ -557,11 +574,11 @@ trend::TrxWire::TrxWire(const int4b* pdata, unsigned psize, WireWidth width, boo
 }
 
 trend::TrxWire::TrxWire(const unsigned psize, const WireWidth /*width*/, bool clo) :
-   TrxNcvx (NULL, 0),
-   _ldata    (NULL   ),
-   _lsize    (psize  ),
-   _celno    (clo    ),
-   _tdata    (NULL   )
+   TrxNcvx (NULL, 0)
+  ,_ldata    (NULL   )
+  ,_lsize    (psize  )
+  ,_celno    (clo    )
+//   _tdata    (NULL   )
 {
 }
 
@@ -588,12 +605,12 @@ void trend::TrxWire::drctDrawCLine()
 
 void trend::TrxWire::drctDrawFill()
 {
-   for ( TeselChain::const_iterator TCH = _tdata->begin(); TCH != _tdata->end(); TCH++ )
+   for (auto TCH : *_tdata->tdata())
    {
-      DBGL_CALL(glBegin,TCH->type())
-      for(unsigned cindx = 0 ; cindx < TCH->size(); cindx++)
+      DBGL_CALL(glBegin,TCH.type())
+      for(unsigned cindx = 0 ; cindx < TCH.size(); cindx++)
       {
-         unsigned vindex = TCH->index_seq()[cindx];
+         unsigned vindex = TCH.index_seq()[cindx];
          DBGL_CALL(glVertex2i,_cdata[2*vindex], _cdata[2*vindex+1])
       }
       DBGL_CALL0(glEnd)
@@ -610,8 +627,13 @@ void trend::TrxWire::drctDrawFill()
 */
 void trend::TrxWire::Tesselate()
 {
-   _tdata = DEBUG_NEW TeselChain();
-   _tdata->push_back( TeselChunk(_cdata, _csize, 0));
+   const_cast<TessellPoly*>(_tdata)->pushBackTChunk(TeselChunk(_cdata, _csize, 0));
+   // regarding the const_cast above: unlike the TrxNcvx, which is using a ready
+   // tesselation data from tdtPoly (and must not be changed here), with tdtWire
+   // tesselation is trivial, and happens on the fly (during rendering) HERE!
+   // Reason? Balance between memory usage and speed
+   // - polygon tesselation is considered heavy processing, so it shall better be done once
+   // - wire tesselation is trivial, so let's use half the memory for storage
 }
 
 trend::TrxWire::~TrxWire()
@@ -620,48 +642,14 @@ trend::TrxWire::~TrxWire()
    if (NULL != _tdata) delete _tdata;
 }
 
-
-//=============================================================================
-//
-// class Trx3DBox
-//
-//trend::Trx3DBox::Trx3DBox(const int4b* pdata) : TrxNcvx(pdata, 4)
-//{
-//}
-//trend::Trx3DBox::~Trx3DBox()
-//{
-//   delete _tdata;
-//}
-
-//=============================================================================
-//
-// class Trx3DPoly
-//
-//trend::Trx3DPoly::Trx3DPoly(const int4b* pdata, unsigned psize) : TrxNcvx(pdata, psize)
-//{
-//   bool TODO = true;
-//
-//}
-//trend::Trx3DPoly::~Trx3DPoly()
-//{
-//   
-//}
-
-
 //=============================================================================
 //
 // class Trx3DWire
 //
-trend::Trx3DWire::Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width):
-   TrxWire  (pdata, psize, width, false)
-{
-}
-
 void trend::Trx3DWire::Tesselate()
 {
    TrxWire::Tesselate();
-   _tdata->push_back( TeselChunk(_tdata->front(),_csize));
-   _tdata->push_back(_csize);
+   const_cast<TessellPoly*>(_tdata)->tessellate3DPoly(_csize);
 }
 
 //trend::Trx3DWire::~Trx3DWire()
