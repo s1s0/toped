@@ -46,14 +46,14 @@
 //
 //=============================================================================
 
-class TeselChunk {
+class TessellChunk {
    public:
-                        TeselChunk(const TeselChunk&);                        //copy constructor
-                        TeselChunk(const TeselChunk& tcobj, unsigned offset); //copy the sequence and add offset
-                        TeselChunk(unsigned offset);                          //generate a sequence (i / i+offset)
-                        TeselChunk(const WordList&, GLenum, unsigned);
-                        TeselChunk(const int*, unsigned, unsigned);
-                       ~TeselChunk();
+                        TessellChunk(const TessellChunk&);                        //copy constructor
+                        TessellChunk(const TessellChunk& tcobj, unsigned offset); //copy the sequence and add offset
+                        TessellChunk(unsigned offset);                          //generate a sequence (i / i+offset)
+                        TessellChunk(const WordList&, GLenum, unsigned);
+                        TessellChunk(const int*, unsigned, unsigned);
+                       ~TessellChunk();
       GLenum            type() const      {return _type;}
       word              size() const      {return _size;}
       const unsigned*   index_seq() const {return _index_seq;}
@@ -63,7 +63,7 @@ class TeselChunk {
       GLenum            _type;
 };
 
-typedef std::list<TeselChunk> TeselChain;
+typedef std::list<TessellChunk> TessellChain;
 
 //=============================================================================
 //
@@ -125,18 +125,18 @@ class TessellPoly {
                         TessellPoly();
                         TessellPoly(const TessellPoly*);//deep copy constructor
       void              tessellate(const int4b* pdata, unsigned psize);
-      void              pushBackTChunk(TeselChunk chunk);
+      void              pushBackTChunk(TessellChunk chunk);
       void              tessellate3DBox();
       void              tessellate3DPoly(const unsigned idxShift);
       bool              valid() const    { return (0 < (_all_tria + _all_tstr));}
       word              num_tria() const { return _all_tria;}
       word              num_tstr() const { return _all_tstr;}
-      const TeselChain* tdata() const    { return &_tdata;  }
+      const TessellChain* tdata() const    { return &_tdata;  }
       void              num_indexs(unsigned& iftrs, unsigned& iftss) const;
       void              clear();
    //====================================================================
    private:
-      TeselChain        _tdata;
+      TessellChain      _tdata;
       word              _all_tria;// GL_TRIANGLES
       word              _all_tstr;// GL_TRIANGLE_STRIP
 
@@ -205,7 +205,7 @@ namespace trend {
          virtual          ~TrxNcvx(){};
          virtual void      setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual void      drctDrawFill();
-         const TeselChain* tdata()              {return _tdata->tdata();}
+         const TessellChain* tdata()              {return _tdata->tdata();}
       protected:
          const TessellPoly*    _tdata; //! polygon tesselation data
    };

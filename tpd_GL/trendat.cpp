@@ -305,11 +305,11 @@ void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
              assert(false);
              break;
           case 3:
-             _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLES, 0));
+             _tdata.push_back(TessellChunk(indexSequence, GL_TRIANGLES, 0));
              _all_tria++;
              break;
           default:
-             _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLE_STRIP, 0));
+             _tdata.push_back(TessellChunk(indexSequence, GL_TRIANGLE_STRIP, 0));
              _all_tstr++;
              break;
        }
@@ -322,9 +322,9 @@ void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 void TessellPoly::tessellate3DBox()
 {
    assert(0 == _tdata.size());
-   _tdata.push_back(TeselChunk(/*indexSequence*/{0,1,2,3}, GL_TRIANGLE_STRIP, 0));
-   _tdata.push_back(TeselChunk(/*indexSequence*/{4,5,6,7}, GL_TRIANGLE_STRIP, 0));
-   _tdata.push_back(TeselChunk(/*indexSequence*/{0,4,1,5,2,6,3,7}, GL_TRIANGLE_STRIP, 0));
+   _tdata.push_back(TessellChunk(/*indexSequence*/{0,1,2,3}, GL_TRIANGLE_STRIP, 0));
+   _tdata.push_back(TessellChunk(/*indexSequence*/{4,5,6,7}, GL_TRIANGLE_STRIP, 0));
+   _tdata.push_back(TessellChunk(/*indexSequence*/{0,4,1,5,2,6,3,7}, GL_TRIANGLE_STRIP, 0));
    _all_tstr = 3;
 }
 
@@ -337,10 +337,10 @@ void TessellPoly::tessellate3DPoly(const unsigned idxShift)
    // This will be done by duplicating every single chain and shifting the indexes there
    // with the idxShift constant;
    size_t listSize = _tdata.size();
-   TeselChain::iterator tchain = _tdata.begin();
+   TessellChain::iterator tchain = _tdata.begin();
    while (listSize > 0)
    {
-      _tdata.push_back(TeselChunk(*tchain, idxShift));
+      _tdata.push_back(TessellChunk(*tchain, idxShift));
       switch (tchain->type())
       {
          case GL_TRIANGLES      : _all_tria++   ; break;
@@ -353,13 +353,13 @@ void TessellPoly::tessellate3DPoly(const unsigned idxShift)
    // now we need to take care about the side of the 3D object. It will consist of
    // rectangles which can be treated as wires (i.e.) with the same width
    // the function below shall generate a single GL_TRIANGLE_STRIP sequence
-   _tdata.push_back(TeselChunk(idxShift));
+   _tdata.push_back(TessellChunk(idxShift));
    _all_tstr++;
 }
 
 void TessellPoly::num_indexs(unsigned& iftrs, /*unsigned& iftfs,*/ unsigned& iftss) const
 {
-   for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
+   for (TessellChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
       switch (CCH->type())
       {
@@ -377,7 +377,7 @@ void TessellPoly::clear() {
    _tdata.clear();
 }
 
-void TessellPoly::pushBackTChunk(TeselChunk chunk)
+void TessellPoly::pushBackTChunk(TessellChunk chunk)
 {
    _tdata.push_back(chunk);
    switch (chunk.type())
@@ -392,7 +392,7 @@ void TessellPoly::pushBackTChunk(TeselChunk chunk)
 
 //=============================================================================
 //
-TeselChunk::TeselChunk(const WordList& data, GLenum type, unsigned offset)
+TessellChunk::TessellChunk(const WordList& data, GLenum type, unsigned offset)
 {
    _size = data.size();
    _index_seq = DEBUG_NEW unsigned[_size];
@@ -412,7 +412,7 @@ TeselChunk::TeselChunk(const WordList& data, GLenum type, unsigned offset)
 //      _index_seq[i] = copy_seq[i] + offset;
 //}
 
-TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
+TessellChunk::TessellChunk(const int* /*data*/, unsigned size, unsigned offset)
 { // used for wire tesselation explicitly
    _size = size;
    _type = GL_TRIANGLE_STRIP;
@@ -427,7 +427,7 @@ TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
    }
 }
 
-TeselChunk::TeselChunk(const TeselChunk& tcobj)
+TessellChunk::TessellChunk(const TessellChunk& tcobj)
 {
    _size = tcobj._size;
    _type = tcobj._type;
@@ -435,7 +435,7 @@ TeselChunk::TeselChunk(const TeselChunk& tcobj)
    memcpy(_index_seq, tcobj._index_seq, sizeof(unsigned) * _size);
 }
 
-TeselChunk::TeselChunk(const TeselChunk& tcobj, unsigned offset)
+TessellChunk::TessellChunk(const TessellChunk& tcobj, unsigned offset)
 {
    _size = tcobj.size();
    _type = tcobj.type();
@@ -445,7 +445,7 @@ TeselChunk::TeselChunk(const TeselChunk& tcobj, unsigned offset)
       _index_seq[i] += offset;
 }
 
-TeselChunk::TeselChunk(unsigned offset)
+TessellChunk::TessellChunk(unsigned offset)
 {
    _size = 2*(offset+1);
    _type = GL_TRIANGLE_STRIP;
@@ -457,7 +457,7 @@ TeselChunk::TeselChunk(unsigned offset)
    }
 }
  
-TeselChunk::~TeselChunk()
+TessellChunk::~TessellChunk()
 {
    delete [] _index_seq;
 }
@@ -532,7 +532,7 @@ void trend::TrxBox::drctDrawFill()
 //
 void trend::TrxNcvx::drctDrawFill()
 {
-   for ( TeselChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
+   for ( TessellChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
    {
       DBGL_CALL(glBegin,CCH->type())
       for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
@@ -621,7 +621,7 @@ void trend::TrxWire::drctDrawFill()
 */
 void trend::TrxWire::Tesselate()
 {
-   const_cast<TessellPoly*>(_tdata)->pushBackTChunk(TeselChunk(_cdata, _csize, 0));
+   const_cast<TessellPoly*>(_tdata)->pushBackTChunk(TessellChunk(_cdata, _csize, 0));
    // regarding the const_cast above: unlike the TrxNcvx, which is using a ready
    // tesselation data from tdtPoly (and must not be changed here), with tdtWire
    // tesselation is trivial, and happens on the fly (during rendering) HERE!

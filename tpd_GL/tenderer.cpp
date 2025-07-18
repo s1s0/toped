@@ -55,10 +55,10 @@ trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
    }
 }
 
-void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
+void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChain* tdata, unsigned* size_index,
                              unsigned* index_offset, unsigned cpoint_index)
 {
-   for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
+   for (TessellChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
    {
       switch (TCH->type())
       {
