@@ -239,7 +239,7 @@ trend::TrendLay::TrendLay(bool rend3D):
    _num_total_strings    (          0u ),
    _rend3D               ( rend3D      )
 {
-   for (int i = lstr; i <= lnes; i++)
+   for (int i = STlstr; i < SLCT_TYPES; i++)
    {
       _asindxs[i] = 0u;
       _asobjix[i] = 0u;
@@ -390,21 +390,21 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lnes] += sobj->ssize();
-      _asobjix[lnes]++;
+      _asindxs[STlnes] += sobj->ssize();
+      _asobjix[STlnes]++;
    }
    else
    {
-      _asindxs[llps] += sobj->csize();
-      _asobjix[llps]++;
+      _asindxs[STllps] += sobj->csize();
+      _asobjix[STllps]++;
    }
 }
 
 void trend::TrendLay::registerSOBox (TrxTextSOvlBox* sobj)
 {
    _slct_data.push_back(sobj);
-   _asindxs[llps] += 4;
-   _asobjix[llps]++;
+   _asindxs[STllps] += 4;
+   _asobjix[STllps]++;
 }
 
 
@@ -413,13 +413,13 @@ void trend::TrendLay::registerSPoly (TrxSNcvx* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lnes] += sobj->ssize();
-      _asobjix[lnes]++;
+      _asindxs[STlnes] += sobj->ssize();
+      _asobjix[STlnes]++;
    }
    else
    {
-      _asindxs[llps] += sobj->csize();
-      _asobjix[llps]++;
+      _asindxs[STllps] += sobj->csize();
+      _asobjix[STllps]++;
    }
 }
 
@@ -428,21 +428,21 @@ void trend::TrendLay::registerSWire (TrxSWire* sobj)
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
    {
-      _asindxs[lnes] += sobj->ssize();
-      _asobjix[lnes]++;
+      _asindxs[STlnes] += sobj->ssize();
+      _asobjix[STlnes]++;
    }
    else
    {
-      _asindxs[lstr] += sobj->lsize();
-      _asobjix[lstr]++;
+      _asindxs[STlstr] += sobj->lsize();
+      _asobjix[STlstr]++;
    }
 }
 
 unsigned trend::TrendLay::total_slctdx()
 {
-   return ( _asindxs[lstr] +
-            _asindxs[llps] +
-            _asindxs[lnes]
+   return ( _asindxs[STlstr] +
+            _asindxs[STllps] +
+            _asindxs[STlnes]
           );
 }
 

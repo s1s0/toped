@@ -315,7 +315,7 @@ trend::TenderLay::TenderLay(bool rend3D):
    _stv_array_offset     (          0u ),
    _slctd_array_offset   (          0u )
 {
-   for (int i = lstr; i <= lnes; i++)
+   for (int i = STlstr; i < SLCT_TYPES; i++)
    {
       _sizslix[i] = NULL;
       _fstslix[i] = NULL;
@@ -393,31 +393,31 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
 
 void trend::TenderLay::collectSelected(unsigned int* slctd_array)
 {
-   unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
+   unsigned      slct_arr_size = _asindxs[STlstr] + _asindxs[STllps] + _asindxs[STlnes];
    if (0 == slct_arr_size) return;
 
    // initialise the indexing arrays of selected objects
-   if (0 < _asobjix[lstr])
+   if (0 < _asobjix[STlstr])
    {
-      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
-      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
+      _sizslix[STlstr] = DEBUG_NEW GLsizei[_asobjix[STlstr]];
+      _fstslix[STlstr] = DEBUG_NEW GLuint[_asobjix[STlstr]];
    }
-   if (0 < _asobjix[llps])
+   if (0 < _asobjix[STllps])
    {
-      _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
-      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
+      _sizslix[STllps] = DEBUG_NEW GLsizei[_asobjix[STllps]];
+      _fstslix[STllps] = DEBUG_NEW GLuint[_asobjix[STllps]];
    }
-   if (0 < _asobjix[lnes])
+   if (0 < _asobjix[STlnes])
    {
-      _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
-      _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
+      _sizslix[STlnes] = DEBUG_NEW GLsizei[_asobjix[STlnes]];
+      _fstslix[STlnes] = DEBUG_NEW GLuint[_asobjix[STlnes]];
    }
    unsigned size_sindex[3];
    unsigned index_soffset[3];
-   size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
-   index_soffset[lstr] = _slctd_array_offset;
-   index_soffset[llps] = index_soffset[lstr] + _asindxs[lstr];
-   index_soffset[lnes] = index_soffset[llps] + _asindxs[llps];
+   size_sindex[STlstr] = size_sindex[STllps] = size_sindex[STlnes] = 0u;
+   index_soffset[STlstr] = _slctd_array_offset;
+   index_soffset[STllps] = index_soffset[STlstr] + _asindxs[STlstr];
+   index_soffset[STlnes] = index_soffset[STllps] + _asindxs[STllps];
 
 
    for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
@@ -425,25 +425,25 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
       TrxSelected* cchunk = *SSL;
       switch (cchunk->type())
       {
-         case lstr : // LINES
+         case STlstr : // LINES
          {
-            assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
+            assert(_sizslix[STlstr]);
+            _fstslix[STlstr][size_sindex[STlstr]  ] = sizeof(unsigned) * index_soffset[STlstr];
+            _sizslix[STlstr][size_sindex[STlstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[STlstr]);
             break;
          }
-         case llps      : // LINE_LOOP
+         case STllps      : // LINE_LOOP
          {
-            assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = sizeof(unsigned) * index_soffset[llps];
-            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+            assert(_sizslix[STllps]);
+            _fstslix[STllps][size_sindex[STllps]  ] = sizeof(unsigned) * index_soffset[STllps];
+            _sizslix[STllps][size_sindex[STllps]++] = cchunk->sDataCopy(slctd_array, index_soffset[STllps]);
             break;
          }
-         case lnes   : // LINE_STRIP
+         case STlnes   : // LINE_STRIP
          {
-            assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = sizeof(unsigned) * index_soffset[lnes];
-            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
+            assert(_sizslix[STlnes]);
+            _fstslix[STlnes][size_sindex[STlnes]  ] = sizeof(unsigned) * index_soffset[STlnes];
+            _sizslix[STlnes][size_sindex[STlnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[STlnes]);
             break;
          }
          default: assert(false);break;
@@ -490,29 +490,29 @@ void trend::TenderLay::drawSelected()
    DBGL_CALL(glEnableClientState, GL_INDEX_ARRAY)
    DBGL_CALL(glVertexPointer, 2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
 
-   if (_asobjix[lstr] > 0)
+   if (_asobjix[STlstr] > 0)
    {
-      assert(_sizslix[lstr]);
-      assert(_fstslix[lstr]);
+      assert(_sizslix[STlstr]);
+      assert(_fstslix[STlstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
-      for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         DBGL_CALL(tpd_glDrawElements,GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
+      for (unsigned i= 0; i < _asobjix[STlstr]; i++)
+         DBGL_CALL(tpd_glDrawElements,GL_LINE_STRIP, _sizslix[STlstr][i], GL_UNSIGNED_INT, _fstslix[STlstr][i])
    }
-   if (_asobjix[llps] > 0)
+   if (_asobjix[STllps] > 0)
    {
-      assert(_sizslix[llps]);
-      assert(_fstslix[llps]);
+      assert(_sizslix[STllps]);
+      assert(_fstslix[STllps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
-      for (unsigned i= 0; i < _asobjix[llps]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
+      for (unsigned i= 0; i < _asobjix[STllps]; i++)
+         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[STllps][i], GL_UNSIGNED_INT, _fstslix[STllps][i])
    }
-   if (_asobjix[lnes] > 0)
+   if (_asobjix[STlnes] > 0)
    {
-      assert(_sizslix[lnes]);
-      assert(_fstslix[lnes]);
+      assert(_sizslix[STlnes]);
+      assert(_fstslix[STlnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
-      for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         DBGL_CALL(tpd_glDrawElements,GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
+      for (unsigned i= 0; i < _asobjix[STlnes]; i++)
+         DBGL_CALL(tpd_glDrawElements,GL_LINES, _sizslix[STlnes][i], GL_UNSIGNED_INT, _fstslix[STlnes][i])
    }
    DBGL_CALL(glDisableClientState, GL_INDEX_ARRAY)
    DBGL_CALL(glDisableClientState, GL_VERTEX_ARRAY)
@@ -535,13 +535,13 @@ void trend::TenderLay::drawTexts(layprop::DrawProperties* drawprop)
 
 trend::TenderLay::~TenderLay()
 {
-   if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
-   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
-   if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
+   if (NULL != _sizslix[STlstr]) delete [] _sizslix[STlstr];
+   if (NULL != _sizslix[STllps]) delete [] _sizslix[STllps];
+   if (NULL != _sizslix[STlnes]) delete [] _sizslix[STlnes];
 
-   if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
-   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
-   if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
+   if (NULL != _fstslix[STlstr]) delete [] _fstslix[STlstr];
+   if (NULL != _fstslix[STllps]) delete [] _fstslix[STllps];
+   if (NULL != _fstslix[STlnes]) delete [] _fstslix[STlnes];
 }
 
 

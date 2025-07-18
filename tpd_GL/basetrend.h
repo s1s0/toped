@@ -619,8 +619,8 @@ namespace trend {
          // Data related to selected objects
          SliceSelected     _slct_data;
          // index related data for selected objects
-         unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
-         unsigned          _asobjix[3]; //! array with the total number of selected objects
+         unsigned          _asindxs[SLCT_TYPES]; //! array with the total number of indexes of selected objects
+         unsigned          _asobjix[SLCT_TYPES]; //! array with the total number of selected objects
          bool              _rend3D;
    };
 

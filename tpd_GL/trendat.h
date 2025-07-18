@@ -145,10 +145,11 @@ class TessellPoly {
 
 namespace trend {
 
-   typedef enum {  lstr // line strip
-                  ,llps // line loops
-                  ,lnes // lines (individual)
-   } SlctTypes;
+   enum SlctTypes{  STlstr // line strip
+                   ,STllps // line loops
+                   ,STlnes // lines (individual)
+                   ,SLCT_TYPES
+   };
 
 
    //==========================================================================
@@ -387,7 +388,7 @@ namespace trend {
                            TrxSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxCnvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
+         virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
@@ -398,7 +399,7 @@ namespace trend {
                            TrxSBox(const int4b* pdata, const SGBitSet* slist) :
                               TrxBox(pdata), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
+         virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
@@ -417,7 +418,7 @@ namespace trend {
                            TrxSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxNcvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
+         virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
@@ -441,7 +442,7 @@ namespace trend {
                               TrxWire(pdata, psize, width, clo), TrxSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
+         virtual SlctTypes type() { return ((NULL == _slist) ? STlstr : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
@@ -458,7 +459,7 @@ namespace trend {
                               TrxTextOvlBox(box, mtrx), TrxSelected(NULL) {}
          virtual          ~TrxTextSOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return llps;}
+         virtual SlctTypes type() { return STllps;}
          virtual unsigned  ssize(){ return 4;}
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();

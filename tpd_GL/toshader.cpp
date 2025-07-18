@@ -242,29 +242,29 @@ void trend::ToshaderLay::drawSelected()
    // Set-up the offset in the binded Vertex buffer
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
 
-   if (_asobjix[lstr] > 0)
+   if (_asobjix[STlstr] > 0)
    {
-      assert(_sizslix[lstr]);
-      assert(_fstslix[lstr]);
+      assert(_sizslix[STlstr]);
+      assert(_fstslix[STlstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
-      for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
+      for (unsigned i= 0; i < _asobjix[STlstr]; i++)
+         DBGL_CALL(tpd_glDrawElements, GL_LINE_STRIP, _sizslix[STlstr][i], GL_UNSIGNED_INT, _fstslix[STlstr][i])
    }
-   if (_asobjix[llps] > 0)
+   if (_asobjix[STllps] > 0)
    {
-      assert(_sizslix[llps]);
-      assert(_fstslix[llps]);
+      assert(_sizslix[STllps]);
+      assert(_fstslix[STllps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
-      for (unsigned i= 0; i < _asobjix[llps]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
+      for (unsigned i= 0; i < _asobjix[STllps]; i++)
+         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[STllps][i], GL_UNSIGNED_INT, _fstslix[STllps][i])
    }
-   if (_asobjix[lnes] > 0)
+   if (_asobjix[STlnes] > 0)
    {
-      assert(_sizslix[lnes]);
-      assert(_fstslix[lnes]);
+      assert(_sizslix[STlnes]);
+      assert(_fstslix[STlnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
-      for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
+      for (unsigned i= 0; i < _asobjix[STlnes]; i++)
+         DBGL_CALL(tpd_glDrawElements, GL_LINES, _sizslix[STlnes][i], GL_UNSIGNED_INT, _fstslix[STlnes][i])
    }
    DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
