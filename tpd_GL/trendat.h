@@ -207,7 +207,7 @@ namespace trend {
          virtual          ~TrxNcvx(){};
          virtual void      setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual void      drctDrawFill();
-         virtual const TeselChain* tdata()              {return _tdata->tdata();}
+         const TeselChain* tdata()              {return _tdata->tdata();}
       protected:
          const TessellPoly*    _tdata; //! polygon tesselation data
    };
@@ -236,6 +236,8 @@ namespace trend {
          virtual void      drctDrawCLine();
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
+         const TessellPoly* tpdata()               {return _tdata;}
+
       protected:
                            TrxWire(unsigned, const WireWidth, bool);
          const int4b*      _ldata; //! the vertexes of the wires central line. A link to TDT wire object data
@@ -278,7 +280,6 @@ namespace trend {
          virtual void      Tesselate();
          virtual void      drctDrawFill()  {assert(false);}
          virtual void      drctDrawCLine() {assert(false);}
-         const TessellPoly* tpdata()       {return _tdata;}
    };
    
    //==========================================================================

@@ -388,8 +388,7 @@ void TessellPoly::pushBackTChunk(TeselChunk chunk)
       case GL_TRIANGLES      : _all_ftrs++   ; break;
       case GL_TRIANGLE_FAN   : _all_ftfs++   ; break;
       case GL_TRIANGLE_STRIP : _all_ftss++   ; break;
-      case GL_QUAD_STRIP     : bool WTF_is_doing_this_here = true; break;
-//      default: assert(0);break; // FIXME!
+      default: assert(0);break;
    }
 }
 
@@ -420,8 +419,7 @@ TeselChunk::TeselChunk(const WordList& data, GLenum type, unsigned offset)
 TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
 { // used for wire tesselation explicitly
    _size = size;
-//   _type = GL_TRIANGLE_STRIP;
-   _type = GL_QUAD_STRIP;
+   _type = GL_TRIANGLE_STRIP;
    assert(0 ==(size % 2));
    _index_seq = DEBUG_NEW unsigned[_size];
    word findex = 0;     // forward  index

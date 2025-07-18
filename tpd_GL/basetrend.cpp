@@ -140,9 +140,11 @@ void trend::TrendTV::registerWire (TrxWire* cobj)
          cobj->Tesselate();
          _ncvx_data.push_back(cobj);
          _alvrtxs[ncvx] += allpoints;
-         _alindxs[fqss] += allpoints;
+         _alobjix[ftrs] += cobj->tpdata()->num_ftrs();
+         _alobjix[ftfs] += cobj->tpdata()->num_ftfs();
+         _alobjix[ftss] += cobj->tpdata()->num_ftss();
+         cobj->tpdata()->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
          _alobjvx[ncvx]++;
-         _alobjix[fqss]++;
       }
       else
       {
