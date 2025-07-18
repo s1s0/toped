@@ -277,16 +277,14 @@ bool EarClipping::earClip(WordList& indexSeq)
 //
 TessellPoly::TessellPoly():
      _tdata    ()
-    ,_all_ftrs (0)
-    ,_all_ftfs (0)
-    ,_all_ftss (0)
+    ,_all_tria (0)
+    ,_all_tstr (0)
 {}
 
 TessellPoly::TessellPoly(const TessellPoly* original) :
      _tdata    ()
-    ,_all_ftrs (original->_all_ftrs)
-    ,_all_ftfs (original->_all_ftfs)
-    ,_all_ftss (original->_all_ftss)
+    ,_all_tria (original->_all_tria)
+    ,_all_tstr (original->_all_tstr)
 {
    // make a deep copy of all chains
    for(auto iter: *original->tdata()) _tdata.push_back(iter);
@@ -308,11 +306,11 @@ void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
              break;
           case 3:
              _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLES, 0));
-             _all_ftrs++;
+             _all_tria++;
              break;
           default:
              _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLE_STRIP, 0));
-             _all_ftss++;
+             _all_tstr++;
              break;
        }
        // clear vertex list
@@ -327,7 +325,7 @@ void TessellPoly::tessellate3DBox()
    _tdata.push_back(TeselChunk(/*indexSequence*/{0,1,2,3}, GL_TRIANGLE_STRIP, 0));
    _tdata.push_back(TeselChunk(/*indexSequence*/{4,5,6,7}, GL_TRIANGLE_STRIP, 0));
    _tdata.push_back(TeselChunk(/*indexSequence*/{0,4,1,5,2,6,3,7}, GL_TRIANGLE_STRIP, 0));
-   _all_ftss = 3;
+   _all_tstr = 3;
 }
 
 void TessellPoly::tessellate3DPoly(const unsigned idxShift)
@@ -345,9 +343,8 @@ void TessellPoly::tessellate3DPoly(const unsigned idxShift)
       _tdata.push_back(TeselChunk(*tchain, idxShift));
       switch (tchain->type())
       {
-         case GL_TRIANGLES      : _all_ftrs++   ; break;
-         case GL_TRIANGLE_FAN   : _all_ftfs++   ; break;
-         case GL_TRIANGLE_STRIP : _all_ftss++   ; break;
+         case GL_TRIANGLES      : _all_tria++   ; break;
+         case GL_TRIANGLE_STRIP : _all_tstr++   ; break;
          default: assert(0);break;
       }
       tchain++;
@@ -357,16 +354,16 @@ void TessellPoly::tessellate3DPoly(const unsigned idxShift)
    // rectangles which can be treated as wires (i.e.) with the same width
    // the function below shall generate a single GL_TRIANGLE_STRIP sequence
    _tdata.push_back(TeselChunk(idxShift));
-   _all_ftss++;
+   _all_tstr++;
 }
 
-void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
+void TessellPoly::num_indexs(unsigned& iftrs, /*unsigned& iftfs,*/ unsigned& iftss) const
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
       switch (CCH->type())
       {
-         case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
+//         case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
          case GL_TRIANGLE_STRIP : iftss += CCH->size(); break;
          case GL_TRIANGLES      : iftrs += CCH->size(); break;
          default: assert(0);break;
@@ -376,7 +373,7 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
 
 void TessellPoly::clear() {
    // make sure that nothing's left from possible previous tessellation
-   _all_ftfs = _all_ftrs = _all_ftss = 0;
+   _all_tria = _all_tstr = 0;
    _tdata.clear();
 }
 
@@ -385,9 +382,8 @@ void TessellPoly::pushBackTChunk(TeselChunk chunk)
    _tdata.push_back(chunk);
    switch (chunk.type())
    {
-      case GL_TRIANGLES      : _all_ftrs++   ; break;
-      case GL_TRIANGLE_FAN   : _all_ftfs++   ; break;
-      case GL_TRIANGLE_STRIP : _all_ftss++   ; break;
+      case GL_TRIANGLES      : _all_tria++   ; break;
+      case GL_TRIANGLE_STRIP : _all_tstr++   ; break;
       default: assert(0);break;
    }
 }

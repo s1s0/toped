@@ -128,19 +128,17 @@ class TessellPoly {
       void              pushBackTChunk(TeselChunk chunk);
       void              tessellate3DBox();
       void              tessellate3DPoly(const unsigned idxShift);
-      bool              valid() const    { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
-      word              num_ftrs() const { return _all_ftrs;}
-      word              num_ftfs() const { return _all_ftfs;}
-      word              num_ftss() const { return _all_ftss;}
+      bool              valid() const    { return (0 < (_all_tria + _all_tstr));}
+      word              num_tria() const { return _all_tria;}
+      word              num_tstr() const { return _all_tstr;}
       const TeselChain* tdata() const    { return &_tdata;  }
-      void              num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const;
+      void              num_indexs(unsigned& iftrs, unsigned& iftss) const;
       void              clear();
    //====================================================================
    private:
       TeselChain        _tdata;
-      word              _all_ftrs;// GL_TRIANGLES
-      word              _all_ftfs;// GL_TRIANGLE_FAN
-      word              _all_ftss;// GL_TRIANGLE_STRIP
+      word              _all_tria;// GL_TRIANGLES
+      word              _all_tstr;// GL_TRIANGLE_STRIP
 
 };
 

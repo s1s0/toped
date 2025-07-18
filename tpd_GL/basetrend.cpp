@@ -45,15 +45,15 @@ trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
    _filled              ( filled          ),
    _reusable            ( reusable        )
 {
-   for (int i = fqss; i <= ftss; i++)
+   for (int i = ITfqss; i <= ITtstr; i++)
    {
-      _alobjix[i] = 0u;
-      _alindxs[i] = 0u;
+      _iobjnum[i] = 0u;
+      _indxnum[i] = 0u;
    }
-   for (int i = cont; i <= ncvx; i++)
+   for (int i = OTcntr; i < OBJ_TYPES; i++)
    {
-      _alobjvx[i] = 0u;
-      _alvrtxs[i] = 0u;
+      _vobjnum[i] = 0u;
+      _vrtxnum[i] = 0u;
    }
 }
 
@@ -63,14 +63,14 @@ void trend::TrendTV::registerBox (TrxCnvx* cobj)
    if (_filled)
    {
       _cnvx_data.push_back(cobj);
-      _alvrtxs[cnvx] += allpoints;
-      _alobjvx[cnvx]++;
+      _vrtxnum[OTcnvx] += allpoints;
+      _vobjnum[OTcnvx]++;
    }
    else
    {
       _cont_data.push_back(cobj);
-      _alvrtxs[cont] += allpoints;
-      _alobjvx[cont]++;
+      _vrtxnum[OTcntr] += allpoints;
+      _vobjnum[OTcntr]++;
    }
 }
 
@@ -82,12 +82,11 @@ void trend::TrendTV::register3DBox(Trx3DBox* cobj)
    cobj->setTeselData(tdata);
 
    _ncvx_data.push_back(cobj);
-   _alvrtxs[ncvx] += 2 * cobj->csize();
-   _alobjix[ftrs] += tdata->num_ftrs();
-   _alobjix[ftfs] += tdata->num_ftfs();
-   _alobjix[ftss] += tdata->num_ftss();
-   tdata->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-   _alobjvx[ncvx]++;
+   _vrtxnum[OTncvx] += 2 * cobj->csize();
+   _iobjnum[ITtria] += tdata->num_tria();
+   _iobjnum[ITtstr] += tdata->num_tstr();
+   tdata->num_indexs(_indxnum[ITtria], _indxnum[ITtstr]);
+   _vobjnum[OTncvx]++;
 }
 
 void trend::TrendTV::registerPoly (TrxNcvx* cobj, const TessellPoly* tchain)
@@ -97,18 +96,17 @@ void trend::TrendTV::registerPoly (TrxNcvx* cobj, const TessellPoly* tchain)
    {
       cobj->setTeselData(tchain);
       _ncvx_data.push_back(cobj);
-      _alvrtxs[ncvx] += allpoints;
-      _alobjix[ftrs] += tchain->num_ftrs();
-      _alobjix[ftfs] += tchain->num_ftfs();
-      _alobjix[ftss] += tchain->num_ftss();
-      tchain->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-      _alobjvx[ncvx]++;
+      _vrtxnum[OTncvx] += allpoints;
+      _iobjnum[ITtria] += tchain->num_tria();
+      _iobjnum[ITtstr] += tchain->num_tstr();
+      tchain->num_indexs(_indxnum[ITtria], _indxnum[ITtstr]);
+      _vobjnum[OTncvx]++;
    }
    else
    {
       _cont_data.push_back(cobj);
-      _alvrtxs[cont] += allpoints;
-      _alobjvx[cont]++;
+      _vrtxnum[OTcntr] += allpoints;
+      _vobjnum[OTcntr]++;
    }
 }
 
@@ -119,38 +117,37 @@ void trend::TrendTV::register3DPoly(Trx3DPoly* cobj, const TessellPoly* tchain)
    cobj->setTeselData(tdata);
 
    _ncvx_data.push_back(cobj);
-   _alvrtxs[ncvx] += 2 * cobj->csize();
-   _alobjix[ftrs] += tdata->num_ftrs();
-   _alobjix[ftfs] += tdata->num_ftfs();
-   _alobjix[ftss] += tdata->num_ftss();
-   tdata->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-   _alobjvx[ncvx]++;
+   _vrtxnum[OTncvx] += 2 * cobj->csize();
+   _iobjnum[ITtria] += tdata->num_tria();
+//   _alobjix[ftfs] += tdata->num_ftfs();
+   _iobjnum[ITtstr] += tdata->num_tstr();
+   tdata->num_indexs(_indxnum[ITtria], /*_alindxs[ftfs],*/ _indxnum[ITtstr]);
+   _vobjnum[OTncvx]++;
 }
 
 void trend::TrendTV::registerWire (TrxWire* cobj)
 {
    unsigned allpoints = cobj->csize();
    _line_data.push_back(cobj);
-   _alvrtxs[line] += cobj->lsize();
-   _alobjvx[line]++;
+   _vrtxnum[OTline] += cobj->lsize();
+   _vobjnum[OTline]++;
    if ( !cobj->center_line_only() )
    {
       if (_filled)
       {
          cobj->Tesselate();
          _ncvx_data.push_back(cobj);
-         _alvrtxs[ncvx] += allpoints;
-         _alobjix[ftrs] += cobj->tpdata()->num_ftrs();
-         _alobjix[ftfs] += cobj->tpdata()->num_ftfs();
-         _alobjix[ftss] += cobj->tpdata()->num_ftss();
-         cobj->tpdata()->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-         _alobjvx[ncvx]++;
+         _vrtxnum[OTncvx] += allpoints;
+         _iobjnum[ITtria] += cobj->tpdata()->num_tria();
+         _iobjnum[ITtstr] += cobj->tpdata()->num_tstr();
+         cobj->tpdata()->num_indexs(_indxnum[ITtria], _indxnum[ITtstr]);
+         _vobjnum[OTncvx]++;
       }
       else
       {
          _cont_data.push_back(cobj);
-         _alobjvx[cont] ++;
-         _alvrtxs[cont] += allpoints;
+         _vobjnum[OTcntr] ++;
+         _vrtxnum[OTcntr] += allpoints;
       }
    }
 }
@@ -161,12 +158,11 @@ void trend::TrendTV::register3DWire(Trx3DWire* cobj)
 //   unsigned allpoints = cobj->csize();
    _ncvx_data.push_back(cobj);
    
-   _alvrtxs[ncvx] += 2 * cobj->csize();
-   _alobjix[ftrs] += cobj->tpdata()->num_ftrs();
-   _alobjix[ftfs] += cobj->tpdata()->num_ftfs();
-   _alobjix[ftss] += cobj->tpdata()->num_ftss();
-   cobj->tpdata()->num_indexs(_alindxs[ftrs], _alindxs[ftfs], _alindxs[ftss]);
-   _alobjvx[ncvx]++;
+   _vrtxnum[OTncvx] += 2 * cobj->csize();
+   _iobjnum[ITtria] += cobj->tpdata()->num_tria();
+   _iobjnum[ITtstr] += cobj->tpdata()->num_tstr();
+   cobj->tpdata()->num_indexs(_indxnum[ITtria], _indxnum[ITtstr]);
+   _vobjnum[OTncvx]++;
 }
 
 
@@ -177,26 +173,26 @@ void trend::TrendTV::registerText (TrxText* cobj, TrxTextOvlBox* oobj)
    if (NULL != oobj)
    {
       _txto_data.push_back(oobj);
-      _alvrtxs[cont] += 4;
-      _alobjvx[cont]++;
+      _vrtxnum[OTcntr] += 4;
+      _vobjnum[OTcntr]++;
    }
 }
 
 unsigned trend::TrendTV::num_total_points()
 {
-   return ( _alvrtxs[cont] +
-            _alvrtxs[line] +
-            _alvrtxs[cnvx] +
-            _alvrtxs[ncvx]
+   return ( _vrtxnum[OTcntr] +
+            _vrtxnum[OTline] +
+            _vrtxnum[OTcnvx] +
+            _vrtxnum[OTncvx]
           );
 }
 
 unsigned trend::TrendTV::num_total_indexs()
 {
-   return ( _alindxs[fqss] +
-            _alindxs[ftrs] +
-            _alindxs[ftfs] +
-            _alindxs[ftss]
+   return ( _indxnum[ITfqss] +
+            _indxnum[ITtria] +
+            _indxnum[ITftfs] +
+            _indxnum[ITtstr]
           );
 }
 

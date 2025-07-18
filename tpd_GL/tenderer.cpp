@@ -43,12 +43,12 @@ trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   )
 {
-   for (int i = fqss; i <= ftss; i++)
+   for (int i = ITfqss; i <= ITtstr; i++)
    {
       _sizesix[i] = NULL;
       _firstix[i] = NULL;
    }
-   for (int i = cont; i <= ncvx; i++)
+   for (int i = OTcntr; i <= OTncvx; i++)
    {
       _sizesvx[i] = NULL;
       _firstvx[i] = NULL;
@@ -64,38 +64,38 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
       {
          case GL_QUAD_STRIP     :
          {
-            assert(_sizesix[fqss]);
-            _firstix[fqss][size_index[fqss]  ] = sizeof(unsigned) * index_offset[fqss];
-            _sizesix[fqss][size_index[fqss]++] = TCH->size();
+            assert(_sizesix[ITfqss]);
+            _firstix[ITfqss][size_index[ITfqss]  ] = sizeof(unsigned) * index_offset[ITfqss];
+            _sizesix[ITfqss][size_index[ITfqss]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ITfqss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLES      :
          {
-            assert(_sizesix[ftrs]);
-            _firstix[ftrs][size_index[ftrs]  ] = sizeof(unsigned) * index_offset[ftrs];
-            _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
+            assert(_sizesix[ITtria]);
+            _firstix[ITtria][size_index[ITtria]  ] = sizeof(unsigned) * index_offset[ITtria];
+            _sizesix[ITtria][size_index[ITtria]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ITtria]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_FAN   :
          {
-            assert(_sizesix[ftfs]);
-            _firstix[ftfs][size_index[ftfs]  ] = sizeof(unsigned) * index_offset[ftfs];
-            _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
+            assert(_sizesix[ITftfs]);
+            _firstix[ITftfs][size_index[ITftfs]  ] = sizeof(unsigned) * index_offset[ITftfs];
+            _sizesix[ITftfs][size_index[ITftfs]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ITftfs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_STRIP :
          {
-            assert(_sizesix[ftss]);
-            _firstix[ftss][size_index[ftss]  ] = sizeof(unsigned) * index_offset[ftss];
-            _sizesix[ftss][size_index[ftss]++] = TCH->size();
+            assert(_sizesix[ITtstr]);
+            _firstix[ITtstr][size_index[ITtstr]  ] = sizeof(unsigned) * index_offset[ITtstr];
+            _sizesix[ITtstr][size_index[ITtstr]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
+               index_array[index_offset[ITtstr]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          default: assert(0);break;
@@ -105,77 +105,77 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
 
 void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
-   unsigned line_arr_size = 2 * _alvrtxs[line];
-   unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
-   unsigned cont_arr_size = 2 * _alvrtxs[cont];
-   unsigned poly_arr_size = 2 * _alvrtxs[ncvx];
+   unsigned line_arr_size = 2 * _vrtxnum[OTline]; // x2 to accomodate X & Y coordinate
+   unsigned fqus_arr_size = 2 * _vrtxnum[OTcnvx]; // x2 to accomodate X & Y coordinate
+   unsigned cont_arr_size = 2 * _vrtxnum[OTcntr]; // x2 to accomodate X & Y coordinate
+   unsigned poly_arr_size = 2 * _vrtxnum[OTncvx]; // x2 to accomodate X & Y coordinate
    // initialise the indexing
    unsigned pntindx = 0;
 
-   if  (_alobjvx[line] > 0)
+   if  (_vobjnum[OTline] > 0)
    {// collect all central lines of the wires
       unsigned  szindx  = 0;
-      _firstvx[line] = DEBUG_NEW int[_alobjvx[line]];
-      _sizesvx[line] = DEBUG_NEW int[_alobjvx[line]];
+      _firstvx[OTline] = DEBUG_NEW int[_vobjnum[OTline]];
+      _sizesvx[OTline] = DEBUG_NEW int[_vobjnum[OTline]];
       for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         _firstvx[line][szindx  ] = pntindx/2;
-         _sizesvx[line][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+         _firstvx[OTline][szindx  ] = pntindx/2;
+         _sizesvx[OTline][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size);
-      assert(szindx  == _alobjvx[line]);
+      assert(szindx  == _vobjnum[OTline]);
    }
 
-   if  (_alobjvx[cnvx] > 0)
+   if  (_vobjnum[OTcnvx] > 0)
    {// collect all convex polygons
       unsigned  szindx  = 0;
-      _firstvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
-      _sizesvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
+      _firstvx[OTcnvx] = DEBUG_NEW int[_vobjnum[OTcnvx]];
+      _sizesvx[OTcnvx] = DEBUG_NEW int[_vobjnum[OTcnvx]];
       for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         _firstvx[cnvx][szindx  ] = pntindx/2;
-         _sizesvx[cnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+         _firstvx[OTcnvx][szindx  ] = pntindx/2;
+         _sizesvx[OTcnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size + fqus_arr_size);
-      assert(szindx  == _alobjvx[cnvx]);
+      assert(szindx  == _vobjnum[OTcnvx]);
    }
 
-   if  (_alobjvx[ncvx] > 0)
+   if  (_vobjnum[OTncvx] > 0)
    {// collect all non-convex polygons
       unsigned  szindx  = 0;
-      _firstvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
-      _sizesvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
+      _firstvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
+      _sizesvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
       if (NULL != index_array)
       {
-         assert(_alobjix[fqss] + _alobjix[ftrs] + _alobjix[ftfs] + _alobjix[ftss]);
-         if (0 < _alobjix[fqss])
+         assert(_iobjnum[ITfqss] + _iobjnum[ITtria] + _iobjnum[ITftfs] + _iobjnum[ITtstr]);
+         if (0 < _iobjnum[ITfqss])
          {
-            _sizesix[fqss] = DEBUG_NEW GLsizei[_alobjix[fqss]];
-            _firstix[fqss] = DEBUG_NEW GLuint[_alobjix[fqss]];
+            _sizesix[ITfqss] = DEBUG_NEW GLsizei[_iobjnum[ITfqss]];
+            _firstix[ITfqss] = DEBUG_NEW GLuint[_iobjnum[ITfqss]];
          }
-         if (0 < _alobjix[ftrs])
+         if (0 < _iobjnum[ITtria])
          {
-            _sizesix[ftrs] = DEBUG_NEW GLsizei[_alobjix[ftrs]];
-            _firstix[ftrs] = DEBUG_NEW GLuint[_alobjix[ftrs]];
+            _sizesix[ITtria] = DEBUG_NEW GLsizei[_iobjnum[ITtria]];
+            _firstix[ITtria] = DEBUG_NEW GLuint[_iobjnum[ITtria]];
          }
-         if (0 < _alobjix[ftfs])
+         if (0 < _iobjnum[ITftfs])
          {
-            _sizesix[ftfs] = DEBUG_NEW GLsizei[_alobjix[ftfs]];
-            _firstix[ftfs] = DEBUG_NEW GLuint[_alobjix[ftfs]];
+            _sizesix[ITftfs] = DEBUG_NEW GLsizei[_iobjnum[ITftfs]];
+            _firstix[ITftfs] = DEBUG_NEW GLuint[_iobjnum[ITftfs]];
          }
-         if (0 < _alobjix[ftss])
+         if (0 < _iobjnum[ITtstr])
          {
-            _sizesix[ftss] = DEBUG_NEW GLsizei[_alobjix[ftss]];
-            _firstix[ftss] = DEBUG_NEW GLuint[_alobjix[ftss]];
+            _sizesix[ITtstr] = DEBUG_NEW GLsizei[_iobjnum[ITtstr]];
+            _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
          }
       }
       unsigned size_index[4];
       unsigned index_offset[4];
-      size_index[fqss] = size_index[ftrs] = size_index[ftfs] = size_index[ftss] = 0u;
-      index_offset[fqss] = _index_array_offset;
-      index_offset[ftrs] = index_offset[fqss] + _alindxs[fqss];
-      index_offset[ftfs] = index_offset[ftrs] + _alindxs[ftrs];
-      index_offset[ftss] = index_offset[ftfs] + _alindxs[ftfs];
+      size_index[ITfqss] = size_index[ITtria] = size_index[ITftfs] = size_index[ITtstr] = 0u;
+      index_offset[ITfqss] = _index_array_offset;
+      index_offset[ITtria] = index_offset[ITfqss] + _indxnum[ITfqss];
+      index_offset[ITftfs] = index_offset[ITtria] + _indxnum[ITtria];
+      index_offset[ITtstr] = index_offset[ITftfs] + _indxnum[ITftfs];
       for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
 
@@ -186,40 +186,40 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
                            index_offset    ,
                            pntindx/2
                          );
-         _firstvx[ncvx][szindx  ] = pntindx/2;
-         _sizesvx[ncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+         _firstvx[OTncvx][szindx  ] = pntindx/2;
+         _sizesvx[OTncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
 
       }
-      assert(size_index[fqss] == _alobjix[fqss]);
-      assert(size_index[ftrs] == _alobjix[ftrs]);
-      assert(size_index[ftfs] == _alobjix[ftfs]);
-      assert(size_index[ftss] == _alobjix[ftss]);
-      assert(index_offset[fqss] == (_index_array_offset + _alindxs[fqss]));
-      assert(index_offset[ftrs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs]));
-      assert(index_offset[ftfs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] ));
-      assert(index_offset[ftss] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] + _alindxs[ftss] ));
+      assert(size_index[ITfqss] == _iobjnum[ITfqss]);
+      assert(size_index[ITtria] == _iobjnum[ITtria]);
+      assert(size_index[ITftfs] == _iobjnum[ITftfs]);
+      assert(size_index[ITtstr] == _iobjnum[ITtstr]);
+      assert(index_offset[ITfqss] == (_index_array_offset + _indxnum[ITfqss]));
+      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria]));
+      assert(index_offset[ITftfs] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria] + _indxnum[ITftfs] ));
+      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria] + _indxnum[ITftfs] + _indxnum[ITtstr] ));
       assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
-      assert(szindx  == _alobjvx[ncvx]);
+      assert(szindx  == _vobjnum[OTncvx]);
    }
 
-   if  (_alobjvx[cont] > 0)
+   if  (_vobjnum[OTcntr] > 0)
    {// collect all contours (only non-filled objects here)
       unsigned  szindx  = 0;
-      _firstvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
-      _sizesvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
+      _firstvx[OTcntr] = DEBUG_NEW int[_vobjnum[OTcntr]];
+      _sizesvx[OTcntr] = DEBUG_NEW int[_vobjnum[OTcntr]];
       for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         _firstvx[cont][szindx  ] = pntindx/2;
-         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+         _firstvx[OTcntr][szindx  ] = pntindx/2;
+         _sizesvx[OTcntr][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       //... and text overlapping boxes
       for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
-         _firstvx[cont][szindx  ] = pntindx/2;
-         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+         _firstvx[OTcntr][szindx  ] = pntindx/2;
+         _sizesvx[OTcntr][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
       }
       assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
-      assert(szindx  == _alobjvx[cont] );
+      assert(szindx  == _vobjnum[OTcntr] );
    }
 }
 
@@ -234,67 +234,67 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
    // Set-up the offset in the binded Vertex buffer
    glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
-   if  (_alobjvx[line] > 0)
+   if  (_vobjnum[OTline] > 0)
    {// Draw the wire center lines
-      assert(_firstvx[line]);
-      assert(_sizesvx[line]);
-      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+      assert(_firstvx[OTline]);
+      assert(_sizesvx[OTline]);
+      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[OTline], _sizesvx[OTline], _vobjnum[OTline]);
    }
-   if  (_alobjvx[cnvx] > 0)
+   if  (_vobjnum[OTcnvx] > 0)
    {// Draw convex polygons
-      assert(_firstvx[cnvx]);
-      assert(_sizesvx[cnvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
-      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+      assert(_firstvx[OTcnvx]);
+      assert(_sizesvx[OTcnvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[OTcnvx], _sizesvx[OTcnvx], _vobjnum[OTcnvx]);
+      glMultiDrawArrays(GL_QUADS, _firstvx[OTcnvx], _sizesvx[OTcnvx], _vobjnum[OTcnvx]);
    }
-   if  (_alobjvx[ncvx] > 0)
+   if  (_vobjnum[OTncvx] > 0)
    {// Draw non-convex polygons
       glEnableClientState(GL_INDEX_ARRAY);
-      assert(_firstvx[ncvx]);
-      assert(_sizesvx[ncvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
-      if (_alobjix[fqss] > 0)
+      assert(_firstvx[OTncvx]);
+      assert(_sizesvx[OTncvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[OTncvx], _sizesvx[OTncvx], _vobjnum[OTncvx]);
+      if (_iobjnum[ITfqss] > 0)
       {
-         assert(_sizesix[fqss]);
-         assert(_firstix[fqss]);
+         assert(_sizesix[ITfqss]);
+         assert(_firstix[ITfqss]);
          // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
          // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
          // Besides - everybody is saying that there is no speed benefit from this operation
          //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
-         for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, _firstix[fqss][i])
+         for (unsigned i= 0; i < _iobjnum[ITfqss]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[ITfqss][i], GL_UNSIGNED_INT, _firstix[ITfqss][i])
       }
-      if (_alobjix[ftrs] > 0)
+      if (_iobjnum[ITtria] > 0)
       {
-         assert(_sizesix[ftrs]);
-         assert(_firstix[ftrs]);
+         assert(_sizesix[ITtria]);
+         assert(_firstix[ITtria]);
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
-         for (unsigned i= 0; i < _alobjix[ftrs]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, _firstix[ftrs][i])
+         for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
       }
-      if (_alobjix[ftfs] > 0)
+      if (_iobjnum[ITftfs] > 0)
       {
-         assert(_sizesix[ftfs]);
-         assert(_firstix[ftfs]);
+         assert(_sizesix[ITftfs]);
+         assert(_firstix[ITftfs]);
          //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
-         for (unsigned i= 0; i < _alobjix[ftfs]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, _firstix[ftfs][i])
+         for (unsigned i= 0; i < _iobjnum[ITftfs]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ITftfs][i], GL_UNSIGNED_INT, _firstix[ITftfs][i])
       }
-      if (_alobjix[ftss] > 0)
+      if (_iobjnum[ITtstr] > 0)
       {
-         assert(_sizesix[ftss]);
-         assert(_firstix[ftss]);
+         assert(_sizesix[ITtstr]);
+         assert(_firstix[ITtstr]);
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
-         for (unsigned i= 0; i < _alobjix[ftss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, _firstix[ftss][i])
+         for (unsigned i= 0; i < _iobjnum[ITtstr]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, _firstix[ITtstr][i])
       }
       glDisableClientState(GL_INDEX_ARRAY);
    }
-   if (_alobjvx[cont] > 0)
+   if (_vobjnum[OTcntr] > 0)
    {// Draw the remaining non-filled shapes of any kind
-      assert(_firstvx[cont]);
-      assert(_sizesvx[cont]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
+      assert(_firstvx[OTcntr]);
+      assert(_sizesvx[OTcntr]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[OTcntr], _sizesvx[OTcntr], _vobjnum[OTcntr]);
    }
    // Switch the vertex buffers OFF in the openGL engine ...
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -322,25 +322,25 @@ void trend::TenderTV::drawTexts(layprop::DrawProperties* drawprop)
 
 trend::TenderTV::~TenderTV()
 {
-   if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
-   if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
-   if (NULL != _sizesvx[cnvx]) delete [] _sizesvx[cnvx];
-   if (NULL != _sizesvx[ncvx]) delete [] _sizesvx[ncvx];
+   if (NULL != _sizesvx[OTcntr]) delete [] _sizesvx[OTcntr];
+   if (NULL != _sizesvx[OTline]) delete [] _sizesvx[OTline];
+   if (NULL != _sizesvx[OTcnvx]) delete [] _sizesvx[OTcnvx];
+   if (NULL != _sizesvx[OTncvx]) delete [] _sizesvx[OTncvx];
 
-   if (NULL != _sizesix[fqss]) delete [] _sizesix[fqss];
-   if (NULL != _sizesix[ftrs]) delete [] _sizesix[ftrs];
-   if (NULL != _sizesix[ftfs]) delete [] _sizesix[ftfs];
-   if (NULL != _sizesix[ftss]) delete [] _sizesix[ftss];
+   if (NULL != _sizesix[ITfqss]) delete [] _sizesix[ITfqss];
+   if (NULL != _sizesix[ITtria]) delete [] _sizesix[ITtria];
+   if (NULL != _sizesix[ITftfs]) delete [] _sizesix[ITftfs];
+   if (NULL != _sizesix[ITtstr]) delete [] _sizesix[ITtstr];
 
-   if (NULL != _firstvx[cont]) delete [] _firstvx[cont];
-   if (NULL != _firstvx[line]) delete [] _firstvx[line];
-   if (NULL != _firstvx[cnvx]) delete [] _firstvx[cnvx];
-   if (NULL != _firstvx[ncvx]) delete [] _firstvx[ncvx];
+   if (NULL != _firstvx[OTcntr]) delete [] _firstvx[OTcntr];
+   if (NULL != _firstvx[OTline]) delete [] _firstvx[OTline];
+   if (NULL != _firstvx[OTcnvx]) delete [] _firstvx[OTcnvx];
+   if (NULL != _firstvx[OTncvx]) delete [] _firstvx[OTncvx];
 
-   if (NULL != _firstix[fqss]) delete [] _firstix[fqss];
-   if (NULL != _firstix[ftrs]) delete [] _firstix[ftrs];
-   if (NULL != _firstix[ftfs]) delete [] _firstix[ftfs];
-   if (NULL != _firstix[ftss]) delete [] _firstix[ftss];
+   if (NULL != _firstix[ITfqss]) delete [] _firstix[ITfqss];
+   if (NULL != _firstix[ITtria]) delete [] _firstix[ITtria];
+   if (NULL != _firstix[ITftfs]) delete [] _firstix[ITftfs];
+   if (NULL != _firstix[ITtstr]) delete [] _firstix[ITtstr];
 }
 
 //=============================================================================

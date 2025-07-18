@@ -42,14 +42,14 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    glMultMatrixd(_refCell->translation());
    setAlpha(drawprop);
    // ... and here we go ...
-   if  (_alobjvx[line] > 0)
+   if  (_vobjnum[OTline] > 0)
    {// Draw the wire centre lines
       for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
       {
          (*CSH)->drctDrawCLine();
       }
    }
-   if  (_alobjvx[cnvx] > 0)
+   if  (_vobjnum[OTcnvx] > 0)
    {// Draw convex polygons
       for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
       {
@@ -57,7 +57,7 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
          (*CSH)->drctDrawFill();
       }
    }
-   if  (_alobjvx[ncvx] > 0)
+   if  (_vobjnum[OTncvx] > 0)
    {// Draw non-convex polygons
       for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
       {
@@ -65,7 +65,7 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
          (*CSH)->drctDrawFill();
       }
    }
-   if (_alobjvx[cont] > 0)
+   if (_vobjnum[OTcntr] > 0)
    {// Draw the remaining non-filled shapes of any kind
       for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
       {

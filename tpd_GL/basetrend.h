@@ -224,7 +224,12 @@ namespace trend {
       the memory consumption during the first processing step (traversing and
       sorting) is concentrated in this class and naturally most of the TrendBase
       data processing happens in the methods of this class. The input data stream
-      is sorted in 4 "bins" in a form of Tender object lists. The corresponding
+      is sorted in 4 "bins" in a form of Tender object lists.
+      - cont: holding contours of all abjects
+      - line: holding central lines of wires only
+      - cnvx: holding all convex polygons (box type only)
+      - ncvx: non-convex polygons
+      The corresponding
       objects are created by register* methods. Vertex or index data is not
       copied during this process, instead only data references are stored. The
       exception here are the wire objects which generate their contour data
@@ -233,16 +238,16 @@ namespace trend {
       object which also goes to the line bin because of its central line.
     
       \verbatim
-      ---------------------------------------------------------------
-      | TrendBase |    not filled      |        filled      |        |
-      |   data    |--------------------|--------------------|  enum  |
-      | (vertexes)|  box | poly | wire |  box | poly | wire |        |
-      |-----------|------|------|------|------|------|------|--------|
-      | contour   |  x   |  x   |  x   |      |      |      |  cont  |
-      | line      |      |      |  x   |      |      |  x   |  line  |
-      | convex    |      |      |      |  x   |      |      |  cnvx  |
-      | non-convex|      |      |      |      |  x   |  x   |  ncvx  |
-      --------------------------------------------------------------
+      -----------------------------------------------------------------
+      | TrendBase |    not filled      |        filled      |          |
+      |   data    |--------------------|--------------------|  enum    |
+      | (vertexes)|  box | poly | wire |  box | poly | wire |          |
+      |-----------|------|------|------|------|------|------|----------|
+      | contour   |  x   |  x   |  x   |      |      |      |  OTcont  |
+      | line      |      |      |  x   |      |      |  x   |  OTline  |
+      | convex    |      |      |      |  x   |      |      |  OTcnvx  |
+      | non-convex|      |      |      |      |  x   |  x   |  OTncvx  |
+      ----------------------------------------------------------------
       \endverbatim
 
       In case of 3D rendering however the bins described above are not necessary.
@@ -269,7 +274,7 @@ namespace trend {
       appropriate locations of the corresponding buffers and to draw the appropriate
       portions of the data using the appropriate openGL functions. This data is
       stored in the class fields in the form of four arrays with size of four each.
-      One position per bin is allocated in each of those arrays (_alvrtxs[4],
+      One position per bin is allocated in each of those arrays (_vrtxnum[4],
       _alobjvx[4], _sizesvx[4], _firstvx[4]) indicating the overall number of
       vertexes, the total number of objects, the size of each object in terms of
       vertexes, and the offset of each first object vertex in the buffer
@@ -277,9 +282,22 @@ namespace trend {
       If the non-convex data is to be filled, it is sorted further in another four
       index bins. The data statistics is also split further into four to accommodate
       that additional level of detail. This is necessary because the polygon
-      tesselation generates 3 types of index data. In addition the wire tesselation
+      tesselation generates 2 types of index data. In addition the wire tesselation
       is using yet another type of index data and all the above has to be sorted and
-      stored. The array fields _alindxs[4], _alobjix[4], _sizesix[4], _firstix[4]
+      stored. The array fields
+    
+    // vertex related data
+    unsigned          _vrtxnum[4]; //! array with the total number of vertexes
+    unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
+    // index related data for non-convex polygons
+    unsigned          _alindxs[4]; //! array with the total number of indexes
+    unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
+
+      - _alindxs[4] - All indexes
+      - _alobjix[4] - All index sequences
+      - _sizesix[4] - array with number of indexes per object
+      - _firstix[4] - array with first indexes of every object
+      .
       hold a position for each of the four index bins. They represent the overall
       amount of indexes, the total number of indexed objects, the size of each
       object in terms of indexes and the offset of each first object index in the
@@ -290,16 +308,16 @@ namespace trend {
       the indexing.
 
       \verbatim
-      -----------------------------------------------------------------
-      | Tesselation    | non convex object  |        |      openGL      |
-      |         data   |--------------------|  enum  |     drawing      |
-      |   (indexes)    |  polygon |  wire   |        |      method      |
-      |----------------|----------|---------|--------|------------------|
-      | triangles      |     x    |         |  ftrs  | GL_TRIANGLES     |
-      | triangle fan   |     x    |         |  ftfs  | GL_TRIANGLE_FAN  |
-      | triangle strip |     x    |         |  ftss  | GL_TRIANGLE_STRIP|
-      | quadratic strip|          |    x    |  fqss  | GL_QUAD_STRIP    |
-      -----------------------------------------------------------------
+      ------------------------------------------------------------------
+      | Tesselation    | non convex object  |          |      openGL      |
+      |         data   |--------------------|  enum    |     drawing      |
+      |   (indexes)    |  polygon |  wire   |          |      method      |
+      |----------------|----------|---------|----------|------------------|
+      | triangles      |     x    |         |  ITtria  | GL_TRIANGLES     |
+      | triangle fan   |     x    |         |  ITftfs  | GL_TRIANGLE_FAN  |
+      | triangle strip |     x    |         |  ITtstr  | GL_TRIANGLE_STRIP|
+      | quadratic strip|          |    x    |  ITfqss  | GL_QUAD_STRIP    |
+      -------------------------------------------------------------------
       \endverbatim
 
       The collect() method implements the second step of the processing namely
@@ -357,8 +375,16 @@ namespace trend {
    */
    class TrendTV {
       public:
-         typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
-         typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
+         enum ObjectTypes {OTcntr,  // countour object
+                           OTline,  // line object
+                           OTcnvx,  // convex object
+                           OTncvx,  // non-convex object, requires indexation
+                           OBJ_TYPES};
+         enum IndexTypes  {ITfqss,
+                           ITtria,  // triangles
+                           ITftfs,
+                           ITtstr,  // triangle strips
+                           IDX_TYPES};
                            TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
          void              registerBox   (TrxCnvx*);
@@ -392,11 +418,11 @@ namespace trend {
          TrendStrings      _text_data; //! Text (strings)
          RefTxtList        _txto_data; //! Text overlapping boxes
          // vertex related data
-         unsigned          _alvrtxs[4]; //! array with the total number of vertexes
-         unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
+         unsigned          _vrtxnum[OBJ_TYPES]; //! array with the total number of vertexes
+         unsigned          _vobjnum[OBJ_TYPES]; //! array with the total number of objects that will be drawn with vertex related functions
          // index related data for non-convex polygons
-         unsigned          _alindxs[4]; //! array with the total number of indexes
-         unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
+         unsigned          _indxnum[IDX_TYPES]; //! array with the total number of indexes
+         unsigned          _iobjnum[IDX_TYPES]; //! array with the total number of objects that will be drawn with index related functions
          //
          unsigned          _num_total_strings;
          bool              _filled;

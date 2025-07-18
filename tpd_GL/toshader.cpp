@@ -98,79 +98,79 @@ void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
 
 void trend::ToshaderTV::drawTriQuads()
 {
-   if  (_alobjvx[cnvx] > 0)
+   if  (_vobjnum[OTcnvx] > 0)
    {// Draw convex polygons
-      assert(_firstvx[cnvx]);
-      assert(_sizesvx[cnvx]);
-      DBGL_CALL(glMultiDrawArrays, GL_TRIANGLE_FAN, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
+      assert(_firstvx[OTcnvx]);
+      assert(_sizesvx[OTcnvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_TRIANGLE_FAN, _firstvx[OTcnvx], _sizesvx[OTcnvx], _vobjnum[OTcnvx])
    }
-   if  (_alobjvx[ncvx] > 0)
+   if  (_vobjnum[OTncvx] > 0)
    {// Draw non-convex polygons
-      if (_alobjix[fqss] > 0)
+      if (_iobjnum[ITfqss] > 0)
       {
-         assert(_sizesix[fqss]);
-         assert(_firstix[fqss]);
+         assert(_sizesix[ITfqss]);
+         assert(_firstix[ITfqss]);
          // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
          // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
          // Besides - everybody is saying that there is no speed benefit from this operation
          //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
-         for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, _firstix[fqss][i])
+         for (unsigned i= 0; i < _iobjnum[ITfqss]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITfqss][i], GL_UNSIGNED_INT, _firstix[ITfqss][i])
       }
-      if (_alobjix[ftrs] > 0)
+      if (_iobjnum[ITtria] > 0)
       {
-         assert(_sizesix[ftrs]);
-         assert(_firstix[ftrs]);
+         assert(_sizesix[ITtria]);
+         assert(_firstix[ITtria]);
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
-         for (unsigned i= 0; i < _alobjix[ftrs]; i++)
+         for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
          {
-            DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, _firstix[ftrs][i])
+            DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
          }
       }
-      if (_alobjix[ftfs] > 0)
+      if (_iobjnum[ITftfs] > 0)
       {
-         assert(_sizesix[ftfs]);
-         assert(_firstix[ftfs]);
+         assert(_sizesix[ITftfs]);
+         assert(_firstix[ITftfs]);
          //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
-         for (unsigned i= 0; i < _alobjix[ftfs]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, _firstix[ftfs][i])
+         for (unsigned i= 0; i < _iobjnum[ITftfs]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ITftfs][i], GL_UNSIGNED_INT, _firstix[ITftfs][i])
       }
-      if (_alobjix[ftss] > 0)
+      if (_iobjnum[ITtstr] > 0)
       {
-         assert(_sizesix[ftss]);
-         assert(_firstix[ftss]);
+         assert(_sizesix[ITtstr]);
+         assert(_firstix[ITtstr]);
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
-         for (unsigned i= 0; i < _alobjix[ftss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, _firstix[ftss][i])
+         for (unsigned i= 0; i < _iobjnum[ITtstr]; i++)
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, _firstix[ITtstr][i])
       }
    }
 }
 
 void trend::ToshaderTV::drawLines()
 {
-   if  (_alobjvx[line] > 0)
+   if  (_vobjnum[OTline] > 0)
    {// Draw the wire center lines
-      assert(_firstvx[line]);
-      assert(_sizesvx[line]);
-      DBGL_CALL(glMultiDrawArrays, GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line])
+      assert(_firstvx[OTline]);
+      assert(_sizesvx[OTline]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_STRIP, _firstvx[OTline], _sizesvx[OTline], _vobjnum[OTline])
    }
-   if  (_alobjvx[cnvx] > 0)
+   if  (_vobjnum[OTcnvx] > 0)
    {// Draw convex polygons
-      assert(_firstvx[cnvx]);
-      assert(_sizesvx[cnvx]);
-      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
+      assert(_firstvx[OTcnvx]);
+      assert(_sizesvx[OTcnvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[OTcnvx], _sizesvx[OTcnvx], _vobjnum[OTcnvx])
    }
-   if  (_alobjvx[ncvx] > 0)
+   if  (_vobjnum[OTncvx] > 0)
    {// Draw non-convex polygons
-      assert(_firstvx[ncvx]);
-      assert(_sizesvx[ncvx]);
-      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx])
+      assert(_firstvx[OTncvx]);
+      assert(_sizesvx[OTncvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[OTncvx], _sizesvx[OTncvx], _vobjnum[OTncvx])
    }
-   if (_alobjvx[cont] > 0)
+   if (_vobjnum[OTcntr] > 0)
    {// Draw the remaining non-filled shapes of any kind
-      assert(_firstvx[cont]);
-      assert(_sizesvx[cont]);
-      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont])
+      assert(_firstvx[OTcntr]);
+      assert(_sizesvx[OTcntr]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[OTcntr], _sizesvx[OTcntr], _vobjnum[OTcntr])
    }
 }
 
