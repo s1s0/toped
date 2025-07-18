@@ -106,17 +106,6 @@ void trend::ToshaderTV::drawTriQuads()
    }
    if  (_vobjnum[OTncvx] > 0)
    {// Draw non-convex polygons
-      if (_iobjnum[ITfqss] > 0)
-      {
-         assert(_sizesix[ITfqss]);
-         assert(_firstix[ITfqss]);
-         // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
-         // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
-         // Besides - everybody is saying that there is no speed benefit from this operation
-         //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
-         for (unsigned i= 0; i < _iobjnum[ITfqss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITfqss][i], GL_UNSIGNED_INT, _firstix[ITfqss][i])
-      }
       if (_iobjnum[ITtria] > 0)
       {
          assert(_sizesix[ITtria]);
@@ -126,14 +115,6 @@ void trend::ToshaderTV::drawTriQuads()
          {
             DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
          }
-      }
-      if (_iobjnum[ITftfs] > 0)
-      {
-         assert(_sizesix[ITftfs]);
-         assert(_firstix[ITftfs]);
-         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
-         for (unsigned i= 0; i < _iobjnum[ITftfs]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ITftfs][i], GL_UNSIGNED_INT, _firstix[ITftfs][i])
       }
       if (_iobjnum[ITtstr] > 0)
       {

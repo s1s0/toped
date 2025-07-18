@@ -43,12 +43,12 @@ trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   )
 {
-   for (int i = ITfqss; i <= ITtstr; i++)
+   for (int i = ITtria; i < IDX_TYPES; i++)
    {
       _sizesix[i] = NULL;
       _firstix[i] = NULL;
    }
-   for (int i = OTcntr; i <= OTncvx; i++)
+   for (int i = OTcntr; i < OBJ_TYPES; i++)
    {
       _sizesvx[i] = NULL;
       _firstvx[i] = NULL;
@@ -62,15 +62,6 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
    {
       switch (TCH->type())
       {
-         case GL_QUAD_STRIP     :
-         {
-            assert(_sizesix[ITfqss]);
-            _firstix[ITfqss][size_index[ITfqss]  ] = sizeof(unsigned) * index_offset[ITfqss];
-            _sizesix[ITfqss][size_index[ITfqss]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ITfqss]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
          case GL_TRIANGLES      :
          {
             assert(_sizesix[ITtria]);
@@ -78,15 +69,6 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
             _sizesix[ITtria][size_index[ITtria]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
                index_array[index_offset[ITtria]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
-         case GL_TRIANGLE_FAN   :
-         {
-            assert(_sizesix[ITftfs]);
-            _firstix[ITftfs][size_index[ITftfs]  ] = sizeof(unsigned) * index_offset[ITftfs];
-            _sizesix[ITftfs][size_index[ITftfs]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ITftfs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_STRIP :
@@ -147,21 +129,11 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
       _sizesvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
       if (NULL != index_array)
       {
-         assert(_iobjnum[ITfqss] + _iobjnum[ITtria] + _iobjnum[ITftfs] + _iobjnum[ITtstr]);
-         if (0 < _iobjnum[ITfqss])
-         {
-            _sizesix[ITfqss] = DEBUG_NEW GLsizei[_iobjnum[ITfqss]];
-            _firstix[ITfqss] = DEBUG_NEW GLuint[_iobjnum[ITfqss]];
-         }
+         assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
          if (0 < _iobjnum[ITtria])
          {
             _sizesix[ITtria] = DEBUG_NEW GLsizei[_iobjnum[ITtria]];
             _firstix[ITtria] = DEBUG_NEW GLuint[_iobjnum[ITtria]];
-         }
-         if (0 < _iobjnum[ITftfs])
-         {
-            _sizesix[ITftfs] = DEBUG_NEW GLsizei[_iobjnum[ITftfs]];
-            _firstix[ITftfs] = DEBUG_NEW GLuint[_iobjnum[ITftfs]];
          }
          if (0 < _iobjnum[ITtstr])
          {
@@ -171,11 +143,9 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
       }
       unsigned size_index[4];
       unsigned index_offset[4];
-      size_index[ITfqss] = size_index[ITtria] = size_index[ITftfs] = size_index[ITtstr] = 0u;
-      index_offset[ITfqss] = _index_array_offset;
-      index_offset[ITtria] = index_offset[ITfqss] + _indxnum[ITfqss];
-      index_offset[ITftfs] = index_offset[ITtria] + _indxnum[ITtria];
-      index_offset[ITtstr] = index_offset[ITftfs] + _indxnum[ITftfs];
+      size_index[ITtria] = size_index[ITtstr] = 0u;
+      index_offset[ITtria] = _index_array_offset;
+      index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
       for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
       { // shapes in the current translation (layer within the cell)
 
@@ -190,14 +160,10 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
          _sizesvx[OTncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
 
       }
-      assert(size_index[ITfqss] == _iobjnum[ITfqss]);
       assert(size_index[ITtria] == _iobjnum[ITtria]);
-      assert(size_index[ITftfs] == _iobjnum[ITftfs]);
       assert(size_index[ITtstr] == _iobjnum[ITtstr]);
-      assert(index_offset[ITfqss] == (_index_array_offset + _indxnum[ITfqss]));
-      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria]));
-      assert(index_offset[ITftfs] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria] + _indxnum[ITftfs] ));
-      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITfqss] + _indxnum[ITtria] + _indxnum[ITftfs] + _indxnum[ITtstr] ));
+      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
+      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
       assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
       assert(szindx  == _vobjnum[OTncvx]);
    }
@@ -253,17 +219,6 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
       assert(_firstvx[OTncvx]);
       assert(_sizesvx[OTncvx]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[OTncvx], _sizesvx[OTncvx], _vobjnum[OTncvx]);
-      if (_iobjnum[ITfqss] > 0)
-      {
-         assert(_sizesix[ITfqss]);
-         assert(_firstix[ITfqss]);
-         // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
-         // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
-         // Besides - everybody is saying that there is no speed benefit from this operation
-         //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
-         for (unsigned i= 0; i < _iobjnum[ITfqss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[ITfqss][i], GL_UNSIGNED_INT, _firstix[ITfqss][i])
-      }
       if (_iobjnum[ITtria] > 0)
       {
          assert(_sizesix[ITtria]);
@@ -271,14 +226,6 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
          for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
             DBGL_CALL(tpd_glDrawElements, GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
-      }
-      if (_iobjnum[ITftfs] > 0)
-      {
-         assert(_sizesix[ITftfs]);
-         assert(_firstix[ITftfs]);
-         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
-         for (unsigned i= 0; i < _iobjnum[ITftfs]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ITftfs][i], GL_UNSIGNED_INT, _firstix[ITftfs][i])
       }
       if (_iobjnum[ITtstr] > 0)
       {
@@ -327,9 +274,7 @@ trend::TenderTV::~TenderTV()
    if (NULL != _sizesvx[OTcnvx]) delete [] _sizesvx[OTcnvx];
    if (NULL != _sizesvx[OTncvx]) delete [] _sizesvx[OTncvx];
 
-   if (NULL != _sizesix[ITfqss]) delete [] _sizesix[ITfqss];
    if (NULL != _sizesix[ITtria]) delete [] _sizesix[ITtria];
-   if (NULL != _sizesix[ITftfs]) delete [] _sizesix[ITftfs];
    if (NULL != _sizesix[ITtstr]) delete [] _sizesix[ITtstr];
 
    if (NULL != _firstvx[OTcntr]) delete [] _firstvx[OTcntr];
@@ -337,9 +282,7 @@ trend::TenderTV::~TenderTV()
    if (NULL != _firstvx[OTcnvx]) delete [] _firstvx[OTcnvx];
    if (NULL != _firstvx[OTncvx]) delete [] _firstvx[OTncvx];
 
-   if (NULL != _firstix[ITfqss]) delete [] _firstix[ITfqss];
    if (NULL != _firstix[ITtria]) delete [] _firstix[ITtria];
-   if (NULL != _firstix[ITftfs]) delete [] _firstix[ITftfs];
    if (NULL != _firstix[ITtstr]) delete [] _firstix[ITtstr];
 }
 

@@ -45,7 +45,7 @@ trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
    _filled              ( filled          ),
    _reusable            ( reusable        )
 {
-   for (int i = ITfqss; i <= ITtstr; i++)
+   for (int i = ITtria; i < IDX_TYPES; i++)
    {
       _iobjnum[i] = 0u;
       _indxnum[i] = 0u;
@@ -189,9 +189,7 @@ unsigned trend::TrendTV::num_total_points()
 
 unsigned trend::TrendTV::num_total_indexs()
 {
-   return ( _indxnum[ITfqss] +
-            _indxnum[ITtria] +
-            _indxnum[ITftfs] +
+   return ( _indxnum[ITtria] +
             _indxnum[ITtstr]
           );
 }

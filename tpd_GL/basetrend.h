@@ -380,9 +380,7 @@ namespace trend {
                            OTcnvx,  // convex object
                            OTncvx,  // non-convex object, requires indexation
                            OBJ_TYPES};
-         enum IndexTypes  {ITfqss,
-                           ITtria,  // triangles
-                           ITftfs,
+         enum IndexTypes  {ITtria,  // triangles
                            ITtstr,  // triangle strips
                            IDX_TYPES};
                            TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
