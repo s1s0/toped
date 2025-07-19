@@ -69,7 +69,7 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
-         virtual void      collect(bool, GLuint, GLuint);
+         virtual void      collect(GLuint, GLuint);
          virtual void      collectSelected(unsigned int*);
 
       protected:

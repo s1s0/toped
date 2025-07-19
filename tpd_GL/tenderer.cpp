@@ -350,17 +350,19 @@ bool trend::TenderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
    return true;
 }
 
-void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
+void trend::TenderLay::collect(GLuint pbuf, GLuint ibuf)
 {
    TNDR_GLDATAT* cpoint_array = NULL;
    unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
    _ibuffer = ibuf;
+   //---------------------------------------------------------
+   // bind the buffers & get the reference to the OGL data&index arrays
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
    DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                   ,
                 2 * _num_total_points * sizeof(TNDR_GLDATAT),
                 nullptr                                     ,
-                GL_DYNAMIC_DRAW                              )
+                GL_STATIC_DRAW                              )
    cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY);
    if (0 != _ibuffer)
    {
@@ -368,20 +370,20 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
       DBGL_CALL(glBufferData,GL_ELEMENT_ARRAY_BUFFER    ,
                    _num_total_indexs * sizeof(unsigned) ,
                    nullptr                              ,
-                   GL_DYNAMIC_DRAW                    )
+                   GL_STATIC_DRAW                    )
       cindex_array = (unsigned int*)DBGL_CALL(glMapBuffer,GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
    }
-   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-      (*TLAY)->collect(cpoint_array, cindex_array);
+
+   //---------------------------------------------------------
+   // Fill-up the buffers with data and indexes for drawing
+   for( auto TLAY : _layData)
+      TLAY->collect(cpoint_array, cindex_array);
+
    // Unmap the buffers
 //   trend::dumpOGLArrayFloat(cpoint_array, _num_total_points );
    DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
    if (0 != _ibuffer)
-   {
-//      trend::dumpOGLArrayUint(cindex_array, _num_total_indexs);
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
-//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   }
 }
 
 void trend::TenderLay::collectSelected(unsigned int* slctd_array)
@@ -893,7 +895,7 @@ bool trend::Tenderer::collect()
       GLuint pbuf = _ogl_buffers[current_buffer++];
       assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
+      CLAY->collect(/*_drawprop->layerFilled(CLAY()),*/ pbuf, ibuf);
    }
 
    checkOGLError("collect");
@@ -987,7 +989,7 @@ bool trend::Tenderer::grcCollect()
       }
       GLuint pbuf = _ogl_grc_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
+      CLAY->collect(/*_drawprop->layerFilled(CLAY()),*/ pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
