@@ -56,7 +56,7 @@ trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
 }
 
 void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChain* tdata, unsigned* size_index,
-                             unsigned* index_offset, unsigned cpoint_index)
+                             unsigned* index_offset, const unsigned cpoint_index)
 {
    for (TessellChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
    {
@@ -87,46 +87,66 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChai
 
 void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
-   unsigned line_arr_size = 2 * _vrtxnum[OTline]; // x2 to accomodate X & Y coordinate
-   unsigned fqus_arr_size = 2 * _vrtxnum[OTcnvx]; // x2 to accomodate X & Y coordinate
-   unsigned cont_arr_size = 2 * _vrtxnum[OTcntr]; // x2 to accomodate X & Y coordinate
-   unsigned poly_arr_size = 2 * _vrtxnum[OTncvx]; // x2 to accomodate X & Y coordinate
    // initialise the indexing
-   unsigned pntindx = 0;
+   unsigned    pntindx     = 0;
+   unsigned    szindx      = 0;
+   unsigned    pntindxNCVX = 0;
+   unsigned    controlSize = 0; // used only in asserts
+   ObjectTypes objType     = OTcntr;
 
-   if  (_vobjnum[OTline] > 0)
-   {// collect all central lines of the wires
-      unsigned  szindx  = 0;
-      _firstvx[OTline] = DEBUG_NEW int[_vobjnum[OTline]];
-      _sizesvx[OTline] = DEBUG_NEW int[_vobjnum[OTline]];
-      for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[OTline][szindx  ] = pntindx/2;
-         _sizesvx[OTline][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+   //====================================================================
+   // Some lambda functions (to put some fun in the code :) )
+   auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] <typename T> (T* iter)
+   {
+      _firstvx[objType][szindx  ] = pntindx/2;
+      _sizesvx[objType][szindx++] = iter->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+
+   auto lineCopy = [this, &szindx, &pntindx, &point_array, &objType](TrxWire* iter)
+   {
+      _firstvx[objType][szindx  ] = pntindx/2;
+      _sizesvx[objType][szindx++] = iter->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+
+   //====================================================================
+   // collect all vertexes and copy them in the point_array
+   for( auto koko : {OTline,OTcnvx,OTncvx,OTcntr})
+   {
+      objType = koko;
+      if  (_vobjnum[objType] > 0)
+      {
+         szindx  = 0;
+         controlSize += 2*_vrtxnum[objType];
+         _firstvx[objType] = DEBUG_NEW int[_vobjnum[objType]];
+         _sizesvx[objType] = DEBUG_NEW int[_vobjnum[objType]];
+         switch (objType)
+         {
+            case OTline:// collect the vertexes of all wires central lines
+                         std::for_each(_line_data.cbegin(), _line_data.cend(), lineCopy);
+                         break;
+            case OTcnvx: // collect all convex polygons vertexes
+                         std::for_each(_cnvx_data.cbegin(), _cnvx_data.cend(), dataCopy);
+                         break;
+            case OTncvx:// collect all non-convex polygons vertexes
+                         pntindxNCVX = pntindx; // needed for index gathering below
+                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
+                         break;
+            case OTcntr:// collect the vertexes of all contours (only non-filled objects here)
+                         std::for_each(_cont_data.cbegin(), _cont_data.cend(), dataCopy);
+                         std::for_each(_txto_data.cbegin(), _txto_data.cend(), dataCopy);
+                         break;
+            default: assert(false);
+         }
+         assert(pntindx == controlSize       );
+         assert(szindx  == _vobjnum[objType] );
       }
-      assert(pntindx == line_arr_size);
-      assert(szindx  == _vobjnum[OTline]);
    }
 
-   if  (_vobjnum[OTcnvx] > 0)
-   {// collect all convex polygons
-      unsigned  szindx  = 0;
-      _firstvx[OTcnvx] = DEBUG_NEW int[_vobjnum[OTcnvx]];
-      _sizesvx[OTcnvx] = DEBUG_NEW int[_vobjnum[OTcnvx]];
-      for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[OTcnvx][szindx  ] = pntindx/2;
-         _sizesvx[OTcnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      assert(pntindx == line_arr_size + fqus_arr_size);
-      assert(szindx  == _vobjnum[OTcnvx]);
-   }
-
+   //====================================================================
+   // collect all indexing (non-convex objects only) and copy them in the index_array
    if  (_vobjnum[OTncvx] > 0)
-   {// collect all non-convex polygons
-      unsigned  szindx  = 0;
-      _firstvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
-      _sizesvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
+   {
+      szindx  = 0;
       if (NULL != index_array)
       {
          assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
@@ -141,51 +161,24 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
             _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
          }
       }
-      unsigned size_index[4];
-      unsigned index_offset[4];
-      size_index[ITtria] = size_index[ITtstr] = 0u;
+      unsigned size_index[IDX_TYPES];
+      unsigned index_offset[IDX_TYPES];
+      size_index[ITtria]   = size_index[ITtstr] = 0u;
       index_offset[ITtria] = _index_array_offset;
       index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
-      for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-
-         if (NULL != (*CSH)->tdata())
-            collectIndexs( index_array     ,
-                          (*CSH)->tdata()  ,
-                           size_index      ,
-                           index_offset    ,
-                           pntindx/2
+      for (auto CSH : _ncvx_data)
+      // shapes in the current translation (layer within the cell)
+         if (NULL != CSH->tdata())
+            collectIndexs( index_array   ,
+                           CSH->tdata()  ,
+                           size_index    ,
+                           index_offset  ,
+                           pntindxNCVX/2
                          );
-         _firstvx[OTncvx][szindx  ] = pntindx/2;
-         _sizesvx[OTncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-
-      }
-      assert(size_index[ITtria] == _iobjnum[ITtria]);
-      assert(size_index[ITtstr] == _iobjnum[ITtstr]);
+      assert(  size_index[ITtria] == _iobjnum[ITtria]);
+      assert(  size_index[ITtstr] == _iobjnum[ITtstr]);
       assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
       assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
-      assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
-      assert(szindx  == _vobjnum[OTncvx]);
-   }
-
-   if  (_vobjnum[OTcntr] > 0)
-   {// collect all contours (only non-filled objects here)
-      unsigned  szindx  = 0;
-      _firstvx[OTcntr] = DEBUG_NEW int[_vobjnum[OTcntr]];
-      _sizesvx[OTcntr] = DEBUG_NEW int[_vobjnum[OTcntr]];
-      for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[OTcntr][szindx  ] = pntindx/2;
-         _sizesvx[OTcntr][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      //... and text overlapping boxes
-      for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[OTcntr][szindx  ] = pntindx/2;
-         _sizesvx[OTcntr][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
-      assert(szindx  == _vobjnum[OTcntr] );
    }
 }
 

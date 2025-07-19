@@ -41,7 +41,7 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
       protected:
-         void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, unsigned);
+         void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
          GLsizei*          _sizesvx[OBJ_TYPES]; //! arrays of sizes for vertex sets
          GLsizei*          _firstvx[OBJ_TYPES]; //! arrays of first vertexes
          GLsizei*          _sizesix[IDX_TYPES]; //! arrays of sizes for indexes sets
