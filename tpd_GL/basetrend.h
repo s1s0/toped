@@ -575,6 +575,7 @@ namespace trend {
 
                            TrendLay(bool);
          virtual          ~TrendLay();
+//#warning TODO! Change the parameters from const int4b* to const TVXX& to all box, poly, wire, text calls!
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
          void              box  (const int4b*,                               const SGBitSet*, const CTM&);

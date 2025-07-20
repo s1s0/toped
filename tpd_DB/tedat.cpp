@@ -613,6 +613,275 @@ laydata::TdtBox::~TdtBox()
 {
 }
 
+////-----------------------------------------------------------------------------
+//// class TdtBoxVEC
+////-----------------------------------------------------------------------------
+//laydata::TdtBoxVEC::TdtBoxVEC(const TP& p1, const TP& p2) : TdtData(),_pdata(TVXX(2))
+//{
+//   _pdata[0] = p1;   _pdata[1] = p2;
+//   SGBitSet dummy;
+//   normalize(dummy);
+//}
+//
+//laydata::TdtBoxVEC::TdtBoxVEC(InputTdtFile* const tedfile) : TdtData(),_pdata(TVXX(2))
+//{
+//   _pdata[0] = tedfile->getTP();
+//   _pdata[1] = tedfile->getTP();
+//   SGBitSet dummy;
+//   normalize(dummy);
+//}
+//
+//void laydata::TdtBoxVEC::normalize(SGBitSet& psel)
+//{
+//   int4b swap;
+//   if (_pdata[0].x > _pdata[1].x)
+//   {
+//      swap = _pdata[0].x; _pdata[0].x = _pdata[1].x; _pdata[1].x = swap;
+//      if (0 != psel.size())
+//      {
+//         psel.swap(0,1);
+//         psel.swap(2,3);
+//      }
+//   }
+//   if (_pdata[0].y > _pdata[1].y)
+//   {
+//      swap = _pdata[0].y; _pdata[0].y = _pdata[1].y; _pdata[1].y = swap;
+//      if (0 != psel.size())
+//      {
+//         psel.swap(0,3);
+//         psel.swap(1,2);
+//      }
+//   }
+//}
+//
+//void laydata::TdtBoxVEC::drawRequest(trend::TrendBase& rend) const
+//{
+//   rend.box((int4b*)&_pdata[0]);
+//}
+//
+//void laydata::TdtBoxVEC::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
+//{
+//   rend.box((int4b*)&_pdata[0], pslist);
+//}
+//
+//
+//void laydata::TdtBoxVEC::motionDraw(trend::TrendBase& rend, SGBitSet* plst) const
+//{
+//   if (sh_partsel == status())
+//      rend.boxm((int4b*)&_pdata[0], plst);
+//   else
+//      rend.box((int4b*)&_pdata[0]);
+//}
+//
+//void  laydata::TdtBoxVEC::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
+//   if (select_in.inside(TP(_pdata[0].x, _pdata[0].y)))  pntlst.set(0);
+//   if (select_in.inside(TP(_pdata[1].x, _pdata[0].y)))  pntlst.set(1);
+//   if (select_in.inside(TP(_pdata[1].x, _pdata[1].y)))  pntlst.set(2);
+//   if (select_in.inside(TP(_pdata[0].x, _pdata[1].y)))  pntlst.set(3);
+//   pntlst.check_neighbours_set(false);
+//}
+//
+//void  laydata::TdtBoxVEC::unselectPoints(DBbox& select_in, SGBitSet& pntlst) {
+//   if (sh_selected == _status) pntlst.setall();
+//   if (select_in.inside(TP(_pdata[0].x, _pdata[0].y)))  pntlst.reset(0);
+//   if (select_in.inside(TP(_pdata[1].x, _pdata[0].y)))  pntlst.reset(1);
+//   if (select_in.inside(TP(_pdata[1].x, _pdata[1].y)))  pntlst.reset(2);
+//   if (select_in.inside(TP(_pdata[0].x, _pdata[1].y)))  pntlst.reset(3);
+//}
+//
+//laydata::Validator* laydata::TdtBoxVEC::move(const CTM& trans, SGBitSet& plst)
+//{
+//   if (0 != plst.size())
+//   {// used for modify
+//      PointVector* nshape = movePointsSelected(plst, trans);
+//      _pdata[0].x = (*nshape)[0].x();_pdata[0].y = (*nshape)[0].y();
+//      _pdata[1].x = (*nshape)[2].x();_pdata[1].y = (*nshape)[2].y();;
+//      normalize(plst);
+//      nshape->clear(); delete nshape;
+//      return NULL;
+//   }
+//   else
+//   {// used for rotate
+//      PointVector plist;
+//      plist.reserve(4);
+//      plist.push_back(TP(_pdata[0].x, _pdata[0].y)*trans);
+//      plist.push_back(TP(_pdata[1].x, _pdata[0].y)*trans);
+//      plist.push_back(TP(_pdata[1].x, _pdata[1].y)*trans);
+//      plist.push_back(TP(_pdata[0].x, _pdata[1].y)*trans);
+//      laydata::ValidBox* check = DEBUG_NEW ValidBox(plist);
+//      if (laydata::shp_box & check->status())
+//      {
+//         // modify the box ONLY if we're going to get a box
+//         transfer(trans);
+//         delete check;
+//         return NULL;
+//      }
+//      // in all other cases keep the original box, depending on the check->status()
+//      // the shape will be replaced, or marked as failed to rotate
+//      return check;
+//   }
+//
+//}
+//
+//void laydata::TdtBoxVEC::transfer(const CTM& trans) {
+//   TP p1 = TP(_pdata[0].x, _pdata[0].y) * trans;
+//   TP p2 = TP(_pdata[1].x, _pdata[1].y) * trans;
+//   _pdata[0].x = p1.x();_pdata[0].y = p1.y();
+//   _pdata[1].x = p2.x();_pdata[1].y = p2.y();
+//   SGBitSet dummy;
+//   normalize(dummy);
+//}
+//
+//laydata::TdtData* laydata::TdtBoxVEC::copy(const CTM& trans)
+//{
+//   TP cp1(_pdata[0].x, _pdata[0].y); cp1 *= trans;
+//   TP cp2(_pdata[1].x, _pdata[1].y); cp2 *= trans;
+//   return DEBUG_NEW TdtBox(cp1, cp2);
+//}
+//
+//void laydata::TdtBoxVEC::info(std::ostringstream& ost, real DBU) const {
+//   ost << "box - {";
+//   TP p1 (_pdata[0].x, _pdata[0].y);
+//   p1.info(ost, DBU);
+//   ost << " , ";
+//   TP p2 (_pdata[1].x, _pdata[1].y);
+//   p2.info(ost, DBU);
+//   ost << "};";
+//}
+//
+//void laydata::TdtBoxVEC::write(OutputTdtFile* const tedfile) const {
+//   tedfile->putByte(tedf_BOX);
+//   tedfile->put4b(_pdata[0].x); tedfile->put4b(_pdata[0].y);
+//   tedfile->put4b(_pdata[1].x); tedfile->put4b(_pdata[1].y);
+//}
+//
+//void laydata::TdtBoxVEC::dbExport(DbExportFile& exportF) const
+//{
+//   exportF.box((int4b*)&_pdata);
+//}
+//
+//DBbox laydata::TdtBoxVEC::overlap() const
+//{
+//   return DBbox(_pdata[0].x, _pdata[0].y, _pdata[1].x, _pdata[1].y);
+//}
+//
+//PointVector laydata::TdtBoxVEC::shape2poly() const
+//{
+//  // convert box to polygon
+//   PointVector _plist;
+//   _plist.push_back(TP(_pdata[0].x, _pdata[0].y));
+//   _plist.push_back(TP(_pdata[1].x, _pdata[0].y));
+//   _plist.push_back(TP(_pdata[1].x, _pdata[1].y));
+//   _plist.push_back(TP(_pdata[0].x, _pdata[1].y));
+//   return _plist;
+//};
+//
+//PointVector laydata::TdtBoxVEC::dumpPoints() const
+//{
+//   PointVector _plist;
+//   _plist.push_back(TP(_pdata[0].x, _pdata[0].y));
+//   _plist.push_back(TP(_pdata[1].x, _pdata[1].y));
+//   return _plist;
+//};
+//
+//void laydata::TdtBoxVEC::polyCut(PointVector& cutter, ShapeList** decure)
+//{
+//   PointVector _plist = shape2poly();
+//   // and proceed in the same way as for the polygon
+//   logicop::logic operation(_plist, cutter);
+//   try
+//   {
+//      operation.findCrossingPoints();
+//   }
+//   catch (EXPTNpolyCross&) {return;}
+//   pcollection cut_shapes;
+//   laydata::TdtData* newshape;
+//   if (operation.AND(cut_shapes))
+//   {
+//      pcollection::const_iterator CI;
+//      // add the resulting cut_shapes to the_cut ShapeList
+//      for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+//         if (NULL != (newshape = createValidShape(*CI)))
+//            decure[1]->push_back(newshape);
+//      cut_shapes.clear();
+//      // if there is a cut - there will be (most likely) be cut remains as well
+//      operation.reset_visited();
+//      pcollection rest_shapes;
+//      if (operation.ANDNOT(rest_shapes))
+//         // add the resulting cut remainings to the_rest ShapeList
+//         for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++)
+//            if (NULL != (newshape = createValidShape(*CI)))
+//               decure[2]->push_back(newshape);
+//      rest_shapes.clear();
+//      // and finally add this to the_delete shapelist
+//      decure[0]->push_back(this);
+//   }
+//}
+//
+//void laydata::TdtBoxVEC::stretch(int bfactor, ShapeList** decure)
+//{
+//   if ( ((_pdata[0].x - _pdata[1].x) < 2*bfactor) &&
+//        ((_pdata[0].y - _pdata[1].y) < 2*bfactor)    )
+//   {
+//      TP np1(_pdata[0].x - bfactor, _pdata[0].y - bfactor );
+//      TP np2(_pdata[1].x + bfactor, _pdata[1].y + bfactor );
+//      TdtBox* modified = DEBUG_NEW TdtBox(np1, np2);
+//      decure[1]->push_back(modified);
+//   }
+//   decure[0]->push_back(this);
+//}
+//
+//TVXX* laydata::TdtBoxVEC::movePointsSelected(const SGBitSet& pset,
+//                                             const CTM&  movedM, const CTM& stableM) const {
+//   // convert box to polygon
+//   TVXX* mlist = DEBUG_NEW TVXX(4);
+//   (*mlist)[0] = VX(_pdata[0].x, _pdata[0].y);
+//   (*mlist)[1] = VX(_pdata[1].x, _pdata[0].y);
+//   (*mlist)[2] = VX(_pdata[1].x, _pdata[1].y);
+//   (*mlist)[3] = VX(_pdata[0].x, _pdata[1].y);
+//   
+//   glm::ivec3 boza = {(*mlist)[0], 0.0f};//(_pdata[0].x, _pdata[0].y, 0.0f);
+//   glm::mat3x3 movedMGLM(movedM.a(), movedM.b(), 0, movedM.c(), movedM.d(),0.0f, movedM.tx(), movedM.ty(),1.0f);
+//   boza = movedMGLM * boza;
+//
+//   word size = mlist->size();
+//   PSegment seg1,seg0;
+//   // Things to remember in this algo...
+//   // Each of the points in the initial mlist is recalculated in the seg1.crossP
+//   // method. This actually means that on pass 0 (i == 0), no points are
+//   // recalculated because seg0 at that moment is empty. On pass 1 (i == 1),
+//   // point mlist[1] is recalculated etc. The catch comes on the last pass
+//   // (i == size) when constructing the seg1, we need mlist[0] and mlist[1], but
+//   // mlist[1] has been already recalculated and multiplying it with CTM
+//   // matrix again has pretty funny effect.
+//   // That's why another condition is introduced -> if (i == size)
+//   for (unsigned i = 0; i <= size; i++) {
+//      if (i == size)
+//         if (pset.check(i%size) && pset.check((i+1) % size))
+//            seg1 = PSegment((*mlist)[(i  ) % size] * movedMGLM,
+//                            (*mlist)[(i+1) % size]         );
+//         else
+//            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
+//                            (*mlist)[(i+1) % size]          );
+//      else
+//         if (pset.check(i%size) && pset.check((i+1) % size))
+//            seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
+//                            (*mlist)[(i+1) % size] * movedM);
+//         else
+//            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
+//                            (*mlist)[(i+1) % size] * stableM);
+//      if (!seg0.empty()) {
+//         seg1.crossP(seg0,(*mlist)[i%size]);
+//      }
+//      seg0 = seg1;
+//   }
+//   return mlist;
+//}
+//
+//laydata::TdtBoxVEC::~TdtBoxVEC()
+//{
+//}
+
 //-----------------------------------------------------------------------------
 // class TdtPoly
 //-----------------------------------------------------------------------------

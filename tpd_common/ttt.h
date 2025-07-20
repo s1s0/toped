@@ -37,6 +37,7 @@
 #include <assert.h>
 // Include GLM
 #include <glm/glm.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 //using namespace glm;
 
@@ -64,8 +65,8 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 //typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
-typedef glm::ivec2              VX  ; // Vertex
-typedef std::vector<glm::ivec2> TVXX; // TDT Vertexes
+//typedef glm::ivec2              VX  ; // Vertex
+//typedef std::vector<VX>         TVXX; // TDT Vertexes
 
 //=============================================================================
 // Some common constants
@@ -287,9 +288,10 @@ private:
 class TP {
 public:
    friend class DBbox;
-   TP(int4b x=0, int4b y=0): _x(x), _y(y) {};
-   TP(real, real, real);
-   TP(const TP&) = default;
+            TP(int4b x=0, int4b y=0): _x(x), _y(y) {};
+            TP(real, real, real);
+//            TP(const VX& vx):_x(vx.x),_y(vx.y) {};
+            TP(const TP&) = default;
    void     roundTO(int4b step);
    void     move(int4b dX, int4b dY) {_x += dX; _y += dY;};
    void     info(std::ostringstream&,real) const;
@@ -311,6 +313,15 @@ private:
    int4b    _y;
 };
 
+
+//class TPX: public VX {
+//public:
+//   VX operator = (const TP& op1) {x = op1.x(); y = op1.y(); return *this;}
+////   VX operator * ( const CTM& ) const;
+//};
+////   typedef glm::ivec2              VX  ; // Vertex
+//   typedef std::vector<TPX>         TVXX; // TDT Vertexes
+//
 class DoublePoint {
 public:
    DoublePoint(const TP& tp);
@@ -330,11 +341,11 @@ private:
 //
 class DBbox {
 public:
-   DBbox(const TP& p) :        _p1(p)       , _p2(p)    {};
-   DBbox(int4b x1, int4b y1) : _p1(x1,y1) , _p2(x1,y1)  {};
-   DBbox(int4b x1, int4b y1, int4b x2, int4b y2) : _p1(x1,y1) , _p2(x2,y2)  {};
-   DBbox(const DBbox& bx) :    _p1(bx.p1()) , _p2(bx.p2())    {};
-   DBbox(const TP& p1, const TP& p2): _p1(p1)      , _p2(p2)   {};
+         DBbox(const TP& p) :        _p1(p)       , _p2(p)    {};
+         DBbox(int4b x1, int4b y1) : _p1(x1,y1) , _p2(x1,y1)  {};
+         DBbox(int4b x1, int4b y1, int4b x2, int4b y2) : _p1(x1,y1) , _p2(x2,y2)  {};
+         DBbox(const DBbox& bx) :    _p1(bx.p1()) , _p2(bx.p2())    {};
+         DBbox(const TP& p1, const TP& p2): _p1(p1)      , _p2(p2)   {};
    void  overlap(int4b, int4b);
    void  overlap(const TP& p);
    void  overlap(const DBbox& bx);
@@ -377,6 +388,7 @@ public:
                PSegment() : _A(0), _B(0), _C(0), _angle(0) {};
                PSegment(real A, real B, real C) : _A(A), _B(B), _C(C), _angle(0) {};
                PSegment(TP,TP);
+//               PSegment(VX,VX);
                PSegment(const PSegment& pseg) = default;
    byte        crossP(PSegment, TP&);
    bool        empty() {return ((0 == _A) && (0 == _B));};
