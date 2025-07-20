@@ -559,7 +559,7 @@ short laydata::QTreeTmpl<DataT>::clipType(trend::TrendBase& rend) const
 }
 
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::openGlRender(trend::TrendBase& rend, const TObjDataPairList* slst) const
+void laydata::QTreeTmpl<DataT>::oglTraverse(trend::TrendBase& rend, const TObjDataPairList* slst) const
 {
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the vast majority of the cases. A bit bigger code though.
@@ -594,7 +594,7 @@ void laydata::QTreeTmpl<DataT>::openGlRender(trend::TrendBase& rend, const TObjD
    // continue traversing down given that the objects exists and are visible
    for (byte i = 0; i < _props.numSubQuads(); i++)
       if ( 0 != _subQuads[i]->clipType(rend))
-         _subQuads[i]->openGlRender(rend, slst);
+         _subQuads[i]->oglTraverse(rend, slst);
 }
 
 /*! Used to copy DataT objects from QTreeTmpl to a TObjDataPairList. This is

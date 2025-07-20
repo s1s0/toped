@@ -1304,13 +1304,13 @@ bool laydata::TdtDesign::editTop() {
    return _target.top();
 }
 
-void laydata::TdtDesign::openGlRender(trend::TrendBase& rend)
+void laydata::TdtDesign::oglTraverse(trend::TrendBase& rend)
 {
    if (_target.checkEdit())
    {
       const CTM unity;
       rend.initDrawRefStack(_target.pEditChain());
-      _target.view()->openGlRender(rend, unity, false, _target.isCell());
+      _target.view()->oglTraverse(rend, unity, false, _target.isCell());
       rend.clearDrawRefStack();
    }
 }

@@ -144,7 +144,38 @@ namespace laydata {
       PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
       int4b             _pdata[4];
    };
-
+   
+//   class TdtBoxVEC : public TdtData   {
+//   public:
+//                           TdtBoxVEC(const TP& p1, const TP& p2);       //TODO! Remove TP
+//                           TdtBoxVEC(InputTdtFile* const tedfile);
+//      virtual             ~TdtBoxVEC();
+//      virtual DBbox        overlap() const;
+//      virtual Validator*   move(const CTM&, SGBitSet& plst);
+//      virtual void         transfer(const CTM&);
+//      virtual TdtData*     copy(const CTM&);
+//
+//      virtual void         drawRequest(trend::TrendBase&) const;
+//      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
+//      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
+//
+//      virtual void         info(std::ostringstream&, real) const;
+//      virtual void         write(OutputTdtFile* const tedfile) const;
+//      virtual void         dbExport(DbExportFile&) const;
+//      virtual word         numPoints() const {return 4;};
+//      virtual void         polyCut(PointVector&, ShapeList**);
+//      virtual void         stretch(int bfactor, ShapeList**);
+//      virtual PointVector  shape2poly() const;
+//      virtual PointVector  dumpPoints() const;
+//      virtual word         lType() const {return _lmbox;}
+//   protected:
+//      void                 selectPoints(DBbox&, SGBitSet&);
+//      void                 unselectPoints(DBbox&, SGBitSet&);
+//   private:
+//      void              normalize(SGBitSet& psel);
+//      TVXX*             movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
+//      TVXX              _pdata;
+//   };
 //==============================================================================
    class TdtPoly : public TdtData   {
       public:

@@ -849,7 +849,7 @@ void DataCenter::renderOGLBuffer(int W, int H)
             RENTIMER_SET;
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(*cRenderer);
+            _TEDLIB()->oglTraverse(*cRenderer);
             RENTIMER_REPORT("Time elapsed for data traversing: ");
             if (cRenderer->collect())
             {
@@ -904,7 +904,7 @@ void DataCenter::render3D(int W, int H)
             RENTIMER_SET;
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(*cRenderer);
+            _TEDLIB()->oglTraverse(*cRenderer);
             RENTIMER_REPORT("Time elapsed for data traversing: ");
             if (cRenderer->collect())
             {

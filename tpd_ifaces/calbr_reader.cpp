@@ -235,7 +235,7 @@ void clbr::DrcRule::addResults(const DrcRule& results)
 
 void clbr::DrcRule::drawAll(trend::TrendBase& dRenderer)
 {
-   _drcData->openGlRender(dRenderer, NULL);
+   _drcData->oglTraverse(dRenderer, NULL);
 }
 
 void clbr::DrcRule::parsed()

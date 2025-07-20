@@ -238,7 +238,7 @@ laydata::TdtDefaultCell::~TdtDefaultCell()
    _layers.clear();
 }
 
-void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
+void laydata::TdtDefaultCell::oglTraverse(trend::TrendBase& rend, const CTM& trans,
                                            bool selected, bool) const
 {
    CTM ftm(TP(), 3000/OPENGL_FONT_UNIT, 45, false);
@@ -469,7 +469,7 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
    return true;
 }
 
-void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
+void laydata::TdtCell::oglTraverse(trend::TrendBase& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);
@@ -500,9 +500,9 @@ void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
       switch (curLayDef.num())
       {
          case GRC_LAY:
-         case REF_LAY: lay->openGlRender(rend, dlist); break;
+         case REF_LAY: lay->oglTraverse(rend, dlist); break;
          case DRC_LAY: rend.setLayer(curLayDef, (NULL != dlist));
-                       lay->openGlRender(rend, dlist); break;
+                       lay->oglTraverse(rend, dlist); break;
          default     :
          {// All editable layers
             short cltype = lay->clipType(rend);
@@ -510,12 +510,12 @@ void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
             {
                case -1: {// full overlap - conditional rendering
                   if ( !rend.chunkExists(curLayDef, (NULL != dlist)) )
-                     lay->openGlRender(rend, dlist);
+                     lay->oglTraverse(rend, dlist);
                   break;
                }
                case  1: {//partial clip - render always
                   rend.setLayer(curLayDef, (NULL != dlist));
-                  lay->openGlRender(rend, dlist);
+                  lay->oglTraverse(rend, dlist);
                   break;
                }
                default: assert(0 == cltype);

@@ -111,7 +111,7 @@ namespace laydata {
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
-      void           openGlRender(trend::TrendBase&);
+      void           oglTraverse(trend::TrendBase&);
       void           motionDraw(trend::TrendBase&, const TP&, const TP&);
       void           setTmpData(TdtTmpData* tmpdata) {_tmpdata = tmpdata;}
       void           setTmpCtm(CTM tmpctm)        {_tmpctm  = tmpctm; }

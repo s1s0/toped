@@ -487,7 +487,7 @@ void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& /*trans*/
          default     :
          {
             rend.setGrcLayer(true, layDef);
-            lay->openGlRender(rend, NULL);
+            lay->oglTraverse(rend, NULL);
             rend.setGrcLayer(false, layDef);
             break;
          }

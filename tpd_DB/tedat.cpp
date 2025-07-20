@@ -1621,7 +1621,7 @@ void laydata::TdtCellRef::drawRequest(trend::TrendBase& rend) const
    layprop::CellRefChainType crchain;
    if (rend.preCheckCRS(this, crchain))
    {
-      structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
+      structure()->oglTraverse(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
       if ((layprop::crc_PREACTIVE == crchain) ||
           (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
    }
@@ -1650,7 +1650,7 @@ void laydata::TdtCellRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) 
    layprop::CellRefChainType crchain;
    if (rend.preCheckCRS(this, crchain))
    {
-      structure()->openGlRender(rend, _translation, true, (layprop::crc_ACTIVE == crchain));
+      structure()->oglTraverse(rend, _translation, true, (layprop::crc_ACTIVE == crchain));
       if ((layprop::crc_PREACTIVE == crchain) ||
           (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
    }
@@ -1892,7 +1892,7 @@ void laydata::TdtCellAref::drawRequest(trend::TrendBase& rend) const
          // ... get the translation matrix ...
          CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          // ...draw the structure itself
-         structure()->openGlRender(rend, refCTM * _translation, false, false);
+         structure()->oglTraverse(rend, refCTM * _translation, false, false);
       }
    }
 }
