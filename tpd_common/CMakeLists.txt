@@ -1,3 +1,5 @@
+find_package(glm REQUIRED)
+
 file( GLOB tpd_common_headers     "*.h")
 file( GLOB tpd_common_sources     "*.cpp")
 
@@ -12,6 +14,7 @@ target_include_directories(tpd_common INTERFACE
 
 target_link_libraries(tpd_common PUBLIC
                          toped_compiler_flags
+                         glm::glm
 )
 
 #SET(tpd_common_LIBRARY tpd_common)

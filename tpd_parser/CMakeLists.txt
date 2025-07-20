@@ -15,6 +15,8 @@ BISON_TARGET(Parser tell_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/tell_yacc.cpp
 )
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
+find_package(glm REQUIRED)
+
 file( GLOB tpd_parser_headers     "*.h")
 file( GLOB tpd_parser_sources     "*.cpp")
 #-------------------------------------------------------------------------------
@@ -31,6 +33,7 @@ target_include_directories(tpd_parser PUBLIC
 )
 target_link_libraries(tpd_parser PUBLIC
                          toped_compiler_flags
+                         glm::glm
 )
 
 

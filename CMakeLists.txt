@@ -70,6 +70,7 @@ target_compile_options(toped_compiler_flags INTERFACE
 #---------------------------------------------------------------------------
 # external libraries, prerequisites for the project
 find_package(GLEW REQUIRED)
+#find_package(glm REQUIRED)
 #find_package(OpenGL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(wxWidgets COMPONENTS core base aui gl REQUIRED)
@@ -169,6 +170,7 @@ target_link_libraries(${PRJ_NAME} PUBLIC
 #                      ${wxWidgets_LIBRARIES}
 #                      wx_osx_cocoau_gl-2.9
                       GLEW::GLEW
+#                      glm::glm
 #                      glew_s
                       z
                       toped_compiler_flags

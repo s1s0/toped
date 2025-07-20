@@ -14,6 +14,8 @@ BISON_TARGET(Parser cif_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/cif_yacc.cpp
                       DEFINES_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cif_yacc.hh"
 )
 
+find_package(glm REQUIRED)
+
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
 file( GLOB tpd_ifaces_headers     "*.h")
@@ -38,6 +40,7 @@ target_include_directories(tpd_ifaces PUBLIC
 
 target_link_libraries(tpd_ifaces PUBLIC
                          toped_compiler_flags
+                         glm::glm
 )
 
 

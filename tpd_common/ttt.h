@@ -35,6 +35,11 @@
 #include <list>
 #include <set>
 #include <assert.h>
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+//using namespace glm;
+
 //#pragma GCC diagnostic warning "-Wconversion"
 //=============================================================================
 // General type declarations (compatibility)
@@ -59,6 +64,8 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 //typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
+typedef glm::ivec2              VX  ; // Vertex
+typedef std::vector<glm::ivec2> TVXX; // TDT Vertexes
 
 //=============================================================================
 // Some common constants
