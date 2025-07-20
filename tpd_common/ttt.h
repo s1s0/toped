@@ -779,6 +779,14 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
    return false;
 }
 
+template <typename T>
+size_t byteSize(T glmvec)
+{
+   typename decltype(glmvec)::value_type V;
+   return (glmvec.size() * sizeof(V));
+}
+
+
 //=============================================================================
 // more common constants
 //=============================================================================
