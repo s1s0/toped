@@ -84,6 +84,105 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChai
       }
    }
 }
+void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
+{
+   // initialise the indexing
+   unsigned    pntindx     = 0;
+   unsigned    szindx      = 0;
+   unsigned    pntindxNCVX = 0;
+   unsigned    controlSize = 0; // used only in asserts
+   ObjectTypes objType     = OTcntr;
+
+   //====================================================================
+   // Some lambda functions (to put some fun in the code :) )
+   //   auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] (TrxCnvx* iter)
+   auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] <typename T> (T* iter)
+   {
+      _firstvx[objType][szindx  ] = pntindx;
+      _sizesvx[objType][szindx++] = iter->cDataCopy(point_array, pntindx);
+//      _sizesvx[objType][szindx++] = iter->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+
+   auto lineCopy = [this, &szindx, &pntindx, &point_array, &objType](TrxWire* iter)
+   {
+      _firstvx[objType][szindx  ] = pntindx;
+      _sizesvx[objType][szindx++] = iter->lDataCopy(point_array, pntindx);
+//      _sizesvx[objType][szindx++] = iter->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+
+   //====================================================================
+   // collect all vertexes and copy them in the point_array
+   for( auto koko : {OTline,OTcnvx,OTncvx,OTcntr})
+   {
+      objType = koko;
+      if  (_vobjnum[objType] > 0)
+      {
+         szindx  = 0;
+         controlSize += _vrtxnum[objType];
+         _firstvx[objType] = DEBUG_NEW int[_vobjnum[objType]];
+         _sizesvx[objType] = DEBUG_NEW int[_vobjnum[objType]];
+         switch (objType)
+         {
+            case OTline:// collect the vertexes of all wires central lines
+                         std::for_each(_line_data.cbegin(), _line_data.cend(), lineCopy);
+                         break;
+            case OTcnvx: // collect all convex polygons vertexes
+                         std::for_each(_cnvx_data.cbegin(), _cnvx_data.cend(), dataCopy);
+                         break;
+            case OTncvx:// collect all non-convex polygons vertexes
+                         pntindxNCVX = pntindx; // needed for index gathering below
+                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
+                         break;
+            case OTcntr:// collect the vertexes of all contours (only non-filled objects here)
+                         std::for_each(_cont_data.cbegin(), _cont_data.cend(), dataCopy);
+                         std::for_each(_txto_data.cbegin(), _txto_data.cend(), dataCopy);
+                         break;
+            default: assert(false);
+         }
+         assert(pntindx == controlSize       );
+         assert(szindx  == _vobjnum[objType] );
+      }
+   }
+
+   //====================================================================
+   // collect all indexing (non-convex objects only) and copy them in the index_array
+   if  (_vobjnum[OTncvx] > 0)
+   {
+      szindx  = 0;
+      if (NULL != index_array)
+      {
+         assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
+         if (0 < _iobjnum[ITtria])
+         {
+            _sizesix[ITtria] = DEBUG_NEW GLsizei[_iobjnum[ITtria]];
+            _firstix[ITtria] = DEBUG_NEW GLuint[_iobjnum[ITtria]];
+         }
+         if (0 < _iobjnum[ITtstr])
+         {
+            _sizesix[ITtstr] = DEBUG_NEW GLsizei[_iobjnum[ITtstr]];
+            _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
+         }
+      }
+      unsigned size_index[IDX_TYPES];
+      unsigned index_offset[IDX_TYPES];
+      size_index[ITtria]   = size_index[ITtstr] = 0u;
+      index_offset[ITtria] = _index_array_offset;
+      index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
+      for (auto CSH : _ncvx_data)
+      // shapes in the current translation (layer within the cell)
+         if (NULL != CSH->tdata())
+            collectIndexs( index_array   ,
+                           CSH->tdata()  ,
+                           size_index    ,
+                           index_offset  ,
+                           pntindxNCVX
+                         );
+      assert(  size_index[ITtria] == _iobjnum[ITtria]);
+      assert(  size_index[ITtstr] == _iobjnum[ITtstr]);
+      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
+      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
+   }
+}
 
 void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
@@ -376,12 +475,57 @@ void trend::TenderLay::collect(GLuint pbuf, GLuint ibuf)
 
    //---------------------------------------------------------
    // Fill-up the buffers with data and indexes for drawing
-   for( auto TLAY : _layData)
-      TLAY->collect(cpoint_array, cindex_array);
+   for( auto layChunk : _layData)
+      layChunk->collect(cpoint_array, cindex_array);
 
    // Unmap the buffers
 //   trend::dumpOGLArrayFloat(cpoint_array, _num_total_points );
    DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
+   if (0 != _ibuffer)
+      DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
+}
+
+
+void trend::TenderLay::collectGLM(GLuint pbuf, GLuint ibuf)
+{
+//   TNDR_GLDATAT* cpoint_array = NULL;
+   unsigned int* cindex_array = NULL;
+   _pbuffer = pbuf;
+   _ibuffer = ibuf;
+   //---------------------------------------------------------
+   // bind the buffers & get the reference to the OGL data&index arrays
+//   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
+//   DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                   ,
+//                2 * _num_total_points * sizeof(TNDR_GLDATAT),
+//                nullptr                                     ,
+//                GL_STATIC_DRAW                              )
+//   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   if (0 != _ibuffer)
+   {
+      DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
+      DBGL_CALL(glBufferData,GL_ELEMENT_ARRAY_BUFFER    ,
+                   _num_total_indexs * sizeof(unsigned) ,
+                   nullptr                              ,
+                   GL_STATIC_DRAW                    )
+      cindex_array = (unsigned int*)DBGL_CALL(glMapBuffer,GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+   }
+
+   TPVX cpoint_array(_num_total_points);
+   //---------------------------------------------------------
+   // Fill-up the buffers with data and indexes for drawing
+   for( auto layChunk : _layData)
+      layChunk->collectGLM(cpoint_array, cindex_array);
+
+   size_t koko = byteSize(cpoint_array);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
+   DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                ,
+             byteSize(cpoint_array)                      ,
+             &(cpoint_array[0])                          ,
+             GL_STATIC_DRAW                              )
+   
+   // Unmap the buffers
+//   trend::dumpOGLArrayFloat(cpoint_array, _num_total_points );
+//   DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
    if (0 != _ibuffer)
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 }
@@ -883,19 +1027,21 @@ bool trend::Tenderer::collect()
    DBGL_CALL(glGenBuffers,_num_ogl_buffers,_ogl_buffers)
    unsigned current_buffer = 0;
    //
-   // collect the point arrays
-   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      if (0 == CLAY->total_points())
+   // collect the point & index arrays across all visible cells for every layer
+   // separately. This is effectively all vertexes of all visible TDT shapes
+   // TDT cell structure at this stage (i.e. after traversing) is transparent
+   for (auto layer : _data)
+   {//... layer by layer
+      if (0 == layer->total_points())
       {
-         assert(0 != CLAY->total_strings());
+         assert(0 != layer->total_strings());
          continue;
       }
       assert(current_buffer < _num_ogl_buffers);
       GLuint pbuf = _ogl_buffers[current_buffer++];
-      assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
-      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->collect(/*_drawprop->layerFilled(CLAY()),*/ pbuf, ibuf);
+      assert( (0 == layer->total_indexs()) || (current_buffer < _num_ogl_buffers) );
+      GLuint ibuf = (0 == layer->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
+      layer->collectGLM(pbuf, ibuf);
    }
 
    checkOGLError("collect");
@@ -911,11 +1057,10 @@ bool trend::Tenderer::collect()
                    nullptr                             ,
                    GL_DYNAMIC_DRAW                    )
       unsigned int* sindex_array = (unsigned int*)DBGL_CALL(glMapBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
-      for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+      for (auto layer : _data)
       {
-         if (0 == CLAY->total_slctdx())
-            continue;
-         CLAY->collectSelected(sindex_array);
+         if (0 == layer->total_slctdx()) continue;
+         layer->collectSelected(sindex_array);
 //         trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );
       }
 //      trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );

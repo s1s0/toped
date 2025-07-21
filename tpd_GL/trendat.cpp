@@ -479,6 +479,14 @@ unsigned trend::TrxCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
+unsigned trend::TrxCnvx::cDataCopy(TPVX& array, unsigned& pindex)
+{
+   assert(_csize);
+   for ( unsigned i = 0; i < 2*_csize; i+=2)
+      array[pindex++] = TPX((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1]);
+   return _csize;
+}
+
 void trend::TrxCnvx::drctDrawContour()
 {
    DBGL_CALL(glBegin,GL_LINE_LOOP)
@@ -503,6 +511,16 @@ unsigned  trend::TrxBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
    array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
    array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
+   return _csize;
+}
+
+unsigned  trend::TrxBox::cDataCopy(TPVX& array, unsigned& pindex)
+{
+   assert(_csize);
+   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[1]);
+   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[1]);
+   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[3]);
+   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[3]);
    return _csize;
 }
 
@@ -586,6 +604,14 @@ unsigned trend::TrxWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    memcpy(&(array[pindex]), _ldata, 2 * sizeof(TNDR_GLDATAT) * _lsize);
 #endif
    pindex += 2 * _lsize;
+   return _lsize;
+}
+
+unsigned trend::TrxWire::lDataCopy(TPVX& array, unsigned& pindex)
+{
+   assert(_lsize);
+   for (unsigned i = 0; i < 2 * _lsize; i+=2)
+      array[pindex++] = TPX((TNDR_GLDATAT)_ldata[i], (TNDR_GLDATAT)_ldata[i+1]);
    return _lsize;
 }
 
@@ -695,6 +721,13 @@ unsigned trend::TrxTextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
 #endif
    pindex += 8;
+   return 4;
+}
+
+unsigned trend::TrxTextOvlBox::cDataCopy(TPVX& array, unsigned& pindex)
+{
+   for (unsigned i = 0; i <  8; i+=2)
+      array[pindex++] = TPX((TNDR_GLDATAT)_obox[i], (TNDR_GLDATAT)_obox[i+1]);
    return 4;
 }
 

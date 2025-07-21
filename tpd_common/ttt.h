@@ -65,8 +65,8 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 //typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
-//typedef glm::ivec2              VX  ; // Vertex
-//typedef std::vector<VX>         TVXX; // TDT Vertexes
+typedef glm::vec2               TPX  ; // single 2D verteX
+typedef std::vector<TPX>        TPVX ; // array of 2D Vertexes
 
 //=============================================================================
 // Some common constants
