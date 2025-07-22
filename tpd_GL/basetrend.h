@@ -426,6 +426,9 @@ namespace trend {
          unsigned          _num_total_strings;
          bool              _filled;
          bool              _reusable;
+         void              DEBUGprintOGLdata(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX &point_array, unsigned int *size_index);
+
+
 //         bool              _rend3D;
    };
 

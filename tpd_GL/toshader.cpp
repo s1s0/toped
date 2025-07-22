@@ -59,7 +59,9 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset))
+   size_t koko = 2*sizeof(/*TPX*/TNDR_GLDATAT) * _point_array_offset;
+   printf("Offset in the vertex buffer: %d\n", koko);
+   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
    // ... and here we go ...
    drawTriQuads();
    TRENDC->setUniVarui(glslu_in_StippleEn, 0);
@@ -114,6 +116,7 @@ void trend::ToshaderTV::drawTriQuads()
          for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
          {
             DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
+            printf("DRAW TRIA: Offset: %d; Size: %d \n", _firstix[ITtria][i], _sizesix[ITtria][i]);
          }
       }
       if (_iobjnum[ITtstr] > 0)
@@ -122,7 +125,11 @@ void trend::ToshaderTV::drawTriQuads()
          assert(_firstix[ITtstr]);
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
          for (unsigned i= 0; i < _iobjnum[ITtstr]; i++)
+         {
             DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, _firstix[ITtstr][i])
+            printf("DRAW STRP: Offset: %d; Size: %d \n", _firstix[ITtstr][i], _sizesix[ITtstr][i]);
+         }
+
       }
    }
 }
@@ -209,7 +216,7 @@ void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reus
 
 void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, _num_total_points, _num_total_indexs);
 }
 
 bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)

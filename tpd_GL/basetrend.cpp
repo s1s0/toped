@@ -227,6 +227,35 @@ trend::TrendTV::~TrendTV()
    // Don't delete  _tmatrix. It's only a reference to it here
 }
 
+void trend::TrendTV::DEBUGprintOGLdata(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX &point_array, unsigned int *size_index)
+{
+   unsigned i = start;
+   for (auto boza : point_array)
+   {
+      printf("%3i ->X: %f; Y: %f\n", i++, boza.x, boza.y);
+   }
+   
+   for (i = 0; i < size_index[ITtria]; i++)
+   {
+      unsigned findex = _firstix[ITtria][i]/sizeof(unsigned);
+      printf("Triangle  index %d -> Offset: %d ; Size: %d\n", i, findex, _sizesix[ITtria][i]);
+      printf("       Indexes:");
+      for (GLsizei j = 0; j < _sizesix[ITtria][i]; j++)
+         printf(" %d", index_array[findex+j]);
+      printf("\n");
+   }
+   
+   for (i = 0; i < size_index[ITtstr]; i++)
+   {
+      unsigned findex = _firstix[ITtstr][i]/sizeof(unsigned);
+      printf("TriStrips index %d -> Offset: %d ; Size: %d\n", i, findex, _sizesix[ITtstr][i]);
+      printf("       Indexes:");
+      for (GLsizei j = 0; j < _sizesix[ITtstr][i]; j++)
+         printf(" %d", index_array[findex+j]);
+      printf("\n");
+   }
+}
+
 //=============================================================================
 //
 // class TrendLay

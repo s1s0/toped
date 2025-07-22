@@ -84,10 +84,12 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChai
       }
    }
 }
+
 void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
 {
    // initialise the indexing
-   unsigned    pntindx     = 0;
+#warning: fix _point_array_offset (remove */2) all over the place! ... including driwing... here as well!
+   unsigned    pntindx     = _point_array_offset;
    unsigned    szindx      = 0;
    unsigned    pntindxNCVX = 0;
    unsigned    controlSize = 0; // used only in asserts
@@ -139,7 +141,7 @@ void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
                          break;
             default: assert(false);
          }
-         assert(pntindx == controlSize       );
+         assert(pntindx == controlSize + _point_array_offset);
          assert(szindx  == _vobjnum[objType] );
       }
    }
@@ -181,6 +183,8 @@ void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
       assert(  size_index[ITtstr] == _iobjnum[ITtstr]);
       assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
       assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
+      
+      DEBUGprintOGLdata(0, _firstix, _sizesix, index_array, point_array, size_index);
    }
 }
 
