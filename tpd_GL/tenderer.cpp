@@ -88,12 +88,11 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChai
 void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
 {
    // initialise the indexing
-#warning: fix _point_array_offset (remove */2) all over the place! ... including driwing... here as well!
-   unsigned    pntindx     = _point_array_offset;
+#warning: fix _point_array_offset (remove */2) all over the place! ... including selected!
+   unsigned    pntindx     = 0;//_point_array_offset;
    unsigned    szindx      = 0;
-   unsigned    pntindxNCVX = 0;
    unsigned    controlSize = 0; // used only in asserts
-   ObjectTypes objType     = OTcntr;
+   ObjectTypes objType        ;
 
    //====================================================================
    // Some lambda functions (to put some fun in the code :) )
@@ -101,20 +100,67 @@ void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
    auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] <typename T> (T* iter)
    {
       _firstvx[objType][szindx  ] = pntindx;
-      _sizesvx[objType][szindx++] = iter->cDataCopy(point_array, pntindx);
-//      _sizesvx[objType][szindx++] = iter->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+      _sizesvx[objType][szindx++] = iter->cDataCopy(point_array, pntindx, _point_array_offset);
    };
 
    auto lineCopy = [this, &szindx, &pntindx, &point_array, &objType](TrxWire* iter)
    {
       _firstvx[objType][szindx  ] = pntindx;
-      _sizesvx[objType][szindx++] = iter->lDataCopy(point_array, pntindx);
-//      _sizesvx[objType][szindx++] = iter->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+      _sizesvx[objType][szindx++] = iter->lDataCopy(point_array, pntindx, _point_array_offset);
    };
 
    //====================================================================
-   // collect all vertexes and copy them in the point_array
-   for( auto koko : {OTline,OTcnvx,OTncvx,OTcntr})
+   // deal with non-convex polygons
+   if  (_vobjnum[OTncvx] > 0)
+   {// collect all non-convex polygons
+      szindx  = 0;
+      objType = OTncvx;
+      controlSize += _vrtxnum[objType];
+      _firstvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
+      _sizesvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
+      if (NULL != index_array)
+      {
+         assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
+         if (0 < _iobjnum[ITtria])
+         {
+            _sizesix[ITtria] = DEBUG_NEW GLsizei[_iobjnum[ITtria]];
+            _firstix[ITtria] = DEBUG_NEW GLuint[_iobjnum[ITtria]];
+         }
+         if (0 < _iobjnum[ITtstr])
+         {
+            _sizesix[ITtstr] = DEBUG_NEW GLsizei[_iobjnum[ITtstr]];
+            _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
+         }
+      }
+      unsigned size_index[IDX_TYPES];
+      unsigned index_offset[IDX_TYPES];
+      size_index[ITtria] = size_index[ITtstr] = 0u;
+      index_offset[ITtria] = _index_array_offset;
+      index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
+      for (auto CSH : _ncvx_data)
+      {
+         if (NULL != CSH->tdata())
+            collectIndexs( index_array     ,
+                           CSH->tdata()    ,
+                           size_index      ,
+                           index_offset    ,
+                           pntindx
+                         );
+         _firstvx[OTncvx][szindx  ] = pntindx;
+         _sizesvx[OTncvx][szindx++] = CSH->cDataCopy(point_array, pntindx, _point_array_offset);
+      }
+      assert(size_index[ITtria] == _iobjnum[ITtria]);
+      assert(size_index[ITtstr] == _iobjnum[ITtstr]);
+      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
+      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
+
+      assert(pntindx == controlSize);
+      assert(szindx  == _vobjnum[OTncvx]);
+   }
+
+   //====================================================================
+   // collect all other vertexes and copy them in the point_array
+   for( auto koko : {OTcnvx, OTline, OTcntr})
    {
       objType = koko;
       if  (_vobjnum[objType] > 0)
@@ -131,26 +177,52 @@ void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
             case OTcnvx: // collect all convex polygons vertexes
                          std::for_each(_cnvx_data.cbegin(), _cnvx_data.cend(), dataCopy);
                          break;
-            case OTncvx:// collect all non-convex polygons vertexes
-                         pntindxNCVX = pntindx; // needed for index gathering below
-                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
-                         break;
+//            case OTncvx:// collect all non-convex polygons vertexes
+//                         pntindxNCVX = pntindx; // needed for index gathering below
+//                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
+//                         break;
             case OTcntr:// collect the vertexes of all contours (only non-filled objects here)
                          std::for_each(_cont_data.cbegin(), _cont_data.cend(), dataCopy);
                          std::for_each(_txto_data.cbegin(), _txto_data.cend(), dataCopy);
                          break;
             default: assert(false);
          }
-         assert(pntindx == controlSize + _point_array_offset);
+         assert(pntindx == controlSize);
          assert(szindx  == _vobjnum[objType] );
       }
    }
+}
+
+void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
+{
+   // initialise the indexing
+   unsigned pntindx     = 0;
+   unsigned szindx      = 0;
+   unsigned controlSize = 0; // used only in asserts
+   ObjectTypes objType;//     = OTcntr;
 
    //====================================================================
-   // collect all indexing (non-convex objects only) and copy them in the index_array
-   if  (_vobjnum[OTncvx] > 0)
+   // Some lambda functions (to put some fun in the code :) )
+   auto lineCopy = [this, &szindx, &pntindx, &point_array, &objType](TrxWire* iter)
    {
+      _firstvx[objType][szindx  ] = pntindx/2;
+      _sizesvx[objType][szindx++] = iter->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+
+   auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] <typename T> (T* iter)
+   {
+      _firstvx[objType][szindx  ] = pntindx/2;
+      _sizesvx[objType][szindx++] = iter->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+   };
+   //====================================================================
+
+   if  (_vobjnum[OTncvx] > 0)
+   {// collect all non-convex polygons
       szindx  = 0;
+      objType = OTncvx;
+      controlSize += 2*_vrtxnum[objType];
+      _firstvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
+      _sizesvx[OTncvx] = DEBUG_NEW int[_vobjnum[OTncvx]];
       if (NULL != index_array)
       {
          assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
@@ -165,55 +237,38 @@ void trend::TenderTV::collectGLM(TPVX& point_array, unsigned int* index_array)
             _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
          }
       }
-      unsigned size_index[IDX_TYPES];
-      unsigned index_offset[IDX_TYPES];
-      size_index[ITtria]   = size_index[ITtstr] = 0u;
+      unsigned size_index[4];
+      unsigned index_offset[4];
+      size_index[ITtria] = size_index[ITtstr] = 0u;
       index_offset[ITtria] = _index_array_offset;
       index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
+//      unsigned boza = 0;
+//      printf("----------------\n");
       for (auto CSH : _ncvx_data)
-      // shapes in the current translation (layer within the cell)
+      { // shapes in the current translation (layer within the cell)
+//         printf("*%4d: %4d\n", boza++, pntindx/2);
          if (NULL != CSH->tdata())
-            collectIndexs( index_array   ,
-                           CSH->tdata()  ,
-                           size_index    ,
-                           index_offset  ,
-                           pntindxNCVX
+            collectIndexs( index_array     ,
+                           CSH->tdata()    ,
+                           size_index      ,
+                           index_offset    ,
+                           pntindx/2
                          );
-      assert(  size_index[ITtria] == _iobjnum[ITtria]);
-      assert(  size_index[ITtstr] == _iobjnum[ITtstr]);
+         _firstvx[OTncvx][szindx  ] = pntindx/2;
+         _sizesvx[OTncvx][szindx++] = CSH->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+
+      }
+      assert(size_index[ITtria] == _iobjnum[ITtria]);
+      assert(size_index[ITtstr] == _iobjnum[ITtstr]);
       assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
       assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
-      
-      DEBUGprintOGLdata(0, _firstix, _sizesix, index_array, point_array, size_index);
+      assert(pntindx == controlSize);
+      assert(szindx  == _vobjnum[OTncvx]);
    }
-}
-
-void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
-{
-   // initialise the indexing
-   unsigned    pntindx     = 0;
-   unsigned    szindx      = 0;
-   unsigned    pntindxNCVX = 0;
-   unsigned    controlSize = 0; // used only in asserts
-   ObjectTypes objType     = OTcntr;
-
-   //====================================================================
-   // Some lambda functions (to put some fun in the code :) )
-   auto dataCopy = [this, &szindx, &pntindx, &point_array, &objType] <typename T> (T* iter)
-   {
-      _firstvx[objType][szindx  ] = pntindx/2;
-      _sizesvx[objType][szindx++] = iter->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-   };
-
-   auto lineCopy = [this, &szindx, &pntindx, &point_array, &objType](TrxWire* iter)
-   {
-      _firstvx[objType][szindx  ] = pntindx/2;
-      _sizesvx[objType][szindx++] = iter->lDataCopy(&(point_array[_point_array_offset]), pntindx);
-   };
 
    //====================================================================
    // collect all vertexes and copy them in the point_array
-   for( auto koko : {OTline,OTcnvx,OTncvx,OTcntr})
+   for( auto koko : {OTcnvx, OTline, OTcntr})
    {
       objType = koko;
       if  (_vobjnum[objType] > 0)
@@ -230,10 +285,10 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
             case OTcnvx: // collect all convex polygons vertexes
                          std::for_each(_cnvx_data.cbegin(), _cnvx_data.cend(), dataCopy);
                          break;
-            case OTncvx:// collect all non-convex polygons vertexes
-                         pntindxNCVX = pntindx; // needed for index gathering below
-                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
-                         break;
+//            case OTncvx:// collect all non-convex polygons vertexes
+//                         pntindxNCVX = pntindx; // needed for index gathering below
+//                         std::for_each(_ncvx_data.cbegin(), _ncvx_data.cend(), dataCopy);
+//                         break;
             case OTcntr:// collect the vertexes of all contours (only non-filled objects here)
                          std::for_each(_cont_data.cbegin(), _cont_data.cend(), dataCopy);
                          std::for_each(_txto_data.cbegin(), _txto_data.cend(), dataCopy);
@@ -243,45 +298,6 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
          assert(pntindx == controlSize       );
          assert(szindx  == _vobjnum[objType] );
       }
-   }
-
-   //====================================================================
-   // collect all indexing (non-convex objects only) and copy them in the index_array
-   if  (_vobjnum[OTncvx] > 0)
-   {
-      szindx  = 0;
-      if (NULL != index_array)
-      {
-         assert(_iobjnum[ITtria] + _iobjnum[ITtstr]);
-         if (0 < _iobjnum[ITtria])
-         {
-            _sizesix[ITtria] = DEBUG_NEW GLsizei[_iobjnum[ITtria]];
-            _firstix[ITtria] = DEBUG_NEW GLuint[_iobjnum[ITtria]];
-         }
-         if (0 < _iobjnum[ITtstr])
-         {
-            _sizesix[ITtstr] = DEBUG_NEW GLsizei[_iobjnum[ITtstr]];
-            _firstix[ITtstr] = DEBUG_NEW GLuint[_iobjnum[ITtstr]];
-         }
-      }
-      unsigned size_index[IDX_TYPES];
-      unsigned index_offset[IDX_TYPES];
-      size_index[ITtria]   = size_index[ITtstr] = 0u;
-      index_offset[ITtria] = _index_array_offset;
-      index_offset[ITtstr] = index_offset[ITtria] + _indxnum[ITtria];
-      for (auto CSH : _ncvx_data)
-      // shapes in the current translation (layer within the cell)
-         if (NULL != CSH->tdata())
-            collectIndexs( index_array   ,
-                           CSH->tdata()  ,
-                           size_index    ,
-                           index_offset  ,
-                           pntindxNCVX/2
-                         );
-      assert(  size_index[ITtria] == _iobjnum[ITtria]);
-      assert(  size_index[ITtstr] == _iobjnum[ITtstr]);
-      assert(index_offset[ITtria] == (_index_array_offset + _indxnum[ITtria]));
-      assert(index_offset[ITtstr] == (_index_array_offset + _indxnum[ITtria] + _indxnum[ITtstr] ));
    }
 }
 
@@ -1046,6 +1062,7 @@ bool trend::Tenderer::collect()
       assert( (0 == layer->total_indexs()) || (current_buffer < _num_ogl_buffers) );
       GLuint ibuf = (0 == layer->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       layer->collectGLM(pbuf, ibuf);
+//      layer->collect(pbuf, ibuf);
    }
 
    checkOGLError("collect");

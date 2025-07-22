@@ -173,7 +173,7 @@ namespace trend {
                                     _cdata(pdata), _csize(psize){}
          virtual          ~TrxCnvx() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual unsigned  cDataCopy(TPVX&, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
          unsigned          csize()     {return _csize;}
@@ -191,7 +191,7 @@ namespace trend {
                            TrxBox(const int4b* pdata) : TrxCnvx(pdata, 4) {}
          virtual          ~TrxBox() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual unsigned  cDataCopy(TPVX&, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
    };
@@ -233,7 +233,7 @@ namespace trend {
          virtual void      Tesselate();
          virtual void      setTeselData(const TessellPoly*) {assert(false); /*if you hit this assert, use Tesselate method!*/}
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual unsigned  lDataCopy(TPVX&, unsigned&);
+         virtual unsigned  lDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawFill();
          virtual void      drctDrawCLine();
          unsigned          lsize()                 {return _lsize;}
@@ -313,7 +313,7 @@ namespace trend {
                            TrxTextOvlBox(const DBbox&, const CTM&);
          virtual          ~TrxTextOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual unsigned  cDataCopy(TPVX&, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
       protected:
          int4b             _obox[8];

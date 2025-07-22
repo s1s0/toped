@@ -479,11 +479,11 @@ unsigned trend::TrxCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
-unsigned trend::TrxCnvx::cDataCopy(TPVX& array, unsigned& pindex)
+unsigned trend::TrxCnvx::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
 {
    assert(_csize);
    for ( unsigned i = 0; i < 2*_csize; i+=2)
-      array[pindex++] = TPX((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1]);
+      array[offset+pindex++] = TPX((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1]);
    return _csize;
 }
 
@@ -514,13 +514,13 @@ unsigned  trend::TrxBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
-unsigned  trend::TrxBox::cDataCopy(TPVX& array, unsigned& pindex)
+unsigned  trend::TrxBox::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
 {
    assert(_csize);
-   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[1]);
-   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[1]);
-   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[3]);
-   array[pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[3]);
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[1]);
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[1]);
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_cdata[2], (TNDR_GLDATAT)_cdata[3]);
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_cdata[0], (TNDR_GLDATAT)_cdata[3]);
    return _csize;
 }
 
@@ -607,11 +607,11 @@ unsigned trend::TrxWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _lsize;
 }
 
-unsigned trend::TrxWire::lDataCopy(TPVX& array, unsigned& pindex)
+unsigned trend::TrxWire::lDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
 {
    assert(_lsize);
    for (unsigned i = 0; i < 2 * _lsize; i+=2)
-      array[pindex++] = TPX((TNDR_GLDATAT)_ldata[i], (TNDR_GLDATAT)_ldata[i+1]);
+      array[offset+pindex++] = TPX((TNDR_GLDATAT)_ldata[i], (TNDR_GLDATAT)_ldata[i+1]);
    return _lsize;
 }
 
@@ -724,10 +724,10 @@ unsigned trend::TrxTextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return 4;
 }
 
-unsigned trend::TrxTextOvlBox::cDataCopy(TPVX& array, unsigned& pindex)
+unsigned trend::TrxTextOvlBox::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
 {
    for (unsigned i = 0; i <  8; i+=2)
-      array[pindex++] = TPX((TNDR_GLDATAT)_obox[i], (TNDR_GLDATAT)_obox[i+1]);
+      array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox[i], (TNDR_GLDATAT)_obox[i+1]);
    return 4;
 }
 
