@@ -512,16 +512,10 @@ void trend::TenderLay::collectGLM(GLuint pbuf, GLuint ibuf)
    unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
    _ibuffer = ibuf;
-   //---------------------------------------------------------
-   // bind the buffers & get the reference to the OGL data&index arrays
-//   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
-//   DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                   ,
-//                2 * _num_total_points * sizeof(TNDR_GLDATAT),
-//                nullptr                                     ,
-//                GL_STATIC_DRAW                              )
-//   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY);
    if (0 != _ibuffer)
    {
+      //---------------------------------------------------------
+      // bind the index buffer & get the reference to the OGL index arrays
       DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
       DBGL_CALL(glBufferData,GL_ELEMENT_ARRAY_BUFFER    ,
                    _num_total_indexs * sizeof(unsigned) ,
@@ -530,22 +524,22 @@ void trend::TenderLay::collectGLM(GLuint pbuf, GLuint ibuf)
       cindex_array = (unsigned int*)DBGL_CALL(glMapBuffer,GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
    }
 
-   TPVX cpoint_array(_num_total_points);
    //---------------------------------------------------------
+   // For the vertex buffer use std::vector structure i.e. TPVX
+   TPVX cpoint_array(_num_total_points);
    // Fill-up the buffers with data and indexes for drawing
    for( auto layChunk : _layData)
       layChunk->collectGLM(cpoint_array, cindex_array);
 
-   size_t koko = byteSize(cpoint_array);
+   // get the vertex data transferred to OGL
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
    DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                ,
              byteSize(cpoint_array)                      ,
              &(cpoint_array[0])                          ,
              GL_STATIC_DRAW                              )
    
-   // Unmap the buffers
-//   trend::dumpOGLArrayFloat(cpoint_array, _num_total_points );
-//   DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
+   // Unmap the index buffer. This should transfer the data
+   // to OGL
    if (0 != _ibuffer)
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 }
@@ -578,10 +572,8 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
    index_soffset[STllps] = index_soffset[STlstr] + _asindxs[STlstr];
    index_soffset[STlnes] = index_soffset[STllps] + _asindxs[STllps];
 
-
-   for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
+   for (auto cchunk : _slct_data)
    {
-      TrxSelected* cchunk = *SSL;
       switch (cchunk->type())
       {
          case STlstr : // LINES
@@ -1073,7 +1065,8 @@ bool trend::Tenderer::collect()
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
       DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
-      DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER           ,
+#warning Change the GL_DYNAMIC_DRAW to GL_STATIC_DRAW!
+      DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER  ,
                    num_total_slctdx * sizeof(unsigned) ,
                    nullptr                             ,
                    GL_DYNAMIC_DRAW                    )
