@@ -59,7 +59,7 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
-#warning introduce a common function to calculate properly vertex array offsets for glVertexAttribPointer
+#warning: TODO! introduce a common function to calculate properly vertex array offsets for glVertexAttribPointer
    size_t koko = 2*sizeof(/*TPX*/TNDR_GLDATAT) * _point_array_offset;
 //   assert(0==koko);
    /*printf("Offset in the vertex buffer: %d\n", koko)*/;

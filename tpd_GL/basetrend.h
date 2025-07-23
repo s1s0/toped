@@ -394,8 +394,7 @@ namespace trend {
          void              register3DPoly  (Trx3DPoly*, const TessellPoly*);
          void              register3DWire  (Trx3DWire*);
 
-         virtual void      collectGLM(TPVX&, unsigned int*)  {assert(false);}
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*)  {assert(false);}
+         virtual void      collect(TPVX&, unsigned int*)  {assert(false);}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
          TrxCellRef*       swapRefCells(TrxCellRef*);
@@ -579,7 +578,7 @@ namespace trend {
 
                            TrendLay(bool);
          virtual          ~TrendLay();
-//#warning TODO! Change the parameters from const int4b* to const TVXX& to all box, poly, wire, text calls!
+#warning: TODO! Change the parameters from const int4b* to const TVXX& to all box, poly, wire, text calls!
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
          void              box  (const int4b*,                               const SGBitSet*, const CTM&);
@@ -600,7 +599,6 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawSelected() = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
-         virtual void      collect(GLuint, GLuint) { assert(false); }
          virtual void      collectGLM(GLuint, GLuint) { assert(false); }
          virtual void      collectSelected(unsigned int*) { assert(false); }
          unsigned          total_points() {return _num_total_points;}

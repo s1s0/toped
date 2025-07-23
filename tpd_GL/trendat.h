@@ -40,6 +40,14 @@
    #define TNDR_GLENUMT GL_INT
 #endif
 
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+//using namespace glm;
+typedef glm::vec2               TPX  ; // single 2D verteX
+typedef std::vector<TPX>        TPVX ; // array of 2D Vertexes
+
 //=============================================================================
 //
 // Tesselation classes
@@ -172,7 +180,6 @@ namespace trend {
                            TrxCnvx(const int4b* pdata, unsigned psize) :
                                     _cdata(pdata), _csize(psize){}
          virtual          ~TrxCnvx() {};
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
@@ -190,7 +197,6 @@ namespace trend {
       public:
                            TrxBox(const int4b* pdata) : TrxCnvx(pdata, 4) {}
          virtual          ~TrxBox() {};
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
@@ -232,7 +238,6 @@ namespace trend {
          virtual          ~TrxWire();
          virtual void      Tesselate();
          virtual void      setTeselData(const TessellPoly*) {assert(false); /*if you hit this assert, use Tesselate method!*/}
-         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  lDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawFill();
          virtual void      drctDrawCLine();
@@ -312,7 +317,6 @@ namespace trend {
       public:
                            TrxTextOvlBox(const DBbox&, const CTM&);
          virtual          ~TrxTextOvlBox() {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
       protected:
@@ -391,7 +395,6 @@ namespace trend {
       public:
                            TrxSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxCnvx(pdata, psize), TrxSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
@@ -403,7 +406,6 @@ namespace trend {
       public:
                            TrxSBox(const int4b* pdata, const SGBitSet* slist) :
                               TrxBox(pdata), TrxSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
@@ -423,7 +425,6 @@ namespace trend {
       public:
                            TrxSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxNcvx(pdata, psize), TrxSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
@@ -447,9 +448,7 @@ namespace trend {
       public:
                            TrxSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
                               TrxWire(pdata, psize, width, clo), TrxSelected(slist), _loffset(0u) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
-         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  lDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STlstr : STlnes);}
          virtual unsigned  ssize();
@@ -467,7 +466,6 @@ namespace trend {
                            TrxTextSOvlBox(const DBbox& box, const CTM& mtrx) :
                               TrxTextOvlBox(box, mtrx), TrxSelected(NULL) {}
          virtual          ~TrxTextSOvlBox() {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return STllps;}
          virtual unsigned  ssize(){ return 4;}

@@ -35,11 +35,6 @@
 #include <list>
 #include <set>
 #include <assert.h>
-// Include GLM
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_float3x3.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-//using namespace glm;
 
 //#pragma GCC diagnostic warning "-Wconversion"
 //=============================================================================
@@ -65,8 +60,6 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 //typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
-typedef glm::vec2               TPX  ; // single 2D verteX
-typedef std::vector<TPX>        TPVX ; // array of 2D Vertexes
 
 //=============================================================================
 // Some common constants

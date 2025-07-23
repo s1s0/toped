@@ -1,3 +1,5 @@
+find_package(glm REQUIRED)
+
 file( GLOB tpd_GL_headers     "*.h")
 file( GLOB tpd_GL_sources     "*.cpp")
 
@@ -15,6 +17,7 @@ target_include_directories(tpd_GL PUBLIC
 )
 target_link_libraries(tpd_GL PUBLIC
                          toped_compiler_flags
+                         glm::glm
 )
 
 #SET(lib_LTLIBRARIES_GL tpd_GL)

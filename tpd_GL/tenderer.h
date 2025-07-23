@@ -36,9 +36,7 @@ namespace trend {
       public:
                            TenderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TenderTV();
-
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*);
-         virtual void      collectGLM(TPVX&, unsigned int*);
+         virtual void      collect(TPVX&, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
       protected:
@@ -70,7 +68,6 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
-         virtual void      collect(GLuint, GLuint);
          virtual void      collectGLM(GLuint, GLuint);
          virtual void      collectSelected(unsigned int*);
 
