@@ -320,7 +320,8 @@ namespace trend {
          virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual void      drctDrawContour();
       protected:
-         int4b             _obox[8];
+         DBbox             _obox;
+//         int4b             _obox[8];
    };
    typedef std::list<TrxTextOvlBox*> RefTxtList;
 
@@ -569,13 +570,13 @@ namespace trend {
          real*             translation()  {return _translation;}
          const CTM&        ctm() const    {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
-         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
+         unsigned          cDataCopy(TPVX&, unsigned&);
          void              drctDrawContour();
       private:
          std::string       _name;
          real              _translation[16];
          CTM               _ctm;
-         TNDR_GLDATAT      _obox[8];
+         DBbox             _obox;
          word              _alphaDepth;
    };
 
