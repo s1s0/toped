@@ -763,6 +763,13 @@ unsigned trend::TrxSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxCnvx::cDataCopy(array, pindex);
 }
 
+unsigned trend::TrxSCnvx::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _offset = pindex;
+   return TrxCnvx::cDataCopy(array, pindex, offset);
+}
+
+
 unsigned trend::TrxSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
@@ -830,6 +837,12 @@ unsigned trend::TrxSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TrxBox::cDataCopy(array, pindex);
+}
+
+unsigned trend::TrxSBox::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _offset = pindex;
+   return TrxBox::cDataCopy(array, pindex, offset);
 }
 
 unsigned trend::TrxSBox::sDataCopy(unsigned* array, unsigned& pindex)
@@ -909,6 +922,12 @@ unsigned trend::TrxSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxCnvx::cDataCopy(array, pindex);
 }
 
+unsigned trend::TrxSNcvx::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _offset = pindex;
+   return TrxCnvx::cDataCopy(array, pindex, offset);
+}
+
 unsigned trend::TrxSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
@@ -965,10 +984,22 @@ unsigned trend::TrxSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return TrxCnvx::cDataCopy(array, pindex);
 }
 
+unsigned trend::TrxSWire::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _offset = pindex;
+   return TrxCnvx::cDataCopy(array, pindex, offset);
+}
+
 unsigned trend::TrxSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _loffset = pindex/2;
    return TrxWire::lDataCopy(array, pindex);
+}
+
+unsigned trend::TrxSWire::lDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _loffset = pindex;
+   return TrxWire::lDataCopy(array, pindex, offset);
 }
 
 unsigned trend::TrxSWire::ssize()
@@ -1074,6 +1105,12 @@ unsigned trend::TrxTextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TrxTextOvlBox::cDataCopy(array, pindex);
+}
+
+unsigned trend::TrxTextSOvlBox::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
+{
+   _offset = pindex;
+   return TrxTextOvlBox::cDataCopy(array, pindex, offset);
 }
 
 unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)

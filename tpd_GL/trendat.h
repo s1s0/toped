@@ -392,6 +392,7 @@ namespace trend {
                            TrxSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxCnvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -403,6 +404,7 @@ namespace trend {
                            TrxSBox(const int4b* pdata, const SGBitSet* slist) :
                               TrxBox(pdata), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -422,6 +424,7 @@ namespace trend {
                            TrxSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TrxNcvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STllps : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -445,7 +448,9 @@ namespace trend {
                            TrxSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
                               TrxWire(pdata, psize, width, clo), TrxSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  lDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return ((NULL == _slist) ? STlstr : STlnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -463,6 +468,7 @@ namespace trend {
                               TrxTextOvlBox(box, mtrx), TrxSelected(NULL) {}
          virtual          ~TrxTextSOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  cDataCopy(TPVX&, unsigned&, const unsigned);
          virtual SlctTypes type() { return STllps;}
          virtual unsigned  ssize(){ return 4;}
          virtual unsigned  sDataCopy(unsigned*, unsigned&);

@@ -615,14 +615,10 @@ void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
       DBGL_CALL(glGetBufferParameteriv, GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
       assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
    }
-   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-   {
-      (*TLAY)->draw(drawprop);
-   }
-   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
-   {
-      (*TLAY)->draw(drawprop);
-   }
+   for (auto TLAY : _layData)
+      TLAY->draw(drawprop);
+   for (auto TLAY : _reLayData)
+      TLAY->draw(drawprop);
 
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    if (0 != _ibuffer)
