@@ -664,34 +664,25 @@ void trend::TrxText::draw(bool fill, layprop::DrawProperties* drawprop) const
 //
 // class TrxTextOvlBox
 //
-trend::TrxTextOvlBox::TrxTextOvlBox(const DBbox& obox, const CTM& ctm)
-{
-   // Don't get confused here! It's not a stupid code. Think about
-   // boxes rotated to 45 deg for example and you'll see why
-   // obox * ctm is not possible
-   TP tp = TP(obox.p1().x(), obox.p1().y()) * ctm;
-   _obox[0] = tp.x();_obox[1] = tp.y();
-   tp = TP(obox.p2().x(), obox.p1().y()) * ctm;
-   _obox[2] = tp.x();_obox[3] = tp.y();
-   tp = TP(obox.p2().x(), obox.p2().y()) * ctm;
-   _obox[4] = tp.x();_obox[5] = tp.y();
-   tp = TP(obox.p1().x(), obox.p2().y()) * ctm;
-   _obox[6] = tp.x();_obox[7] = tp.y();
-}
-
+trend::TrxTextOvlBox::TrxTextOvlBox(const DBbox& obox, const CTM& ctm):
+   _obox          ( obox * ctm   )
+{}
 
 unsigned trend::TrxTextOvlBox::cDataCopy(TPVX& array, unsigned& pindex, const unsigned offset)
 {
-   for (unsigned i = 0; i <  8; i+=2)
-      array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox[i], (TNDR_GLDATAT)_obox[i+1]);
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox.p1().x(), (TNDR_GLDATAT)_obox.p1().y());
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox.p2().x(), (TNDR_GLDATAT)_obox.p1().y());
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox.p2().x(), (TNDR_GLDATAT)_obox.p2().y());
+   array[offset+pindex++] = TPX((TNDR_GLDATAT)_obox.p1().x(), (TNDR_GLDATAT)_obox.p2().y());
    return 4;
 }
 
 void trend::TrxTextOvlBox::drctDrawContour()
 {
    DBGL_CALL(glBegin,GL_LINE_LOOP)
-   for (unsigned i = 0; i < 4; i++)
-      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   assert(false);  // Used by Tolder. Tolder is scheduled for removing!
+//   for (unsigned i = 0; i < 4; i++)
+//      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
    DBGL_CALL0(glEnd)
 }
 
@@ -1050,8 +1041,9 @@ unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
 void trend::TrxTextSOvlBox::drctDrawSlctd()
 {
    DBGL_CALL(glBegin,GL_LINE_LOOP)
-   for (unsigned i = 0; i < 4; i++)
-      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   assert(false);  // Used by Tolder. Tolder is scheduled for removing!
+//   for (unsigned i = 0; i < 4; i++)
+//      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
    DBGL_CALL0(glEnd)
 }
 
@@ -1337,46 +1329,37 @@ trend::TrxCellRef::TrxCellRef(std::string name, const CTM& ctm, const DBbox& obo
                    word alphaDepth) :
    _name          ( name         ),
    _ctm           ( ctm          ),
+   _obox          ( obox * ctm   ),
    _alphaDepth    ( alphaDepth   )
 {
    _ctm.oglForm(_translation);
-   TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
-   _obox[0] = tp.x();_obox[1] = tp.y();
-   tp = TP(obox.p2().x(), obox.p1().y()) * _ctm;
-   _obox[2] = tp.x();_obox[3] = tp.y();
-   tp = TP(obox.p2().x(), obox.p2().y()) * _ctm;
-   _obox[4] = tp.x();_obox[5] = tp.y();
-   tp = TP(obox.p1().x(), obox.p2().y()) * _ctm;
-   _obox[6] = tp.x();_obox[7] = tp.y();
 }
-
 
 trend::TrxCellRef::TrxCellRef() :
-   _name       ( ""   ),
-   _ctm        (      ),
-   _alphaDepth ( 0    )
+   _name       ( ""     ),
+   _ctm        (        ),
+   _obox       (TP{0,0} ),
+   _alphaDepth (        )
 {
    _ctm.oglForm(_translation);
-   for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned  trend::TrxCellRef::cDataCopy(TPVX& array, unsigned& pindex)
 {
-#ifdef TENDERER_USE_FLOATS
-   for (unsigned i = 0; i <  8; i++)
-      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
-#else
-   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
-#endif
-   pindex += 8;
+//   assert(_csize);
+   array[pindex++] = TPX((TNDR_GLDATAT)_obox.p1().x(), (TNDR_GLDATAT)_obox.p1().y());
+   array[pindex++] = TPX((TNDR_GLDATAT)_obox.p2().x(), (TNDR_GLDATAT)_obox.p1().y());
+   array[pindex++] = TPX((TNDR_GLDATAT)_obox.p2().x(), (TNDR_GLDATAT)_obox.p2().y());
+   array[pindex++] = TPX((TNDR_GLDATAT)_obox.p1().x(), (TNDR_GLDATAT)_obox.p2().y());
    return 4;
 }
 
 void trend::TrxCellRef::drctDrawContour()
 {
    DBGL_CALL(glBegin,GL_LINE_LOOP)
-   for (unsigned i = 0; i < 4; i++)
-      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   assert(false);  // Used by Tolder. Tolder is scheduled for removing!
+//   for (unsigned i = 0; i < 4; i++)
+//      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
    DBGL_CALL0(glEnd)
 }
 

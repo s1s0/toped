@@ -88,7 +88,6 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TessellChai
 void trend::TenderTV::collect(TPVX& point_array, unsigned int* index_array)
 {
    // initialise the indexing
-#warning: TODO! fix _point_array_offset (remove */2) all over the place! ... including selected!
    unsigned    pntindx     = 0;//_point_array_offset;
    unsigned    szindx      = 0;
    unsigned    controlSize = 0; // used only in asserts
@@ -361,7 +360,7 @@ bool trend::TenderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
    return true;
 }
 
-void trend::TenderLay::collectGLM(GLuint pbuf, GLuint ibuf)
+void trend::TenderLay::collect(GLuint pbuf, GLuint ibuf)
 {
 //   TNDR_GLDATAT* cpoint_array = NULL;
    unsigned int* cindex_array = NULL;
@@ -563,16 +562,7 @@ trend::TenderRefLay::TenderRefLay() :
 
 void trend::TenderRefLay::collect(GLuint pbuf)
 {
-#warning: TODO! move vertex gathering to to glm!
-   TNDR_GLDATAT* cpoint_array = NULL;
    _pbuffer = pbuf;
-   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
-   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER              ,
-                2 * total_points() * sizeof(TNDR_GLDATAT) ,
-                nullptr                         ,
-                GL_DYNAMIC_DRAW               )
-   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY)
-
    // initialise the indexing
    unsigned pntindx = 0;
    unsigned  szindx  = 0;
@@ -586,23 +576,33 @@ void trend::TenderRefLay::collect(GLuint pbuf)
          _sizslix = DEBUG_NEW GLsizei[_asobjix];
       }
    }
+
+   TPVX cpoint_array(total_points());
    // collect the cell overlapping boxes
-   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
+   for (auto CSH : _cellRefBoxes)
    {
-      if (1 < (*CSH)->alphaDepth())
+      if (1 < CSH->alphaDepth())
       {
-         _firstvx[szindx  ] = pntindx/2;
-         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+         _firstvx[szindx  ] = pntindx;
+         _sizesvx[szindx++] = CSH->cDataCopy(cpoint_array, pntindx);
       }
    }
-   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+   for (auto CSH : _cellSRefBoxes)
    {
-      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
-      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx;
+      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = CSH->cDataCopy(cpoint_array, pntindx);
       szindx++;
    }
-   assert(pntindx == 2 * (_alvrtxs + _asindxs));
-   assert(szindx  ==     (_alobjvx + _asobjix));
+   assert(pntindx == (_alvrtxs + _asindxs));
+   assert(szindx  == (_alobjvx + _asobjix));
+
+
+   // get the vertex data transferred to OGL
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
+   DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                ,
+             byteSize(cpoint_array)                      ,
+             &(cpoint_array[0])                          ,
+             GL_STATIC_DRAW                              )
 
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -679,7 +679,7 @@ void trend::TenderMarks::collect(GLuint pbuf)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER              ,
                 2 * total_points() * sizeof(TNDR_GLDATAT) ,
                 nullptr                         ,
-                GL_DYNAMIC_DRAW               )
+                GL_STATIC_DRAW               )
    cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
    unsigned pntindx = 0;
@@ -906,8 +906,7 @@ bool trend::Tenderer::collect()
       GLuint pbuf = _ogl_buffers[current_buffer++];
       assert( (0 == layer->total_indexs()) || (current_buffer < _num_ogl_buffers) );
       GLuint ibuf = (0 == layer->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      layer->collectGLM(pbuf, ibuf);
-//      layer->collect(pbuf, ibuf);
+      layer->collect(pbuf, ibuf);
    }
 
    checkOGLError("collect");
@@ -918,11 +917,10 @@ bool trend::Tenderer::collect()
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
       DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
-#warning: TODO! Change the GL_DYNAMIC_DRAW to GL_STATIC_DRAW!
       DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER  ,
                    num_total_slctdx * sizeof(unsigned) ,
                    nullptr                             ,
-                   GL_DYNAMIC_DRAW                    )
+                   GL_STATIC_DRAW                    )
       unsigned int* sindex_array = (unsigned int*)DBGL_CALL(glMapBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
       for (auto layer : _data)
       {
@@ -1001,7 +999,7 @@ bool trend::Tenderer::grcCollect()
       }
       GLuint pbuf = _ogl_grc_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
-      CLAY->collectGLM(pbuf, ibuf);
+      CLAY->collect(pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
@@ -1012,6 +1010,7 @@ bool trend::Tenderer::grcCollect()
 
 bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
 {
+#warning: TODO! Use std::vector<glm::vec2> here
 //   unsigned allPoints = 0;
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
@@ -1039,7 +1038,7 @@ bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER                   ,
                 2 * _num_grid_points * sizeof(TNDR_GLDATAT)  ,
                 nullptr                                  ,
-                GL_DYNAMIC_DRAW                       )
+                GL_STATIC_DRAW                       )
    cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
    unsigned pnt = 0;
    for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
@@ -1076,10 +1075,11 @@ bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step, c
 
    TNDR_GLDATAT* cpoint_array = NULL;
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+#warning: TODO! Use std::vector<glm::vec2>
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER                       ,
                 2 * _num_ruler_ticks * sizeof(TNDR_GLDATAT),
                 nullptr                                    ,
-                GL_DYNAMIC_DRAW                       )
+                GL_STATIC_DRAW                       )
    cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
    unsigned pnt = 0;
    for (DBlineList::const_iterator CL = noniList.begin(); CL != noniList.end(); CL++)
