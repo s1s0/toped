@@ -93,6 +93,16 @@ enum QuadIdentificators{ qidNW = 0,
                          qidSW = 3,
                          qidNULL = 4};
 
+namespace trend {
+   enum RenderType{ rtTBD       // To be defined
+                  ,rtTocom      // command line
+                  ,rtTolder     // basic (i.e. openGL 1.1)
+                  ,rtTenderer   // VBO
+                  ,rtToshader   // shaders
+                  ,rtT3Der      // 3D with shaders
+   } ;
+}
+
 #if (__cplusplus < 201103L)
 enum SH_STATUS {
 #else

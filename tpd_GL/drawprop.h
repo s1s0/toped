@@ -373,6 +373,10 @@ namespace layprop {
          void                       allFills(NameList&) const;
          void                       allLines(NameList&) const;
          LayerDef                   getLayerNo(std::string name) const;
+      
+         void                       setRenderType(trend::RenderType rType) {_renderType = rType;}
+         trend::RenderType          renderType() {return _renderType;}
+
       private:
          typedef std::deque<LayStateList>            LayStateHistory;
          typedef std::map<std::string, LayStateList> LayStateMap;
@@ -411,6 +415,8 @@ namespace layprop {
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          PropertyState              _propertyState; //type of drawing
+         trend::RenderType          _renderType;
+
       public:
          static const tellRGB       _dfltColor;
          static const byte          _dfltFill[128];

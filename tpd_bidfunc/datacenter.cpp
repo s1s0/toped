@@ -893,11 +893,10 @@ void DataCenter::render3D(int W, int H)
    DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
    if (_TEDLIB())
    {
+//      TRENDC->set3D(true);
       trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H);
       if (NULL != cRenderer)
       {
-         cRenderer->set3Drendering();
-
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
             TpdPost::render_status(true);

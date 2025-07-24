@@ -564,7 +564,7 @@ void laydata::QTreeTmpl<DataT>::oglTraverse(trend::TrendBase& rend, const TObjDa
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the vast majority of the cases. A bit bigger code though.
    // Seems the bargain is worth it.
-   if ( slst && (!rend.rend3D()) )
+   if ( slst )
    {
       for (QuadsIter i = 0; i < _props._numObjects; i++)
       {

@@ -36,13 +36,6 @@
 
 namespace trend {
 
-   typedef enum { rtTBD        // To be defined
-                 ,rtTocom      // command line
-                 ,rtTolder     // basic (i.e. openGL 1.1)
-                 ,rtTenderer   // VBO
-                 ,rtToshader   // shaders
-                } RenderType;
-
    typedef struct {
       unsigned int   quadVAO   ; // Vertex Array Object
       unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
@@ -225,9 +218,8 @@ namespace trend {
    ///
    class TrendCenter {
       public:
-                                TrendCenter(bool, RenderType cmdLineReq=trend::rtTBD, bool sprtVbo=false, bool sprtShaders=false);
+                                TrendCenter(bool, RenderType cmdLineReq=rtTBD, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
-//         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
          trend::TrendBase*      makeCRenderer(int W, int H);         //!Get current renderer
@@ -273,7 +265,6 @@ namespace trend {
          trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
-         RenderType             _renderType;
    };
 }
 

@@ -29,6 +29,27 @@
 #define T3DER
 
 #include "toshader.h"
+namespace trend {
 
+   class T3Der : public Toshader {
+   public:
+                        T3Der( layprop::DrawProperties*, real UU);
+      virtual          ~T3Der();
+      virtual void      setLayer(const LayerDef&, bool);
+      virtual void      setHvrLayer(const LayerDef&);
+      virtual void      setGrcLayer(bool, const LayerDef&);
+      virtual bool      chunkExists(const LayerDef&, bool);
+      virtual void      draw();
+      virtual void      grcDraw();
+      virtual void      rlrDraw();
+      virtual void      grdDraw();
+   protected:
+      virtual void      setLayColor(const LayerDef& layer);
+      virtual void      setStipple();
+      virtual void      setLine(bool);
+   private:
+      void              windowVAO();
+   };
+}
 
 #endif  //T3DER

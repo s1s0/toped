@@ -34,6 +34,7 @@
 #include "tolder.h"
 #include "tenderer.h"
 #include "toshader.h"
+#include "t3der.h"
 #include "viewprop.h"
 
 
@@ -918,23 +919,35 @@ trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, b
    _cShaders        (              NULL),
    _activeFontName  (                  )
 {
-   if      (!gui)             _renderType = trend::rtTocom;
-   else if ( sprtShaders)     _renderType = trend::rtToshader;
-   else if ( sprtVbo    )     _renderType = trend::rtTenderer;
-   else                       _renderType = trend::rtTolder;
-   if ((cmdLineReq != trend::rtTBD) & (cmdLineReq < _renderType))
-      _renderType = cmdLineReq;
-   if (trend::rtToshader== _renderType)
+   RenderType                 renderType = trend::rtTBD;
+   if      (!gui)             renderType = trend::rtTocom;
+   else if ( sprtShaders)     renderType = trend::rtToshader;
+   else if ( sprtVbo    )     renderType = trend::rtTenderer;
+   else                       renderType = trend::rtTolder;
+   if ((cmdLineReq != trend::rtTBD) & (cmdLineReq < renderType))
+      renderType = cmdLineReq;
+   if (trend::rtToshader== renderType)
       _cShaders = DEBUG_NEW trend::Shaders();
+   
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+      drawProp->setRenderType(renderType);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
 {
+   RenderType renderType = trend::rtTBD;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+      renderType = drawProp->renderType();
+   PROPC->unlockDrawProp(drawProp, true);
+   
    switch (cmdLineReq)
    {
       case trend::rtTolder  :
       {
-         if (cmdLineReq > _renderType)
+         if (cmdLineReq > renderType)
             tell_log(console::MT_WARNING, "Platform dosn't support basic rendering as requested on the command line. Using text mode.");
          else
             tell_log(console::MT_INFO, "Basic rendering enforced from the command line.");
@@ -942,12 +955,12 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
       }
       case trend::rtTenderer:
       {
-         if (cmdLineReq > _renderType)
+         if (cmdLineReq > renderType)
          {
             std::string info = "Platform dosn't support VBO rendering as requested on the command line.";
-            if      (trend::rtTolder == _renderType)
+            if      (trend::rtTolder == renderType)
                info += "Using basic rendering.";
-            else if (trend::rtTocom  == _renderType)
+            else if (trend::rtTocom  == renderType)
                info += "Using text mode.";
             else
                assert(false);
@@ -959,14 +972,14 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
       }
       case trend::rtToshader:
       {
-         if (cmdLineReq > _renderType)
+         if (cmdLineReq > renderType)
          {
             std::string info = "Platform dosn't support shaders as requested on the command line.";
-            if      (trend::rtTenderer == _renderType)
+            if      (trend::rtTenderer == renderType)
                info += "Using VBO rendering.";
-            else if (trend::rtTolder == _renderType)
+            else if (trend::rtTolder == renderType)
                info += "Using basic rendering.";
-            else if (trend::rtTocom  == _renderType)
+            else if (trend::rtTocom  == renderType)
                info += "Using text mode.";
             else
                assert(false);
@@ -977,7 +990,7 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
          break;
       }
       case trend::rtTBD     : {
-         switch (_renderType)
+         switch (renderType)
          {
             case trend::rtTocom   : /* Don't clutter the command line with nonsence*/ break;
             case trend::rtTolder  : tell_log(console::MT_INFO,"Using basic rendering."); break;
@@ -994,34 +1007,44 @@ void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
 
 void trend::TrendCenter::initShaders(const std::string& codeDirectory)
 {
-   if (trend::rtToshader == _renderType)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      assert(_cShaders);
-      _cShaders->loadShadersCode(codeDirectory);
-      if (_cShaders->status())
+      if (trend::rtToshader <= drawProp->renderType())
       {
-         _cShaders->useProgram(glslp_VF);
-      }
-      else
-      {
-         wxLogDebug("Falling back to VBO rendering because of the errors above");
-         tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
-         _renderType = trend::rtTBD;//trend::rtTenderer;
+         assert(_cShaders);
+         _cShaders->loadShadersCode(codeDirectory);
+         if (_cShaders->status())
+         {
+            _cShaders->useProgram(glslp_VF);
+         }
+         else
+         {
+            wxLogDebug("Falling back to VBO rendering because of the errors above");
+            tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
+            drawProp->setRenderType(trend::rtTBD);//trend::rtTenderer;
+         }
       }
    }
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 void trend::TrendCenter::drawFrameBuffer()
 {
-   switch (_renderType) {
-      case trend::rtToshader:
-         assert(_cShaders);
-         _cShaders->drawFrameBuffer();
-         break;
-      default: assert(false); // TODO handled for Toshader only at this stage
-         break;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      switch (drawProp->renderType())
+      {
+         case trend::rtToshader:
+            assert(_cShaders);
+            _cShaders->drawFrameBuffer();
+            break;
+         default: assert(false); // TODO handled for Toshader only at this stage
+            break;
+      }
    }
-   
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
@@ -1038,7 +1061,7 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp))
    {
-      switch (_renderType)
+      switch (drawProp->renderType())
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
@@ -1052,6 +1075,15 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
                delete _cRenderer;
                _cRenderer = NULL;
             }
+            break;
+#warning: TODO - UNCOMMENT THIS!
+//         case trend::rtT3Der:
+//            _cRenderer = DEBUG_NEW trend::T3Der( drawProp, PROPC->UU() );
+//            if (!_cShaders->setFrameBuffer(W, H))
+//            {
+//               delete _cRenderer;
+//               _cRenderer = NULL;
+//            }
             break;
          default: assert(false); break;
       }
@@ -1092,7 +1124,7 @@ trend::TrendBase* trend::TrendCenter::makeHRenderer()
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp))
    {
-      switch (_renderType)
+      switch (drawProp->renderType())
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
@@ -1113,7 +1145,7 @@ trend::TrendBase* trend::TrendCenter::makeMRenderer(console::ACTIVE_OP& curOp)
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp))
    {
-      switch (_renderType)
+      switch (drawProp->renderType())
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::rtTolder   :
@@ -1135,7 +1167,7 @@ trend::TrendBase* trend::TrendCenter::makeZRenderer()
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp, layprop::prsSCR))
    {
-      switch (_renderType)
+      switch (drawProp->renderType())
       {
       case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
       case trend::rtTolder:
@@ -1156,7 +1188,7 @@ trend::TrendBase* trend::TrendCenter::makeDRenderer()
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp, layprop::prsDRC))
    {
-      switch (_renderType)
+      switch (drawProp->renderType())
       {
       case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
       case trend::rtTolder:
@@ -1238,28 +1270,33 @@ void trend::TrendCenter::destroyZRenderer()
 
 void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 {
-   // Parse the font library
-   TolderGlfFont* curFont = NULL;
-   switch (_renderType)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      case trend::rtTocom    : assert(false);          break;
-      case trend::rtTolder   :
-         curFont = DEBUG_NEW trend::TolderGlfFont(fontfile, _activeFontName);
-         break;
-      case trend::rtTenderer :
-         curFont = DEBUG_NEW trend::TenderGlfFont(fontfile, _activeFontName);
-         break;
-      case trend::rtToshader :
-         curFont = DEBUG_NEW trend::ToshaderGlfFont(fontfile, _activeFontName);
-         break;
-      default: assert(false); break;
+      // Parse the font library
+      TolderGlfFont* curFont = NULL;
+      switch (drawProp->renderType())
+      {
+         case trend::rtTocom    : assert(false);          break;
+         case trend::rtTolder   :
+            curFont = DEBUG_NEW trend::TolderGlfFont(fontfile, _activeFontName);
+            break;
+         case trend::rtTenderer :
+            curFont = DEBUG_NEW trend::TenderGlfFont(fontfile, _activeFontName);
+            break;
+         case trend::rtToshader :
+            curFont = DEBUG_NEW trend::ToshaderGlfFont(fontfile, _activeFontName);
+            break;
+         default: assert(false); break;
+      }
+      
+      if (!curFont->status())
+      {
+         _oglFont[_activeFontName] = curFont;
+         TpdPost::addFont(_activeFontName);
+      }
    }
-
-   if (!curFont->status())
-   {
-      _oglFont[_activeFontName] = curFont;
-      TpdPost::addFont(_activeFontName);
-   }
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 void trend::TrendCenter::getStringBounds(const std::string& text, DBbox* overlap)

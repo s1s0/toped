@@ -759,8 +759,6 @@ namespace trend {
          virtual void      grcDraw() = 0;
          virtual void      grdDraw() = 0;
          virtual void      rlrDraw()=0;
-         void              set3Drendering()              { _rend3D = true;}
-         bool              rend3D() const                { return _rend3D;}
       
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
