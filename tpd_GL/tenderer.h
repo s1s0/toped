@@ -27,7 +27,6 @@
 #ifndef TENDERER_H
 #define TENDERER_H
 
-#include <GL/glew.h>
 #include "basetrend.h"
 
 namespace trend {

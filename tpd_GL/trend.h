@@ -31,6 +31,7 @@
 #include "ttt.h"
 #include "basetrend.h"
 
+#warning: TODO -> get this into something like glslUniVarLoc
 #define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
 
 namespace trend {

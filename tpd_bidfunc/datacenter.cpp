@@ -840,6 +840,7 @@ void DataCenter::renderOGLBuffer(int W, int H)
       if (NULL != cRenderer)
       {
          // grid
+#warning: TODO! Draw a grid using shaders directly. Here - it's a waste of resources
          const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
          if (cRenderer->grdCollect(allGrids))
             cRenderer->grdDraw();
@@ -896,7 +897,6 @@ void DataCenter::render3D(int W, int H)
       if (NULL != cRenderer)
       {
          cRenderer->set3Drendering();
-         // TODO: grid using the shaders
 
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {

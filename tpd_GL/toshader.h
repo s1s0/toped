@@ -28,7 +28,6 @@
 #ifndef TOSHADER_H
 #define TOSHADER_H
 
-#include <GL/glew.h>
 #include "tenderer.h"
 
 namespace trend {
