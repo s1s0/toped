@@ -576,7 +576,7 @@ namespace trend {
          typedef std::list<TrendReTV*>   TrendReTVList;
          typedef std::map<std::string, TrendTV*> ReusableTTVMap;
 
-                           TrendLay(bool);
+                           TrendLay();
          virtual          ~TrendLay();
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
@@ -624,7 +624,6 @@ namespace trend {
          // index related data for selected objects
          unsigned          _asindxs[SLCT_TYPES]; //! array with the total number of indexes of selected objects
          unsigned          _asobjix[SLCT_TYPES]; //! array with the total number of selected objects
-         bool              _rend3D;
    };
 
    /**
@@ -725,7 +724,7 @@ namespace trend {
          virtual void      setHvrLayer(const LayerDef&) = 0;
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
          virtual bool      chunkExists(const LayerDef&, bool) = 0;
-         void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
+         virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool) = 0;
          void              setRmm(const CTM&);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
@@ -746,8 +745,8 @@ namespace trend {
          void              wirem(int4b*, unsigned, WireWidth, const SGBitSet*);
          void              wiret(const PointVector&, WireWidth);
          void              grcwire (int4b*, unsigned, WireWidth);
-         void              arefOBox(std::string, const CTM&, const DBbox&, bool);
-         void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
+         virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool) = 0;
+         virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool) = 0;
          void              textt(const std::string*, const CTM&, const TP&);
 
          virtual bool      collect() = 0;
@@ -783,8 +782,8 @@ namespace trend {
       protected:
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-         virtual void      grdCleanUp();
-         virtual void      rlrCleanUp();
+         virtual void      grdCleanUp() = 0;
+         virtual void      rlrCleanUp() = 0;
          virtual void      setLayColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
@@ -795,21 +794,18 @@ namespace trend {
          DataLay           _grcData;         //!All GRC      data for drawing
          TrendLay*         _clayer;          //!Working variable pointing to the current edit slice
          TrendLay*         _grcLayer;        //!Working variable pointing to the current GRC  slice
-         TrendRefLay*      _refLayer;        //!All cell references with visible overlapping boxes
+//         TrendRefLay*      _refLayer;        //!All cell references with visible overlapping boxes
          CellStack         _cellStack;       //!Required during data traversing stage
-         unsigned          _cslctd_array_offset; //! Current selected array offset
+//         unsigned          _cslctd_array_offset; //! Current selected array offset
          //
          TrxCellRef*       _activeCS;
          byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
-         RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
-         TrendMarks*       _marks;           //!All kinds of object marks
+//         RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
+//         TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
-         VGrids            _grid_props;      //! The properties of all visual grids
-         unsigned          _num_grid_points; //! Number of all points in all grids
-//         TrendGrids        _grids;           //!All grid points
-         TrendStrings      _rulerTexts;      //!The labels on all rulers
-         bool              _rend3D;
-
+//         VGrids            _grid_props;      //! The properties of all visual grids
+//         unsigned          _num_grid_points; //! Number of all points in all grids
+//         TrendStrings      _rulerTexts;      //!The labels on all rulers
    };
 
    class ogl_logfile {

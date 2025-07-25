@@ -197,8 +197,8 @@ void trend::ToshaderTV::setAlpha(layprop::DrawProperties* drawprop)
 //
 // class ToshaderLay
 //
-trend::ToshaderLay::ToshaderLay(bool rend3D):
-   TenderLay           ( rend3D      )
+trend::ToshaderLay::ToshaderLay():
+   TenderLay           (      )
 {
 }
 
@@ -423,7 +423,7 @@ bool trend::Toshader::chunkExists(const LayerDef& laydef, bool has_selected)
    }
    else
    {
-      _clayer = DEBUG_NEW ToshaderLay(_rend3D);
+      _clayer = DEBUG_NEW ToshaderLay();
       _data.add(laydef, _clayer);
    }
    if (has_selected)
@@ -449,7 +449,7 @@ void trend::Toshader::setLayer(const LayerDef& laydef, bool has_selected)
    }
    else
    {
-      _clayer = DEBUG_NEW ToshaderLay(_rend3D);
+      _clayer = DEBUG_NEW ToshaderLay();
       _data.add(laydef, _clayer);
    }
    if (has_selected)
@@ -462,7 +462,7 @@ void trend::Toshader::setHvrLayer(const LayerDef& laydef)
 {
    if (REF_LAY_DEF != laydef)
    {
-      _clayer = DEBUG_NEW ToshaderLay(false);
+      _clayer = DEBUG_NEW ToshaderLay();
       _data.add(laydef, _clayer);
       _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
    }
@@ -692,7 +692,7 @@ void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
       }
       else
       {
-         _grcLayer = DEBUG_NEW ToshaderLay(false);
+         _grcLayer = DEBUG_NEW ToshaderLay();
          _grcData.add(laydef, _grcLayer);
       }
       _grcLayer->newSlice(_cellStack.top(), false, false);

@@ -256,6 +256,35 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
    _marks    = DEBUG_NEW TolderMarks();
 }
 
+void trend::Tolder::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
+{
+   TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
+                                          trans * _cellStack.top()->ctm(),
+                                          overlap,
+                                          _cellStack.size()
+                                         );
+   if (selected || (!_drawprop->cellBoxHidden()))
+      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
+   else
+      // This list is to keep track of the hidden cRefBox - so we can clean
+      // them up. Don't get confused - we need cRefBox during the collecting
+      // and drawing phase so we can't really delete them here or after they're
+      // poped-up from _cellStack. The confusion is coming from the "duality"
+      // of the TrxCellRef - once as a cell reference with CTM, view depth etc.
+      // and then as a placeholder of the overlapping reference box
+      _hiddenRefBoxes.push_back(cRefBox);
+
+   _cellStack.push(cRefBox);
+   if (active)
+   {
+      assert(NULL == _activeCS);
+      _activeCS = cRefBox;
+   }
+   else if (!_drawprop->cellMarksHidden())
+   {
+      _marks->addRefMark(overlap.p1(), _cellStack.top()->ctm());
+   }
+}
 
 void trend::Tolder::grdDraw()
 {
@@ -593,11 +622,33 @@ void trend::Tolder::grcDraw()
 void trend::Tolder::cleanUp()
 {
    TrendBase::cleanUp();
+   for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
+      delete (*CSH);
+   _hiddenRefBoxes.clear();
+   _activeCS = NULL;
 }
 
 void trend::Tolder::grcCleanUp()
 {
    TrendBase::grcCleanUp();
+}
+
+void trend::Tolder::grdCleanUp()
+{
+   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
+   {
+      delete (*CG);
+   }
+   _grid_props.clear();
+}
+
+void trend::Tolder::rlrCleanUp()
+{
+   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
+   {
+      delete (*TS);
+   }
+   _rulerTexts.clear();
 }
 
 void trend::Tolder::rlrDraw()
@@ -623,13 +674,46 @@ void trend::Tolder::rlrDraw()
    }
 }
 
+void trend::Tolder::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
+{
+   if (!_drawprop->cellMarksHidden())
+   {
+      _marks->addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
+   }
+
+   if (selected || (!_drawprop->cellBoxHidden()))
+   {
+      TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
+                                               trans * _cellStack.top()->ctm(),
+                                               overlap,
+                                               _cellStack.size()
+                                              );
+      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
+   }
+}
+
+void trend::Tolder::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
+{
+   if (sel)
+      _clayer->text(txt, ftmtrx, &ovl, cor, true);
+   else if (_drawprop->textBoxHidden())
+      _clayer->text(txt, ftmtrx, NULL, cor, false);
+   else
+      _clayer->text(txt, ftmtrx, &ovl, cor, false);
+   if (!_drawprop->textMarksHidden())
+   {
+      _marks->addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
+   }
+}
+
+
 trend::Tolder::~Tolder()
 {
    cleanUp();
    grcCleanUp();
    grdCleanUp();
    rlrCleanUp();
-//   delete _refLayer; //>> deleted by the parent destructor
-//   delete _marks; //>> deleted by the parent destructor
+   if (_refLayer) delete _refLayer;
+   if (_marks)    delete _marks;
 }
 

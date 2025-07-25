@@ -894,7 +894,7 @@ void DataCenter::render3D(int W, int H)
    if (_TEDLIB())
    {
 //      TRENDC->set3D(true);
-      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H);
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H, true);
       if (NULL != cRenderer)
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())

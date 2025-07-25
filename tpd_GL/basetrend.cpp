@@ -260,13 +260,12 @@ void trend::TrendTV::DEBUGprintOGLdata(const unsigned start, GLuint **_firstix, 
 //
 // class TrendLay
 //
-trend::TrendLay::TrendLay(bool rend3D):
+trend::TrendLay::TrendLay():
    _cslice               (        NULL ),
    _num_total_points     (          0u ),
    _num_total_indexs     (          0u ),
    _num_total_slctdx     (          0u ),
-   _num_total_strings    (          0u ),
-   _rend3D               ( rend3D      )
+   _num_total_strings    (          0u )
 {
    for (int i = STlstr; i < SLCT_TYPES; i++)
    {
@@ -312,9 +311,9 @@ void trend::TrendLay::ppSlice()
 
 void trend::TrendLay::box  (const int4b* pdata)
 {
-   if (_rend3D)
-      _cslice->register3DBox(DEBUG_NEW Trx3DBox(pdata));
-   else
+//   if (_rend3D)
+//      _cslice->register3DBox(DEBUG_NEW Trx3DBox(pdata));
+//   else
       _cslice->registerBox(DEBUG_NEW TrxBox(pdata));
 }
 
@@ -339,9 +338,9 @@ void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss, const CTM& rm
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   if (_rend3D)
-      _cslice->register3DPoly(DEBUG_NEW Trx3DPoly(pdata, psize), tpoly);
-   else
+//   if (_rend3D)
+//      _cslice->register3DPoly(DEBUG_NEW Trx3DPoly(pdata, psize), tpoly);
+//   else
       _cslice->registerPoly(DEBUG_NEW TrxNcvx(pdata, psize), tpoly);
 }
 
@@ -366,9 +365,9 @@ void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPol
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
-   if (_rend3D)
-      _cslice->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width));
-   else
+//   if (_rend3D)
+//      _cslice->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width));
+//   else
       _cslice->registerWire(DEBUG_NEW TrxWire(pdata, psize, width, center_only));
 }
 
@@ -560,14 +559,13 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _UU                   (        UU ),
    _clayer               (      NULL ),
    _grcLayer             (      NULL ),
-   _refLayer             (      NULL ),
-   _cslctd_array_offset  (        0u ),
+//   _refLayer             (      NULL ),
+//   _cslctd_array_offset  (        0u ),
    _activeCS             (      NULL ),
    _dovCorrection        (         0 ),
-   _marks                (      NULL ),
-   _rmm                  (      NULL ),
-   _num_grid_points      (        0u ),
-   _rend3D               (      false)
+//   _marks                (      NULL ),
+   _rmm                  (      NULL )
+//   _num_grid_points      (        0u ),
 
 {
    // Initialize the cell (CTM) stack
@@ -580,35 +578,35 @@ void trend::TrendBase::setRmm(const CTM& mm)
    _rmm = DEBUG_NEW CTM(mm.Reversed());
 }
 
-void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
-{
-   TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
-                                          trans * _cellStack.top()->ctm(),
-                                          overlap,
-                                          _cellStack.size()
-                                         );
-   if (selected || (!_drawprop->cellBoxHidden()) || !_rend3D)
-      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
-   else
-      // This list is to keep track of the hidden cRefBox - so we can clean
-      // them up. Don't get confused - we need cRefBox during the collecting
-      // and drawing phase so we can't really delete them here or after they're
-      // poped-up from _cellStack. The confusion is coming from the "duality"
-      // of the TrxCellRef - once as a cell reference with CTM, view depth etc.
-      // and then as a placeholder of the overlapping reference box
-      _hiddenRefBoxes.push_back(cRefBox);
-
-   _cellStack.push(cRefBox);
-   if (active)
-   {
-      assert(NULL == _activeCS);
-      _activeCS = cRefBox;
-   }
-   else if (!(_drawprop->cellMarksHidden() && _rend3D))
-   {
-      _marks->addRefMark(overlap.p1(), _cellStack.top()->ctm());
-   }
-}
+//void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
+//{
+//   TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
+//                                          trans * _cellStack.top()->ctm(),
+//                                          overlap,
+//                                          _cellStack.size()
+//                                         );
+//   if (selected || (!_drawprop->cellBoxHidden()) || !_rend3D)
+//      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
+//   else
+//      // This list is to keep track of the hidden cRefBox - so we can clean
+//      // them up. Don't get confused - we need cRefBox during the collecting
+//      // and drawing phase so we can't really delete them here or after they're
+//      // poped-up from _cellStack. The confusion is coming from the "duality"
+//      // of the TrxCellRef - once as a cell reference with CTM, view depth etc.
+//      // and then as a placeholder of the overlapping reference box
+//      _hiddenRefBoxes.push_back(cRefBox);
+//
+//   _cellStack.push(cRefBox);
+//   if (active)
+//   {
+//      assert(NULL == _activeCS);
+//      _activeCS = cRefBox;
+//   }
+//   else if (!(_drawprop->cellMarksHidden() && _rend3D))
+//   {
+//      _marks->addRefMark(overlap.p1(), _cellStack.top()->ctm());
+//   }
+//}
 
 void trend::TrendBase::grcpoly(int4b* pdata, unsigned psize)
 {
@@ -656,37 +654,37 @@ void trend::TrendBase::grcwire (int4b* pdata, unsigned psize, WireWidth width)
    _grcLayer->wire(pdata, psize, width, center_line_only);
 }
 
-void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
-{
-   if (!_drawprop->cellMarksHidden())
-   {
-      _marks->addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
-   }
+//void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
+//{
+//   if (!_drawprop->cellMarksHidden())
+//   {
+//      _marks->addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
+//   }
+//
+//   if (selected || (!_drawprop->cellBoxHidden()))
+//   {
+//      TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
+//                                               trans * _cellStack.top()->ctm(),
+//                                               overlap,
+//                                               _cellStack.size()
+//                                              );
+//      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
+//   }
+//}
 
-   if (selected || (!_drawprop->cellBoxHidden()))
-   {
-      TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
-                                               trans * _cellStack.top()->ctm(),
-                                               overlap,
-                                               _cellStack.size()
-                                              );
-      _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
-   }
-}
-
-void trend::TrendBase::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
-{
-   if (sel)
-      _clayer->text(txt, ftmtrx, &ovl, cor, true);
-   else if (_drawprop->textBoxHidden())
-      _clayer->text(txt, ftmtrx, NULL, cor, false);
-   else
-      _clayer->text(txt, ftmtrx, &ovl, cor, false);
-   if (!_drawprop->textMarksHidden())
-   {
-      _marks->addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
-   }
-}
+//void trend::TrendBase::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
+//{
+//   if (sel)
+//      _clayer->text(txt, ftmtrx, &ovl, cor, true);
+//   else if (_drawprop->textBoxHidden())
+//      _clayer->text(txt, ftmtrx, NULL, cor, false);
+//   else
+//      _clayer->text(txt, ftmtrx, &ovl, cor, false);
+//   if (!_drawprop->textMarksHidden())
+//   {
+//      _marks->addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
+//   }
+//}
 
 void trend::TrendBase::textt(const std::string* txt, const CTM& ftmtrx, const TP& cor)
 {
@@ -731,10 +729,10 @@ void trend::TrendBase::cleanUp()
 //   }
    assert(1 == _cellStack.size());
    delete (_cellStack.top()); _cellStack.pop();
-   for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
-      delete (*CSH);
-   _hiddenRefBoxes.clear();
-   _activeCS = NULL;
+//   for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
+//      delete (*CSH);
+//   _hiddenRefBoxes.clear();
+//   _activeCS = NULL;
 }
 
 void trend::TrendBase::grcCleanUp()
@@ -746,23 +744,23 @@ void trend::TrendBase::grcCleanUp()
    _grcData.clear();
 }
 
-void trend::TrendBase::grdCleanUp()
-{
-   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
-   {
-      delete (*CG);
-   }
-   _grid_props.clear();
-}
-
-void trend::TrendBase::rlrCleanUp()
-{
-   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
-   {
-      delete (*TS);
-   }
-   _rulerTexts.clear();
-}
+//void trend::TrendBase::grdCleanUp()
+//{
+//   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
+//   {
+//      delete (*CG);
+//   }
+//   _grid_props.clear();
+//}
+//
+//void trend::TrendBase::rlrCleanUp()
+//{
+//   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
+//   {
+//      delete (*TS);
+//   }
+//   _rulerTexts.clear();
+//}
 
 void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)
 {
@@ -792,8 +790,8 @@ void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBlin
 
 trend::TrendBase::~TrendBase()
 {
-   if (_refLayer) delete _refLayer;
-   if (_marks)    delete _marks;
+//   if (_refLayer) delete _refLayer;
+//   if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
 
 }

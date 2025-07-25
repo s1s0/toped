@@ -56,7 +56,7 @@ namespace trend {
 
    class ToshaderLay : public TenderLay {
       public:
-                           ToshaderLay(bool rend3D);
+                           ToshaderLay();
          virtual          ~ToshaderLay() {}
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);

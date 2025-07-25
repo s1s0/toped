@@ -1047,7 +1047,7 @@ void trend::TrendCenter::drawFrameBuffer()
    PROPC->unlockDrawProp(drawProp, true);
 }
 
-trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
+trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H, bool rend3D)
 {
    if (NULL != _cRenderer)
    {
@@ -1061,6 +1061,8 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp))
    {
+      if ((rtToshader == drawProp->renderType()) && rend3D)
+         drawProp->setRenderType(rtT3Der);
       switch (drawProp->renderType())
       {
          case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
@@ -1076,14 +1078,13 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
                _cRenderer = NULL;
             }
             break;
-#warning: TODO - UNCOMMENT THIS!
-//         case trend::rtT3Der:
-//            _cRenderer = DEBUG_NEW trend::T3Der( drawProp, PROPC->UU() );
-//            if (!_cShaders->setFrameBuffer(W, H))
-//            {
-//               delete _cRenderer;
-//               _cRenderer = NULL;
-//            }
+         case trend::rtT3Der:
+            _cRenderer = DEBUG_NEW trend::T3Der( drawProp, PROPC->UU() );
+            if (!_cShaders->setFrameBuffer(W, H))
+            {
+               delete _cRenderer;
+               _cRenderer = NULL;
+            }
             break;
          default: assert(false); break;
       }

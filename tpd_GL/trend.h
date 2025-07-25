@@ -222,7 +222,7 @@ namespace trend {
          virtual               ~TrendCenter();
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      makeCRenderer(int W, int H);         //!Get current renderer
+         trend::TrendBase*      makeCRenderer(int W, int H, bool rend3D = false);         //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
          trend::TrendBase*      makeHRenderer();                     //!Get hover renderer

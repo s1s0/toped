@@ -52,7 +52,7 @@ namespace trend {
 
    class TolderLay : public TrendLay {
       public:
-                           TolderLay() : TrendLay(false) {}
+                           TolderLay() : TrendLay() {}
          virtual          ~TolderLay() {}
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);
@@ -93,13 +93,28 @@ namespace trend {
          virtual void      draw();
          virtual void      grcDraw();
          virtual void      rlrDraw();
-      protected:
+
+         virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool);
+         virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool);
+         virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
+   
+   protected:
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         virtual void      grdCleanUp();
+         virtual void      rlrCleanUp();
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
          DBlineList        _noniList;        //!All ruler lines including Vernier ticks.
+         TrendRefLay*      _refLayer;        //!All cell references with visible overlapping boxes
+         unsigned          _cslctd_array_offset; //! Current selected array offset
+       //
+         RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
+         TrendMarks*       _marks;           //!All kinds of object marks
+         VGrids            _grid_props;      //! The properties of all visual grids
+         unsigned          _num_grid_points; //! Number of all points in all grids
+         TrendStrings      _rulerTexts;      //!The labels on all rulers
    };
 
 }

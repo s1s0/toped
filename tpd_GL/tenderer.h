@@ -59,7 +59,7 @@ namespace trend {
 
    class TenderLay : public TrendLay {
       public:
-                           TenderLay(bool rend3D = false);
+                           TenderLay();
          virtual          ~TenderLay();
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);
@@ -119,7 +119,10 @@ namespace trend {
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
          virtual void      setGrcLayer(bool, const LayerDef&);
+         virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          virtual bool      chunkExists(const LayerDef&, bool);
+         virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool);
+         virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
          virtual bool      grdCollect(const layprop::LayoutGrid**);
@@ -147,6 +150,14 @@ namespace trend {
          GLuint*           _ogl_rlr_buffer;  //!
          GLuint*           _ogl_grd_buffer;
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
+         TrendRefLay*      _refLayer;        //!All cell references with visible overlapping boxes
+         unsigned          _cslctd_array_offset; //! Current selected array offset
+       //
+         RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
+         TrendMarks*       _marks;           //!All kinds of object marks
+         VGrids            _grid_props;      //! The properties of all visual grids
+         unsigned          _num_grid_points; //! Number of all points in all grids
+         TrendStrings      _rulerTexts;      //!The labels on all rulers
    };
 
 }
