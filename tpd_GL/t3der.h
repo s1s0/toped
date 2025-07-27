@@ -31,6 +31,8 @@
 #include "toshader.h"
 namespace trend {
 
+   void setShaderMVP(layprop::DrawProperties* drawprop, const TrxCellRef* refCell);
+
    class Trx3D {
       public:
                               Trx3D(const int4b* pdata, const unsigned psize) :  _cdata(pdata), _csize(psize), _tdata(NULL) {}

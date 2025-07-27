@@ -199,12 +199,16 @@ namespace trend {
          std::string            _fnShdrFragment;
          std::string            _fnShdrFBVertex;   // for framebuffer rendering
          std::string            _fnShdrFBFragment; // for framebuffer rendering
+         std::string            _fnShdr3DVertex;
+         std::string            _fnShdr3DFragment;
          GLint                  _idShdrVertex;
          GLint                  _idShdrGeometry;
          GLint                  _idShdrGeSprite;
          GLint                  _idShdrFragment;
          GLint                  _idShdrFBVertex;
          GLint                  _idShdrFBFragment;
+         GLint                  _idShdr3DVertex;
+         GLint                  _idShdr3DFragment;
          GlslProgramIDs         _idPrograms;
          GlslUniVarAllNames     _glslUniVarNames;
          GlslUniVarAllLoc       _glslUniVarLoc;

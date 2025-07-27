@@ -490,19 +490,25 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
 
 //=============================================================================
 trend::Shaders::Shaders() :
-   _fnShdrVertex     ( "vertex.glsl"      ),
-   _fnShdrGeometry   ( "geometry.glsl"    ),
-   _fnShdrGeSprite   ( "geomsprite.glsl"  ),
-   _fnShdrFragment   ( "fragment.glsl"    ),
-   _fnShdrFBVertex   ( "vertex_fb.glsl"   ),
-   _fnShdrFBFragment ( "fragment_fb.glsl" ),
-   _idShdrVertex     ( -1                 ),
-   _idShdrGeometry   ( -1                 ),
-   _idShdrGeSprite   ( -1                 ),
-   _idShdrFragment   ( -1                 ),
-   _curProgram       ( glslp_NULL         ),
-   _status           ( true               ),
-   _fbProps          ({0,0,0,0,0}         )
+   _fnShdrVertex     ( "vertex.glsl"      )
+  ,_fnShdrGeometry   ( "geometry.glsl"    )
+  ,_fnShdrGeSprite   ( "geomsprite.glsl"  )
+  ,_fnShdrFragment   ( "fragment.glsl"    )
+  ,_fnShdrFBVertex   ( "vertex_fb.glsl"   )
+  ,_fnShdrFBFragment ( "fragment_fb.glsl" )
+  ,_fnShdr3DVertex   ( "vertex_3D.glsl"   )
+  ,_fnShdr3DFragment ( "fragment_3D.glsl" )
+  ,_idShdrVertex     ( -1                 )
+  ,_idShdrGeometry   ( -1                 )
+  ,_idShdrGeSprite   ( -1                 )
+  ,_idShdrFragment   ( -1                 )
+  ,_idShdrFBVertex   ( -1                 )
+  ,_idShdrFBFragment ( -1                 )
+  ,_idShdr3DVertex   ( -1                 )
+  ,_idShdr3DFragment ( -1                 )
+  ,_curProgram       ( glslp_NULL         )
+  ,_status           ( true               )
+  ,_fbProps          ({0,0,0,0,0}         )
 {
    // initialize all uniform variable names
    _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";
@@ -538,10 +544,15 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_PS][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_PS][glslu_in_MStippleEn] = "in_MStippleEn";
+   
+   _glslUniVarNames[glslp_3D][glslu_in_MVP]        = "MVP";
+   _glslUniVarNames[glslp_3D][glslu_in_Color]      = "in_Color";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;
    _idPrograms[glslp_PS] = -1;
+   _idPrograms[glslp_FB] = -1;
+   _idPrograms[glslp_3D] = -1;
 }
 
 void trend::Shaders::useProgram(const glsl_Programs pType)
@@ -606,18 +617,23 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
    _fnShdrFragment   = codeDirectory + _fnShdrFragment  ;
    _fnShdrFBVertex   = codeDirectory + _fnShdrFBVertex  ;
    _fnShdrFBFragment = codeDirectory + _fnShdrFBFragment;
+   _fnShdr3DVertex   = codeDirectory + _fnShdr3DVertex  ;
+   _fnShdr3DFragment = codeDirectory + _fnShdr3DFragment;
    if(  (_status &= compileShader(_fnShdrVertex    , _idShdrVertex    , GL_VERTEX_SHADER   ))
       &&(_status &= compileShader(_fnShdrGeometry  , _idShdrGeometry  , GL_GEOMETRY_SHADER ))
       &&(_status &= compileShader(_fnShdrGeSprite  , _idShdrGeSprite  , GL_GEOMETRY_SHADER ))
       &&(_status &= compileShader(_fnShdrFragment  , _idShdrFragment  , GL_FRAGMENT_SHADER ))
       &&(_status &= compileShader(_fnShdrFBVertex  , _idShdrFBVertex  , GL_VERTEX_SHADER   ))
       &&(_status &= compileShader(_fnShdrFBFragment, _idShdrFBFragment, GL_FRAGMENT_SHADER ))
+      &&(_status &= compileShader(_fnShdr3DVertex  , _idShdr3DVertex  , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdr3DFragment, _idShdr3DFragment, GL_FRAGMENT_SHADER ))
      )
    {
       _status &= linkProgram(glslp_VF);
       _status &= linkProgram(glslp_VG);
       _status &= linkProgram(glslp_PS);
       _status &= linkProgram(glslp_FB);
+      _status &= linkProgram(glslp_3D);
       
       DBGL_CALL(glDeleteShader,_idShdrVertex    )
       DBGL_CALL(glDeleteShader,_idShdrGeometry  )
@@ -625,7 +641,8 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       DBGL_CALL(glDeleteShader,_idShdrFragment  )
       DBGL_CALL(glDeleteShader,_idShdrFBVertex  )
       DBGL_CALL(glDeleteShader,_idShdrFBFragment)
-      
+      DBGL_CALL(glDeleteShader,_idShdr3DVertex  )
+      DBGL_CALL(glDeleteShader,_idShdr3DFragment)
    }
 }
 
@@ -672,6 +689,13 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
          info << "GLSL program FB";
          break;
       }
+      case glslp_3D:
+      {
+         DBGL_CALL(glAttachShader, program, _idShdr3DVertex   )
+         DBGL_CALL(glAttachShader, program, _idShdr3DFragment )
+         info << "GLSL program 3D";
+         break;
+      }
       default: assert(false); break;
    }
    // link
@@ -715,6 +739,19 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
          DBGL_CALL(glDetachShader, program, _idShdrFragment)
          break;
       }
+      case glslp_FB:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdrFBVertex   )
+         DBGL_CALL(glDetachShader, program, _idShdrFBFragment )
+         break;
+      }
+      case glslp_3D:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdr3DVertex   )
+         DBGL_CALL(glDetachShader, program, _idShdr3DFragment )
+         break;
+      }
+
       default: assert(false); break;
    }
 }

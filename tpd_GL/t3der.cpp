@@ -193,7 +193,7 @@ bool trend::T3Der::collect()
 void trend::T3Der::draw()
 {
    _drawprop->initCtmStack();
-   TRENDC->setGlslProg(glslp_VF);
+   TRENDC->setGlslProg(glslp_3D);
    _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -606,7 +606,7 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
 void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
-   setShaderCtm(drawprop, _refCell);
+   setShaderMVP(drawprop, _refCell);
 //   setAlpha(drawprop);
 
    // Activate the vertex buffers in the vertex shader ...
@@ -662,4 +662,12 @@ void trend::T3DTV::drawTriQuads()
 
       }
    }
+}
+
+void trend::setShaderMVP(layprop::DrawProperties* drawprop, const TrxCellRef* refCell)
+{
+   drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
+   float mtrxOrtho [16];
+   drawprop->topCtm().oglForm(mtrxOrtho);
+   TRENDC->setUniMtrx4fv(glslu_in_MVP, mtrxOrtho);
 }
