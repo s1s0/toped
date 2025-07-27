@@ -37,9 +37,21 @@ namespace trend {
                            TolderTV(TrxCellRef* const refCell, bool filled, bool reusable,
                                           unsigned parray_offset, unsigned iarray_offset) :
                                  TrendTV(refCell, filled, reusable, parray_offset, iarray_offset) {}
-         virtual          ~TolderTV() {}
+         virtual          ~TolderTV();
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
+         virtual void      registerBox   (TrxCnvx*);
+         virtual void      registerPoly  (TrxNcvx*, const TessellPoly*);
+         virtual void      registerWire  (TrxWire*);
+         virtual void      registerText  (TrxText*, TrxTextOvlBox*);
+         virtual void      collect(TPVX&, unsigned int*)                {assert(false);}
+      protected:
+      // collected data lists
+         SliceObjects      _cont_data; //! Contour data
+         SliceWires        _line_data; //! Line data
+
+         TrendStrings      _text_data; //! Text (strings)
+         RefTxtList        _txto_data; //! Text overlapping boxes
    };
 
    class TolderReTV : public TrendReTV {

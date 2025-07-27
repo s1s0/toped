@@ -38,7 +38,16 @@ namespace trend {
          virtual void      collect(TPVX&, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
+         virtual void      registerBox   (TrxCnvx*);
+         virtual void      registerPoly  (TrxNcvx*, const TessellPoly*);
+         virtual void      registerWire  (TrxWire*);
+         virtual void      registerText  (TrxText*, TrxTextOvlBox*);
       protected:
+      // collected data lists
+         SliceObjects      _cont_data; //! Contour data
+         SliceWires        _line_data; //! Line data
+         TrendStrings      _text_data; //! Text (strings)
+         RefTxtList        _txto_data; //! Text overlapping boxes
          void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
          GLsizei*          _sizesvx[OBJ_TYPES]; //! arrays of sizes for vertex sets
          GLsizei*          _firstvx[OBJ_TYPES]; //! arrays of first vertexes

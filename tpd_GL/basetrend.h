@@ -385,16 +385,12 @@ namespace trend {
                            IDX_TYPES};
                            TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
-         void              registerBox   (TrxCnvx*);
-         void              registerPoly  (TrxNcvx*, const TessellPoly*);
-         void              registerWire  (TrxWire*);
-         void              registerText  (TrxText*, TrxTextOvlBox*);
+         virtual void      registerBox   (TrxCnvx*) = 0;
+         virtual void      registerPoly  (TrxNcvx*, const TessellPoly*) = 0;
+         virtual void      registerWire  (TrxWire*) = 0;
+         virtual void      registerText  (TrxText*, TrxTextOvlBox*) = 0;
 
-         void              register3DBox   (Trx3DBox*);
-         void              register3DPoly  (Trx3DPoly*, const TessellPoly*);
-         void              register3DWire  (Trx3DWire*);
-
-         virtual void      collect(TPVX&, unsigned int*)  {assert(false);}
+         virtual void      collect(TPVX&, unsigned int*) = 0;
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
          TrxCellRef*       swapRefCells(TrxCellRef*);
@@ -409,12 +405,12 @@ namespace trend {
          virtual void      setAlpha(layprop::DrawProperties*);
          TrxCellRef*       _refCell;
          // collected data lists
-         SliceObjects      _cont_data; //! Contour data
-         SliceWires        _line_data; //! Line data
+//         SliceObjects      _cont_data; //! Contour data
+//         SliceWires        _line_data; //! Line data
          SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
          SlicePolygons     _ncvx_data; //! Non convex data
-         TrendStrings      _text_data; //! Text (strings)
-         RefTxtList        _txto_data; //! Text overlapping boxes
+//         TrendStrings      _text_data; //! Text (strings)
+//         RefTxtList        _txto_data; //! Text overlapping boxes
          // vertex related data
          unsigned          _vrtxnum[OBJ_TYPES]; //! array with the total number of vertexes
          unsigned          _vobjnum[OBJ_TYPES]; //! array with the total number of objects that will be drawn with vertex related functions
@@ -426,9 +422,6 @@ namespace trend {
          bool              _filled;
          bool              _reusable;
          void              DEBUGprintOGLdata(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX &point_array, unsigned int *size_index);
-
-
-//         bool              _rend3D;
    };
 
    /**
@@ -578,19 +571,19 @@ namespace trend {
 
                            TrendLay();
          virtual          ~TrendLay();
-         void              box  (const int4b*);
+         virtual void      box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
          void              box  (const int4b*,                               const SGBitSet*, const CTM&);
          void              box  (const TP&, const CTM&);
-         void              poly (const int4b*, unsigned, const TessellPoly*);
+         virtual void      poly (const int4b*, unsigned, const TessellPoly*);
          void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*);
          void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*, const CTM&);
          void              poly (const PointVector&, const CTM&);
-         void              wire (int4b*, unsigned, WireWidth, bool);
+         virtual void      wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*, const CTM&);
          void              wire (const PointVector&, WireWidth, bool, const CTM&);
-         void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
+         virtual void      text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
          virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/) = 0;
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset) = 0;
          virtual bool      chunkExists(TrxCellRef* const, bool) = 0;
