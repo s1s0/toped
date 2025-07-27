@@ -631,21 +631,6 @@ trend::TrxWire::~TrxWire()
 
 //=============================================================================
 //
-// class Trx3DWire
-//
-void trend::Trx3DWire::Tesselate()
-{
-   TrxWire::Tesselate();
-   const_cast<TessellPoly*>(_tdata)->tessellate3DPoly(_csize);
-}
-
-//trend::Trx3DWire::~Trx3DWire()
-//{
-//   
-//}
-
-//=============================================================================
-//
 // class TrxText
 //
 trend::TrxText::TrxText(const std::string* text, const CTM& ctm) :

@@ -45,8 +45,10 @@
 #include <glm/ext/matrix_float3x3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 //using namespace glm;
-typedef glm::vec2               TPX  ; // single 2D verteX
-typedef std::vector<TPX>        TPVX ; // array of 2D Vertexes
+typedef glm::vec2               TPX   ; // single 2D verteX
+typedef std::vector<TPX>        TPVX  ; // array of 2D Vertexes
+typedef glm::vec3               TPX3  ; // single 3D verteX
+typedef std::vector<TPX3>       TPVX3 ; // array of 2D Vertexes
 
 //=============================================================================
 //
@@ -250,43 +252,6 @@ namespace trend {
          const int4b*      _ldata; //! the vertexes of the wires central line. A link to TDT wire object data
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
-   };
-   
-   /**
-    Object of this class are used to render boxes when rend3D mode is active. The difference
-    with TrxBox is that the field _tdata contains data which belongs to this object
-    NOTE! All 3D objects inherit TrxNcvx - i.e. they do have a tesselation data
-    */
-   class Trx3DBox : public TrxNcvx { // the difference with TrxNcvx is the destructor!
-      public:
-                           Trx3DBox(const int4b* pdata) : TrxNcvx(pdata, 4) {};
-         virtual          ~Trx3DBox() {delete _tdata;}
-         virtual void      drctDrawFill() {assert(false);}
-   };
-
-   /**
-    Used to render polygons when rend3D mode is active.
-    Unlike TrxNcvx, the tesselation data _tdata is not a reference to the
-    tessellation data in the TDT. It copies the original, and then expands it as needed for 3D rendering
-    */
-   class Trx3DPoly : public TrxNcvx {
-      public:
-                           Trx3DPoly(const int4b* pdata, unsigned psize) : TrxNcvx(pdata, psize) {};
-         virtual          ~Trx3DPoly() {delete _tdata;}
-         virtual void      drctDrawFill() {assert(false);}
-   };
-
-   /**
-    Used to render wires when rend3D mode is active. Expands the TrxWire object Tesselate
-    method to accomodate the 3D requirements.
-    */
-   class Trx3DWire : public TrxWire {
-      public:
-                           Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width):
-                              TrxWire  (pdata, psize, width, false) {}
-         virtual void      Tesselate();
-         virtual void      drctDrawFill()  {assert(false);}
-         virtual void      drctDrawCLine() {assert(false);}
    };
    
    //==========================================================================

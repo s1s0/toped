@@ -31,8 +31,61 @@
 #include "toshader.h"
 namespace trend {
 
+   class Trx3D {
+      public:
+                              Trx3D(const int4b* pdata, const unsigned psize) :  _cdata(pdata), _csize(psize), _tdata(NULL) {}
+                             ~Trx3D() {delete _tdata;}
+         void                 setTeselData(TessellPoly* tdata) {_tdata = tdata;}
+         unsigned             csize() const {return _csize;}
+         const TessellChain*  tdata() const {return _tdata->tdata();}
+         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);//       {assert(false);}
+      protected:
+         const int4b*          _cdata;  //! the vertexes of the object contour
+         unsigned              _csize;  //! the number of vertexes in _cdata
+         TessellPoly*          _tdata;  //! polygon tesselation data
+         int4b                 _z[2];    
+   };
+
+   /**
+    Object of this class are used to render boxes when rend3D mode is active. The difference
+    with TrxBox is that the field _tdata contains data which belongs to this object
+    NOTE! All 3D objects inherit TrxNcvx - i.e. they do have a tesselation data
+    */
+   class Trx3DBox : public Trx3D { // the difference with TrxNcvx is the destructor!
+      public:
+                              Trx3DBox(const int4b* pdata) : Trx3D(pdata, 4) {};
+         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
+   };
+
+   /**
+    Used to render polygons when rend3D mode is active.
+    Unlike TrxNcvx, the tesselation data _tdata is not a reference to the
+    tessellation data in the TDT. It copies the original, and then expands it as needed for 3D rendering
+    */
+   class Trx3DPoly : public Trx3D {
+      public:
+                              Trx3DPoly(const int4b* pdata, unsigned psize) : Trx3D(pdata, psize) {};
+//         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
+   };
+
+   /**
+    Used to render wires when rend3D mode is active. Expands the TrxWire object Tesselate
+    method to accomodate the 3D requirements.
+    */
+   class Trx3DWire : public Trx3D {
+      public:
+                              Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width);
+//                              TrxWire  (pdata, psize, width, false) {}
+//         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
+         void                 Tesselate();
+         const TessellPoly*   tpdata()               {return _tdata;}
+   };
+   
+   //===========================================================================
    class T3DTV : public TrendTV{
       public:
+         typedef std::list<Trx3D*>      Slice3DPolygons;
+
                            T3DTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~T3DTV();
 
@@ -45,7 +98,8 @@ namespace trend {
          virtual void      registerWire  (TrxWire*)                              {assert(false);}
          virtual void      registerText  (TrxText*, TrxTextOvlBox*)              {assert(false);}
 
-         virtual void      collect(TPVX&, unsigned int*);
+         virtual void      collect(TPVX&, unsigned int*)                        {assert(false);}
+         void              collect(TPVX3&, unsigned int*);
          virtual void      draw(layprop::DrawProperties*)                        {assert(false);}
          virtual void      drawTexts(layprop::DrawProperties*)                   {assert(false);} // TODO move the method away from TrendTV
 //         TrxCellRef*       swapRefCells(TrxCellRef*);
@@ -57,8 +111,8 @@ namespace trend {
          virtual void      setAlpha(layprop::DrawProperties*)                    {assert(false);}
 //         TrxCellRef*       _refCell;
          // collected data lists
-         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
-         SlicePolygons     _ncvx_data; //! Non convex data
+//         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
+         Slice3DPolygons   _ncvx_data; //! Non convex data
 
          GLsizei*          _sizesvx[OBJ_TYPES]; //! arrays of sizes for vertex sets
          GLsizei*          _firstvx[OBJ_TYPES]; //! arrays of first vertexes
@@ -86,6 +140,7 @@ namespace trend {
    };
 
    
+   //===========================================================================
    class T3DLay : public TrendLay{
       public:
                            T3DLay();
@@ -133,9 +188,8 @@ namespace trend {
 ///         unsigned          _asindxs[SLCT_TYPES]; //! array with the total number of indexes of selected objects
 ///         unsigned          _asobjix[SLCT_TYPES]; //! array with the total number of selected objects
    };
-
    
-   
+   //===========================================================================
    class T3Der : public TrendBase {
    public:
                         T3Der( layprop::DrawProperties* drawprop, real UU);

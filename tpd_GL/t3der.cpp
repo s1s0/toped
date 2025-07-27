@@ -29,6 +29,41 @@
 #include "t3der.h"
 
 
+unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
+{
+   for (unsigned z = 0; z < 2; z++) // front and back plane
+      for ( unsigned i = 0; i < 2*_csize; i+=2)
+         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1], (TNDR_GLDATAT)_z[z]);
+   return _csize * 2;
+}
+
+unsigned trend::Trx3DBox::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
+{
+   unsigned axs[4][2] = {{0,1},{2,1},{2,3},{0,3}};
+   for (unsigned z = 0; z < 2; z++)
+      for (unsigned i = 0; i < _csize; i++)
+         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], (TNDR_GLDATAT)_z[z]);
+   return _csize * 2;
+}
+
+trend::Trx3DWire::Trx3DWire(const int4b* ldata, unsigned lsize, WireWidth width) :
+   Trx3D (NULL, 0)
+{
+   _tdata = DEBUG_NEW TessellPoly;
+   laydata::WireContour wcontour(ldata, lsize, width);
+   _csize = wcontour.csize();
+   // this intermediate variable is just to deal with the const-ness of _cdata;
+   int4b* contData = DEBUG_NEW int4b[ 2 * _csize];
+   wcontour.getArrayData(contData);
+   _cdata = contData;
+}
+
+
+void trend::Trx3DWire::Tesselate()
+{
+   _tdata->pushBackTChunk(TessellChunk(_cdata, _csize, 0));
+}
+
 //===========================================================================
 trend::T3Der::T3Der(layprop::DrawProperties *drawprop, real UU) :
    TrendBase             (drawprop, UU)
@@ -146,43 +181,6 @@ bool trend::T3Der::collect()
    }
 
    checkOGLError("collect");
-
-//   //
-//   // collect the indexes of the selected objects
-//   if (0 < num_total_slctdx)
-//   {// selected objects buffer
-//      _sbuffer = _ogl_buffers[current_buffer++];
-//      DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
-//      DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER  ,
-//                   num_total_slctdx * sizeof(unsigned) ,
-//                   nullptr                             ,
-//                   GL_STATIC_DRAW                    )
-//      unsigned int* sindex_array = (unsigned int*)DBGL_CALL(glMapBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
-//      for (auto layer : _data)
-//      {
-//         if (0 == layer->total_slctdx()) continue;
-//         layer->collectSelected(sindex_array);
-////         trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );
-//      }
-////      trend::dumpOGLArrayUint(sindex_array, num_total_slctdx );
-//      DBGL_CALL(glUnmapBuffer, GL_ELEMENT_ARRAY_BUFFER)
-//   }
-//
-////   checkOGLError("collect");
-//
-//   //
-//   // collect the reference boxes
-//   if (0 < _refLayer->total_points())
-//   {
-//      GLuint pbuf = _ogl_buffers[current_buffer++];
-//      _refLayer->collect(pbuf);
-//   }
-//   // collect reference marks
-//   if (0 < _marks->total_points())
-//   {
-//      GLuint pbuf = _ogl_buffers[current_buffer++];
-//      _marks->collect(pbuf);
-//   }
 
    //
    // that's about it...
@@ -306,10 +304,10 @@ void trend::T3DLay::collect(GLuint pbuf, GLuint ibuf)
 
    //---------------------------------------------------------
    // For the vertex buffer use std::vector structure i.e. TPVX
-   TPVX cpoint_array(_num_total_points);
+   TPVX3 cpoint_array(_num_total_points);
    // Fill-up the buffers with data and indexes for drawing
    for( auto layChunk : _layData)
-      layChunk->collect(cpoint_array, cindex_array);
+      static_cast<T3DTV*>(layChunk)->collect(cpoint_array, cindex_array);
 
    // get the vertex data transferred to OGL
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
@@ -438,7 +436,7 @@ void trend::T3DTV::collectIndexs(unsigned int* index_array, const TessellChain* 
    }
 }
 
-void trend::T3DTV::collect(TPVX& point_array, unsigned int* index_array)
+void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
 {
    // initialise the indexing
    unsigned    pntindx     = 0;//_point_array_offset;
