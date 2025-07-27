@@ -100,7 +100,7 @@ namespace trend {
 
          virtual void      collect(TPVX&, unsigned int*)                        {assert(false);}
          void              collect(TPVX3&, unsigned int*);
-         virtual void      draw(layprop::DrawProperties*)                        {assert(false);}
+         virtual void      draw(layprop::DrawProperties*);//                        {assert(false);}
          virtual void      drawTexts(layprop::DrawProperties*)                   {assert(false);} // TODO move the method away from TrendTV
 //         TrxCellRef*       swapRefCells(TrxCellRef*);
 
@@ -109,6 +109,7 @@ namespace trend {
 ///         unsigned          num_total_strings()  {return _num_total_strings;}
       protected:
          virtual void      setAlpha(layprop::DrawProperties*)                    {assert(false);}
+         void              drawTriQuads();
 //         TrxCellRef*       _refCell;
          // collected data lists
 //         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
@@ -154,7 +155,7 @@ namespace trend {
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned /*slctd_array_offset*/)      { assert(false); }
          virtual bool      chunkExists(TrxCellRef* const, bool)                                          { assert(false); }
 //         void              ppSlice();
-         virtual void      draw(layprop::DrawProperties*)                                                { assert(false); }
+         virtual void      draw(layprop::DrawProperties*);//                                                { assert(false); }
          virtual void      drawSelected()                                                                { assert(false); }
          virtual void      drawTexts(layprop::DrawProperties*)                                           { assert(false); }
          virtual void      collect(GLuint, GLuint);
@@ -205,7 +206,7 @@ namespace trend {
       virtual bool      grdCollect(const layprop::LayoutGrid**)                              {assert(false);}
       virtual bool      rlrCollect(const layprop::RulerList&, int4b, const DBlineList&)      {assert(false);}
 
-      virtual void      draw()                                                               {assert(false);}
+      virtual void      draw();//                                                               {assert(false);}
       virtual void      grcDraw()                                                            {assert(false);}
       virtual void      rlrDraw()                                                            {assert(false);}
       virtual void      grdDraw()                                                            {assert(false);}
@@ -215,7 +216,7 @@ namespace trend {
    protected:
 //      unsigned          _cslctd_array_offset; //! Current selected array offset
 
-      virtual void      setLayColor(const LayerDef& layer)                                   {assert(false);}
+      virtual void      setLayColor(const LayerDef& layer);//                                   {assert(false);}
       virtual void      setStipple()                                                         {assert(false);}
       virtual void      setLine(bool)                                                        {assert(false);}
       virtual void      cleanUp()                                                            {assert(false);}

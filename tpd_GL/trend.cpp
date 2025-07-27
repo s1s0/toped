@@ -1040,6 +1040,10 @@ void trend::TrendCenter::drawFrameBuffer()
             assert(_cShaders);
             _cShaders->drawFrameBuffer();
             break;
+         case trend::rtT3Der:
+            assert(_cShaders);
+            _cShaders->drawFrameBuffer();
+            break;
          default: assert(false); // TODO handled for Toshader only at this stage
             break;
       }

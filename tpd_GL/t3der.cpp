@@ -27,7 +27,9 @@
 
 #include "tpdph.h"
 #include "t3der.h"
+#include "trend.h"
 
+extern trend::TrendCenter*         TRENDC;
 
 unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
 {
@@ -188,6 +190,76 @@ bool trend::T3Der::collect()
    return true;
 }
 
+void trend::T3Der::draw()
+{
+   _drawprop->initCtmStack();
+   TRENDC->setGlslProg(glslp_VF);
+   _drawprop->resetCurrentColor();
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {// for every layer
+      setLayColor(CLAY());
+//      setLine(false);
+//      setStipple();
+      // draw everything
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
+//      // draw texts
+//      if (0 != CLAY->total_strings())
+//      {
+//         TRENDC->bindFont();
+//         CLAY->drawTexts(_drawprop);
+//      }
+   }
+//   // Lines with stipples
+//   TRENDC->setGlslProg(glslp_VG);
+//   _drawprop->resetCurrentColor();
+//   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
+//   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+//   {// for every layer
+//      if (0 != CLAY->total_slctdx())
+//      {// redraw selected contours only
+//         setLayColor(CLAY());
+//         setLine(true);
+//         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
+//         setShaderCtm(_drawprop, _activeCS);
+//         CLAY->drawSelected();
+//         _drawprop->popCtm();
+//         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0)
+//      }
+//   }
+//   // draw reference boxes
+//   if (0 < _refLayer->total_points())
+//   {
+//      TRENDC->setGlslProg(glslp_VG);
+//      _drawprop->resetCurrentColor();
+//      setLayColor(REF_LAY_DEF);
+//      setLine(false);
+//      float mtrxOrtho [16];
+//      _drawprop->topCtm().oglForm(mtrxOrtho);
+//      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
+//      _refLayer->draw(_drawprop);
+//      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
+//   }
+//   // draw reference marks
+//   if (0 < _marks->total_points())
+//   {
+//      TRENDC->setGlslProg(glslp_PS);
+//      _drawprop->resetCurrentColor(); // required after changing the renderer
+//      setLayColor(REF_LAY_DEF);
+//      TRENDC->setUniVarui(glslu_in_StippleEn , 0);
+//      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
+//      TRENDC->setUniVarui(glslu_in_MStippleEn, 1);
+//      float mtrxOrtho [16];
+//      _drawprop->topCtm().oglForm(mtrxOrtho);
+//      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
+//      _marks->draw(_drawprop);
+//   }
+
+   checkOGLError("draw");
+   _drawprop->clearCtmStack();
+}
+
+
 bool trend::T3Der::chunkExists(const LayerDef& laydef, bool /*has_selected*/)
 {
    // Reference layer is processed differently (pushCell), so make sure
@@ -240,6 +312,18 @@ void trend::T3Der::setLayer(const LayerDef& laydef, bool /*has_selected*/)
 //   else
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
 }
+
+void trend::T3Der::setLayColor(const LayerDef& layer)
+{
+   layprop::tellRGB tellColor;
+   if (_drawprop->setCurrentColor(layer, tellColor))
+   {
+      float* oglColor = tellColor.getOGLcolor();
+      TRENDC->setUniColor(oglColor);
+      delete[] oglColor;
+   }
+}
+
 
 void trend::T3Der::text(const std::string *, const CTM &, const DBbox &, const TP &, bool) {
    // In 3D rendering - texts are not visualized - at least for the time being
@@ -321,6 +405,30 @@ void trend::T3DLay::collect(GLuint pbuf, GLuint ibuf)
 //   if (0 != _ibuffer)
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 
+}
+
+
+void trend::T3DLay::draw(layprop::DrawProperties* drawprop)
+{
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
+   // Check the state of the buffer
+   GLint bufferSize;
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
+   assert(bufferSize == (GLint)(3 * _num_total_points * sizeof(TNDR_GLDATAT)));
+   if (0 != _ibuffer)
+   {
+      DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
+      DBGL_CALL(glGetBufferParameteriv, GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
+      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
+   }
+   for (auto TLAY : _layData)
+      TLAY->draw(drawprop);
+   for (auto TLAY : _reLayData)
+      TLAY->draw(drawprop);
+
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   if (0 != _ibuffer)
+      DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
 }
 
 //===========================================================================
@@ -495,3 +603,63 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
 
 }
 
+void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
+{
+   // First - deal with openGL translation matrix
+   setShaderCtm(drawprop, _refCell);
+//   setAlpha(drawprop);
+
+   // Activate the vertex buffers in the vertex shader ...
+   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
+   // Set-up the offset in the binded Vertex buffer
+   size_t koko = sizeof(TPX) * _point_array_offset;
+//   assert(0==koko);
+   /*printf("Offset in the vertex buffer: %d\n", koko)*/;
+   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
+   // ... and here we go ...
+   drawTriQuads();
+//   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
+//   drawLines();
+//   TRENDC->setUniVarui(glslu_in_StippleEn, 1);
+   // Switch the vertex buffers OFF in the openGL engine ...
+   DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
+   // ... and finally restore the openGL translation matrix
+   drawprop->popCtm();
+}
+
+
+void trend::T3DTV::drawTriQuads()
+{
+   if  (_vobjnum[OTcnvx] > 0)
+   {// Draw convex polygons
+      assert(_firstvx[OTcnvx]);
+      assert(_sizesvx[OTcnvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_TRIANGLE_FAN, _firstvx[OTcnvx], _sizesvx[OTcnvx], _vobjnum[OTcnvx])
+   }
+   if  (_vobjnum[OTncvx] > 0)
+   {// Draw non-convex polygons
+      if (_iobjnum[ITtria] > 0)
+      {
+         assert(_sizesix[ITtria]);
+         assert(_firstix[ITtria]);
+         //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
+         for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
+         {
+            DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
+//            printf("DRAW TRIA: Offset: %d; Size: %d \n", _firstix[ITtria][i], _sizesix[ITtria][i]);
+         }
+      }
+      if (_iobjnum[ITtstr] > 0)
+      {
+         assert(_sizesix[ITtstr]);
+         assert(_firstix[ITtstr]);
+         //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
+         for (unsigned i= 0; i < _iobjnum[ITtstr]; i++)
+         {
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, _firstix[ITtstr][i])
+//            printf("DRAW STRP: Offset: %d; Size: %d \n", _firstix[ITtstr][i], _sizesix[ITtstr][i]);
+         }
+
+      }
+   }
+}
