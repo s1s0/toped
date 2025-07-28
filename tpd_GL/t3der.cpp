@@ -41,7 +41,7 @@ unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned 
 
 unsigned trend::Trx3DBox::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
 {
-   unsigned axs[4][2] = {{0,1},{2,1},{2,3},{0,3}};
+   unsigned axs[4][2] = {{0,1},{2,1},{0,3},{2,3}};
    for (unsigned z = 0; z < 2; z++)
       for (unsigned i = 0; i < _csize; i++)
          array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], (TNDR_GLDATAT)_z[z]);
@@ -599,6 +599,8 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
 
       assert(pntindx == controlSize);
       assert(szindx  == _vobjnum[OTncvx]);
+
+//      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
    }
 
 }
@@ -608,6 +610,8 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
    // First - deal with openGL translation matrix
    setShaderMVP(drawprop, _refCell);
 //   setAlpha(drawprop);
+//   DBGL_CALL(glEnable, GL_DEPTH_TEST);
+//   DBGL_CALL(glDepthFunc, GL_LESS); // Accept fragment if it is closer to the camera than the former one
 
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
@@ -615,7 +619,7 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
    size_t koko = sizeof(TPX) * _point_array_offset;
 //   assert(0==koko);
    /*printf("Offset in the vertex buffer: %d\n", koko)*/;
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
+   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 3, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
    // ... and here we go ...
    drawTriQuads();
 //   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
@@ -661,6 +665,36 @@ void trend::T3DTV::drawTriQuads()
          }
 
       }
+   }
+}
+
+
+void trend::T3DTV::DEBUGprintOGL3data(const unsigned start, GLuint **firstix, GLsizei **sizesix, unsigned int *index_array, TPVX3 &point_array, unsigned int *size_index)
+{
+   unsigned i = start;
+   for (auto boza : point_array)
+   {
+      printf("%3i ->X: %7.2f; Y: %7.2f; Z: %7.2f\n", i++, boza.x, boza.y, boza.z);
+   }
+   
+   for (i = 0; i < size_index[ITtria]; i++)
+   {
+      unsigned findex = firstix[ITtria][i]/sizeof(unsigned);
+      printf("Triangle  index %d -> Offset: %d ; Size: %d\n", i, findex, sizesix[ITtria][i]);
+      printf("       Indexes:");
+      for (GLsizei j = 0; j < sizesix[ITtria][i]; j++)
+         printf(" %d", index_array[findex+j]);
+      printf("\n");
+   }
+   
+   for (i = 0; i < size_index[ITtstr]; i++)
+   {
+      unsigned findex = firstix[ITtstr][i]/sizeof(unsigned);
+      printf("TriStrips index %d -> Offset: %d ; Size: %d\n", i, findex, sizesix[ITtstr][i]);
+      printf("       Indexes:");
+      for (GLsizei j = 0; j < sizesix[ITtstr][i]; j++)
+         printf(" %d", index_array[findex+j]);
+      printf("\n");
    }
 }
 

@@ -35,7 +35,7 @@ namespace trend {
 
    class Trx3D {
       public:
-                              Trx3D(const int4b* pdata, const unsigned psize) :  _cdata(pdata), _csize(psize), _tdata(NULL) {}
+      Trx3D(const int4b* pdata, const unsigned psize) :  _cdata(pdata), _csize(psize), _tdata(NULL) {_z[0] = 1; _z[1] = 2;}
                              ~Trx3D() {delete _tdata;}
          void                 setTeselData(TessellPoly* tdata) {_tdata = tdata;}
          unsigned             csize() const {return _csize;}
@@ -102,7 +102,7 @@ namespace trend {
 
          virtual void      collect(TPVX&, unsigned int*)                        {assert(false);}
          void              collect(TPVX3&, unsigned int*);
-         virtual void      draw(layprop::DrawProperties*);//                        {assert(false);}
+         virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*)                   {assert(false);} // TODO move the method away from TrendTV
 //         TrxCellRef*       swapRefCells(TrxCellRef*);
 
@@ -135,11 +135,8 @@ namespace trend {
 //         bool              _filled;
 //         bool              _reusable;
          void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
-
-//         void              DEBUGprintOGLdata(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX &point_array, unsigned int *size_index);
-
-
-//         bool              _rend3D;
+      private:
+         void              DEBUGprintOGL3data(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX3 &point_array, unsigned int *size_index);
    };
 
    
