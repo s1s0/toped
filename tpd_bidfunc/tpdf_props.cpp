@@ -149,17 +149,19 @@ tellstdfunc::stdLAYPROP_D::stdLAYPROP_D(telldata::typeID retype, bool eor) :
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdLAYPROP_D::execute() {
    
-   telldata::TellVar *op;
-   op = OPstack.top();OPstack.pop();
-   int4b ztop = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
-   op = OPstack.top();OPstack.pop();
-   int4b zbot = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+//   telldata::TellVar *op;
+//   op = OPstack.top();OPstack.pop();
+//   int4b ztop = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+//   op = OPstack.top();OPstack.pop();
+//   int4b zbot = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+   float zbot = getOpValue();
+   float ztop = getOpValue();
    std::string sline = getStringValue();
    std::string fill  = getStringValue();
    std::string col   = getStringValue();

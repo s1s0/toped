@@ -58,7 +58,7 @@ typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
-typedef  struct {int4b bottom; int4b top;} ZDepth;
+typedef  struct {float bottom; float top;}  ZDepth;
 //typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
 
@@ -85,7 +85,7 @@ const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
-const ZDepth      NO_DEPTH             = {1,2};//{MIN_INT4B, MAX_INT4B};
+const ZDepth      NO_DEPTH             = {0.0f,0.0f};//{MIN_INT4B, MAX_INT4B};
 
 
 

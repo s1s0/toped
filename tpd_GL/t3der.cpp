@@ -35,7 +35,7 @@ unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned 
 {
    for (unsigned z = 0; z < 2; z++) // front and back plane
    {
-      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) ((0==z ? _zDepth.bottom : _zDepth.top) /10.0f);
       for ( unsigned i = 0; i < 2*_csize; i+=2)
          array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1], zCoord);
    }
@@ -47,7 +47,7 @@ unsigned trend::Trx3DBox::cDataCopy(TPVX3& array, unsigned& pindex, const unsign
    unsigned axs[4][2] = {{0,1},{2,1},{0,3},{2,3}};
    for (unsigned z = 0; z < 2; z++)
    {
-      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) ((0==z ? _zDepth.bottom : _zDepth.top) /10.0f);
       for (unsigned i = 0; i < _csize; i++)
          array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], zCoord);
    }
@@ -235,15 +235,20 @@ void trend::T3Der::draw()
 
 void trend::T3Der::setShaderMVP()
 {
+   
+//      setAlpha(drawprop);
+      DBGL_CALL(glEnable, GL_DEPTH_TEST);
+      DBGL_CALL(glDepthFunc, GL_LESS); // Accept fragment if it is closer to the camera than the former one
+
    // manage the Model/View/Projection matrixes-------------------------------------------
 
    // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
    // Camera matrix
    glm::mat4 View       = glm::lookAt(
-                          glm::vec3(0,0,6), // Camera is at (4,3,3), in World Space
+                          glm::vec3(0,-2,1), // Camera is at (4,3,3), in World Space
                           glm::vec3(0,0,0), // and looks at the origin
-                          glm::vec3(0,-1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                          glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                      );
 //
 //   glm::mat4 View       = glm::lookAt(
@@ -619,10 +624,6 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    setShaderCTM(drawprop, _refCell);
-//   setAlpha(drawprop);
-//   DBGL_CALL(glEnable, GL_DEPTH_TEST);
-//   DBGL_CALL(glDepthFunc, GL_LESS); // Accept fragment if it is closer to the camera than the former one
-
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
