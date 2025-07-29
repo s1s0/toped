@@ -15,7 +15,7 @@
 //    Description: Basic screen setup for Toped
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -151,20 +151,20 @@ void  fillSetup() {
    int list FatDots2 = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E, 
+   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E,
    0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E, 
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E,
    0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E, 
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E,
    0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E, 
-   0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00 };  
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x04, 0x04, 0x04, 0x04, 0x0E, 0x0E, 0x0E, 0x0E,
+   0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00 };
    
    int list vertHash = {
    0x50, 0x00, 0x00, 0x00, 0x50, 0x50, 0x00, 0x00,
@@ -218,7 +218,7 @@ void  fillSetup() {
    0x55 ,0x55 ,0x55 ,0x55 ,0xaa ,0xaa ,0xaa ,0xaa ,
    0x55 ,0x55 ,0x55 ,0x55 ,0xaa ,0xaa ,0xaa ,0xaa ,
    0x55 ,0x55 ,0x55 ,0x55 ,0xaa ,0xaa ,0xaa ,0xaa ,
-   0x55 ,0x55 ,0x55 ,0x55 ,0xaa ,0xaa ,0xaa ,0xaa  
+   0x55 ,0x55 ,0x55 ,0x55 ,0xaa ,0xaa ,0xaa ,0xaa
    };
    
    int list checkerboards = {
@@ -295,7 +295,7 @@ void  fillSetup() {
 }
 
 void colorSetup() {
-//                              R    G    B   Alpha 
+//                              R    G    B   Alpha
    definecolor("black"       ,   0,   0,   0, 178);
    definecolor("white"       , 255, 255, 255, 178);
    definecolor("darkGray"    ,  80,  80,  80, 178);
@@ -325,7 +325,7 @@ void colorSetup() {
    definecolor("lt_brown"     ,219, 184, 137, 178);
    definecolor("orange"       ,255, 127, 0  , 178);
    definecolor("dark_orange"  ,200, 100, 0  , 178);
-   definecolor("brown"        ,128,  64, 0  , 178); 
+   definecolor("brown"        ,128,  64, 0  , 178);
    definecolor("blue_2"       ,0  , 127, 255, 178);
    definecolor("green_2"      ,127, 255, 0  , 178);
    definecolor("bg_1"         ,224, 224, 224, 178);
@@ -357,24 +357,24 @@ void layerSetup() {
 //    lmap list cifmap;
 //    lmap list gdsmap;
 //           name         layer    Color          Fill               Selected          CIF conversion map            GDS conversion map
-   layprop("NWELL"      ,{ 1, 0} ,"yellow"      ,"Dots1"          , "selected3" );
+   layprop("NWELL"      ,{ 1, 0} ,"yellow"      ,"Dots1"          , "selected3" , -3, -2);
    layprop("LAYER0"     ,{ 0, 0} ,"past_cyan"   ,"FatDots2"       , "selected3" );
-   layprop("ACTIVE"     ,{ 2, 0} ,"blue"        ,"diagStripeBack" , "selected3" );
+   layprop("ACTIVE"     ,{ 2, 0} ,"blue"        ,"diagStripeBack" , "selected3" ,  0,  1);
    layprop("UNKWN_1"    ,{ 3, 0} ,"darkGray"    ,""               , "selected3" );
-   layprop("POLY"       ,{ 4, 0} ,"red"         ,"checkerboards"  , "selected2" );
-   layprop("N_IMPL"     ,{ 5, 0} ,"white"       ,""               , "selected3" );
-   layprop("P_IMPL"     ,{ 6, 0} ,"magenta"     ,""               , "selected3" );
-   layprop("CONTACT"    ,{ 7, 0} ,"white"       ,"diagStripeForw" , "selected3" );
-   layprop("METAL1"     ,{ 8, 0} ,"green"       ,"checkerboard"   , "selected3" );
+   layprop("POLY"       ,{ 4, 0} ,"red"         ,"checkerboards"  , "selected2" ,  1,  2);
+   layprop("N_IMPL"     ,{ 5, 0} ,"white"       ,""               , "selected3" , -1,  0);
+   layprop("P_IMPL"     ,{ 6, 0} ,"magenta"     ,""               , "selected3" , -1,  0);
+   layprop("CONTACT"    ,{ 7, 0} ,"white"       ,"diagStripeForw" , "selected3" ,  2,  3);
+   layprop("METAL1"     ,{ 8, 0} ,"green"       ,"checkerboard"   , "selected3" ,  3,  4);
    layprop("PASS"       ,{ 9, 0} ,"darkGray"    ,""               , "selected3" );
    layprop("UNKWN_2"    ,{10, 0} ,"white"       ,""               , "selected3" );
    layprop("UNKWN_3"    ,{11, 0} ,"white"       ,""               , "selected3" );
    layprop("UNKWN_3"    ,{12, 0} ,"white"       ,""               , "selected3" );
    layprop("P_FIELD"    ,{13, 0} ,"white"       ,""               , "selected3" );
-   layprop("POLY1"      ,{14, 0} ,"cyan"        ,"Cross1"         , "selected3" );
+   layprop("POLY1"      ,{14, 0} ,"cyan"        ,"Cross1"         , "selected3" ,  1,  2);
    layprop("FUSE"       ,{15, 0} ,"white"       ,""               , "selected3" );
-   layprop("VIA12"      ,{17, 0} ,"lightGray"   ,""               , "selected3" );
-   layprop("METAL2"     ,{18, 0} ,"darkMagenta" ,""               , "selected3" );
+   layprop("VIA12"      ,{17, 0} ,"lightGray"   ,""               , "selected3" ,  4,  5);
+   layprop("METAL2"     ,{18, 0} ,"darkMagenta" ,""               , "selected3" ,  5,  6);
    layprop("TEXT"       ,{60, 0} ,"darkGray"    ,""               , "selected1" );
    layprop("TEXT"       ,{62, 0} ,"yellow"      ,"horiHash"       , "selected2" );
    layprop("SCRIBE_LANE",{63, 0} ,"white"       ,""               , "selected3" );

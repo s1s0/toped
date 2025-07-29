@@ -570,12 +570,12 @@ bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
       return false;
    std::ostringstream lname;
    lname << defaultLaySuffix[_propertyState] << laydef.num() << "_" << laydef.typ();
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","","",NO_DEPTH));
    return true;
 }
 
 bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef, std::string col,
-                                       std::string fill, std::string sline)
+                                       std::string fill, std::string sline, const ZDepth& zDepth)
 {
    if ((col != "") && (_layCurColors->end() == _layCurColors->find(col)))
    {
@@ -607,7 +607,7 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef,
       ost << "Warning! Layer "<<laydef<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline, zDepth));
 
    return new_layer;
 }
@@ -616,7 +616,7 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
 {
    if (_layCurSet->end() != _layCurSet->find(laydef))
       return false;
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,"","","",NO_DEPTH));
    return true;
 }
 
@@ -712,6 +712,19 @@ const byte* layprop::DrawProperties::getCurrentFill() const
       else return NULL;
    }
    else return NULL;
+}
+
+
+const ZDepth layprop::DrawProperties::getLayDepth(const LayerDef& laydef) const
+{
+   assert((REF_LAY_DEF != laydef) &&
+          (GRC_LAY_DEF != laydef)    );
+   // Retrive the layer settings
+   const LayerSettings* ilayset = findLayerSettings(laydef);
+   if (NULL != ilayset)
+      return ilayset->zDepth();
+   else
+      return NO_DEPTH;
 }
 
 bool layprop::DrawProperties::layerFilled(const LayerDef& laydef) const

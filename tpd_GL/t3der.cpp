@@ -34,8 +34,11 @@ extern trend::TrendCenter*         TRENDC;
 unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
 {
    for (unsigned z = 0; z < 2; z++) // front and back plane
+   {
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
       for ( unsigned i = 0; i < 2*_csize; i+=2)
-         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1], (TNDR_GLDATAT)_z[z]);
+         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1], zCoord);
+   }
    return _csize * 2;
 }
 
@@ -43,13 +46,16 @@ unsigned trend::Trx3DBox::cDataCopy(TPVX3& array, unsigned& pindex, const unsign
 {
    unsigned axs[4][2] = {{0,1},{2,1},{0,3},{2,3}};
    for (unsigned z = 0; z < 2; z++)
+   {
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
       for (unsigned i = 0; i < _csize; i++)
-         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], (TNDR_GLDATAT)_z[z]);
+         array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], zCoord);
+   }
    return _csize * 2;
 }
 
-trend::Trx3DWire::Trx3DWire(const int4b* ldata, unsigned lsize, WireWidth width) :
-   Trx3D (NULL, 0)
+trend::Trx3DWire::Trx3DWire(const int4b* ldata, unsigned lsize, WireWidth width, const ZDepth& zDepth) :
+   Trx3D (NULL, 0, zDepth)
 {
    _tdata = DEBUG_NEW TessellPoly;
    laydata::WireContour wcontour(ldata, lsize, width);
@@ -169,6 +175,18 @@ bool trend::T3Der::collect()
    // collect the point & index arrays across all visible cells for every layer
    // separately. This is effectively all vertexes of all visible TDT shapes
    // TDT cell structure at this stage (i.e. after traversing) is transparent
+//   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+//   {//... layer by layer
+//      if (0 == CLAY->total_points())
+//      {
+//         continue;
+//      }
+//      assert(current_buffer < _num_ogl_buffers);
+//      GLuint pbuf = _ogl_buffers[current_buffer++];
+//      assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
+//      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
+//      CLAY->collect(pbuf, ibuf);
+//   }
    for (auto layer : _data)
    {//... layer by layer
       if (0 == layer->total_points())
@@ -277,13 +295,10 @@ bool trend::T3Der::chunkExists(const LayerDef& laydef, bool /*has_selected*/)
    }
    else
    {
-      _clayer = DEBUG_NEW T3DLay();
+      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef));
       _data.add(laydef, _clayer);
    }
-//   if (has_selected)
-//      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true, _cslctd_array_offset);
-//   else
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true);
    return false;
 
 }
@@ -304,13 +319,10 @@ void trend::T3Der::setLayer(const LayerDef& laydef, bool /*has_selected*/)
    }
    else
    {
-      _clayer = DEBUG_NEW T3DLay();
+      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef));
       _data.add(laydef, _clayer);
    }
-//   if (has_selected)
-//      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
-//   else
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
 }
 
 void trend::T3Der::setLayColor(const LayerDef& layer)
@@ -335,10 +347,10 @@ trend::T3Der::~T3Der() /*noexcept*/
 }
 
 //===========================================================================
-trend::T3DLay::T3DLay() :
-   TrendLay()
+trend::T3DLay::T3DLay(const ZDepth& zDepth) :
+   TrendLay (        )
+ ,_zDepth   ( zDepth )
 {
-   
 }
 
 void trend::T3DLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
@@ -354,17 +366,17 @@ trend::T3DLay::~T3DLay()
 
 void trend::T3DLay::box  (const int4b* pdata)
 {
-   static_cast<T3DTV*>(_cslice)->register3DBox(DEBUG_NEW Trx3DBox(pdata));
+   static_cast<T3DTV*>(_cslice)->register3DBox(DEBUG_NEW Trx3DBox(pdata,_zDepth));
 }
 
 void trend::T3DLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   static_cast<T3DTV*>(_cslice)->register3DPoly(DEBUG_NEW Trx3DPoly(pdata, psize), tpoly);
+   static_cast<T3DTV*>(_cslice)->register3DPoly(DEBUG_NEW Trx3DPoly(pdata, psize, _zDepth), tpoly);
 }
 
 void trend::T3DLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool /*center_only*/)
 {
-   static_cast<T3DTV*>(_cslice)->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width));
+   static_cast<T3DTV*>(_cslice)->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width,_zDepth));
 }
 
 void trend::T3DLay::collect(GLuint pbuf, GLuint ibuf)
@@ -600,7 +612,7 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
       assert(pntindx == controlSize);
       assert(szindx  == _vobjnum[OTncvx]);
 
-//      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
+      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
    }
 
 }

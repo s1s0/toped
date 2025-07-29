@@ -99,7 +99,7 @@ int tellstdfunc::stdLAYPROP::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, laydef, col, fill, sline);
+      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH);
       TpdPost::layer_add(name,laydef);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*tlay) << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
@@ -131,12 +131,52 @@ int tellstdfunc::stdLAYPROP_T::execute() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, laydef, col, fill, sline);
+      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH);
       TpdPost::layer_add(name,laydef);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << telldata::TtLayer(laydef) << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdLAYPROP_D::stdLAYPROP_D(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdLAYPROP_D::execute() {
+   
+   telldata::TellVar *op;
+   op = OPstack.top();OPstack.pop();
+   int4b ztop = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+   op = OPstack.top();OPstack.pop();
+   int4b zbot = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+   std::string sline = getStringValue();
+   std::string fill  = getStringValue();
+   std::string col   = getStringValue();
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+   LayerDef laydef(tlay->value());
+   std::string name  = getStringValue();
+   // error message - included in the method
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->addLayer(name, laydef, col, fill, sline, {zbot, ztop});
+      TpdPost::layer_add(name,laydef);
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*tlay) << ",\"" <<
+            col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+   }
+   PROPC->unlockDrawProp(drawProp, true);
+   delete tlay;
    return EXEC_NEXT;
 }
 

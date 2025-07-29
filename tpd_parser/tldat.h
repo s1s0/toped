@@ -221,7 +221,7 @@ namespace telldata {
       virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtReal(_value);};
       friend class TtPnt;
    private:
-      real  _value;
+      real                 _value;
    };
 
    //==============================================================================

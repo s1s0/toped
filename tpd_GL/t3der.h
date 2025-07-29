@@ -35,7 +35,7 @@ namespace trend {
 
    class Trx3D {
       public:
-      Trx3D(const int4b* pdata, const unsigned psize) :  _cdata(pdata), _csize(psize), _tdata(NULL) {_z[0] = 1; _z[1] = 2;}
+                              Trx3D(const int4b* pdata, const unsigned psize, const ZDepth& zDepth) :  _cdata(pdata), _csize(psize), _tdata(NULL), _zDepth(zDepth) {/*assert(NO_DEPTH != zDepth);*/}
                              ~Trx3D() {delete _tdata;}
          void                 setTeselData(TessellPoly* tdata) {_tdata = tdata;}
          unsigned             csize() const {return _csize;}
@@ -45,40 +45,23 @@ namespace trend {
          const int4b*          _cdata;  //! the vertexes of the object contour
          unsigned              _csize;  //! the number of vertexes in _cdata
          TessellPoly*          _tdata;  //! polygon tesselation data
-         int4b                 _z[2];    
+         ZDepth                _zDepth;
    };
 
-   /**
-    Object of this class are used to render boxes when rend3D mode is active. The difference
-    with TrxBox is that the field _tdata contains data which belongs to this object
-    NOTE! All 3D objects inherit TrxNcvx - i.e. they do have a tesselation data
-    */
    class Trx3DBox : public Trx3D { // the difference with TrxNcvx is the destructor!
       public:
-                              Trx3DBox(const int4b* pdata) : Trx3D(pdata, 4) {};
+                              Trx3DBox(const int4b* pdata, const ZDepth& zDepth) : Trx3D(pdata, 4, zDepth) {/*assert(NO_DEPTH != zDepth);*/}
          virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
    };
 
-   /**
-    Used to render polygons when rend3D mode is active.
-    Unlike TrxNcvx, the tesselation data _tdata is not a reference to the
-    tessellation data in the TDT. It copies the original, and then expands it as needed for 3D rendering
-    */
    class Trx3DPoly : public Trx3D {
       public:
-                              Trx3DPoly(const int4b* pdata, unsigned psize) : Trx3D(pdata, psize) {};
-//         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
+                              Trx3DPoly(const int4b* pdata, unsigned psize, const ZDepth& zDepth) : Trx3D(pdata, psize, zDepth) {};
    };
 
-   /**
-    Used to render wires when rend3D mode is active. Expands the TrxWire object Tesselate
-    method to accomodate the 3D requirements.
-    */
    class Trx3DWire : public Trx3D {
       public:
-                              Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width);
-//                              TrxWire  (pdata, psize, width, false) {}
-//         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
+                              Trx3DWire(const int4b* pdata, unsigned psize, WireWidth width, const ZDepth& zDepth);
          void                 Tesselate();
          const TessellPoly*   tpdata()               {return _tdata;}
    };
@@ -143,7 +126,7 @@ namespace trend {
    //===========================================================================
    class T3DLay : public TrendLay{
       public:
-                           T3DLay();
+                           T3DLay(const ZDepth&);
          virtual          ~T3DLay();
          virtual void      box  (const int4b*);
          virtual void      poly (const int4b*, unsigned, const TessellPoly*);
@@ -187,6 +170,8 @@ namespace trend {
 ///         // index related data for selected objects
 ///         unsigned          _asindxs[SLCT_TYPES]; //! array with the total number of indexes of selected objects
 ///         unsigned          _asobjix[SLCT_TYPES]; //! array with the total number of selected objects
+      private:
+         ZDepth          _zDepth;
    };
    
    //===========================================================================

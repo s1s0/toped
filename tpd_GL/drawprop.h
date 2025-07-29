@@ -198,9 +198,9 @@ namespace layprop {
    //
    class LayerSettings  {
       public:
-                           LayerSettings(std::string name, std::string color, std::string filltype, std::string sline):
+                           LayerSettings(std::string name, std::string color, std::string filltype, std::string sline, const ZDepth& zDepth):
                            _name(name), _color(color), _fill(filltype), _sline(sline),
-                                 _hidden(false), _locked(false), _filled(filltype != "") {};
+                                 _hidden(false), _locked(false), _filled(filltype != ""), _zDepth(zDepth) {};
          std::string       color()    const {return _color;}
          std::string       fill()     const {return _fill;}
          bool              filled()   const {return _filled;}
@@ -208,6 +208,7 @@ namespace layprop {
          std::string       sline()    const {return _sline;}
          bool              hidden()   const {return _hidden;}
          bool              locked()   const {return _locked;}
+         const ZDepth      zDepth()   const {return _zDepth;}
          void              fillLayer(bool filled)  {_filled = filled;};
          friend class DrawProperties;
       private:
@@ -218,6 +219,7 @@ namespace layprop {
          bool              _hidden;
          bool              _locked;
          bool              _filled; //define filling visualisation
+         ZDepth            _zDepth;
    };
 
    //=============================================================================
@@ -269,6 +271,7 @@ namespace layprop {
          void                       resetCurrentColor();
          const byte*                getCurrentFill() const;
          void                       getCurrentLine(LineSettings&, bool) const;
+         const ZDepth               getLayDepth(const LayerDef&) const;
          bool                       getAlpha(word factor, layprop::tellRGB& theColor);
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
@@ -318,7 +321,7 @@ namespace layprop {
          void                       allUnselectable(LayerDefSet&);
          void                       allInvisible(LayerDefSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
-         bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string);
+         bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string, const ZDepth&);
          bool                       addLayer(std::string, const LayerDef&);
          bool                       addLayer(const LayerDef&);
          LayerDef                   addLayer(std::string);

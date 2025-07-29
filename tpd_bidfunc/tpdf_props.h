@@ -37,6 +37,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdPROPSAVE, stdPROPSAVE_AUI);
    TELL_STDCMD_CLASSA(stdLAYPROP       );  //
    TELL_STDCMD_CLASSA(stdLAYPROP_T     );  //
+   TELL_STDCMD_CLASSA(stdLAYPROP_D     );  //
    TELL_STDCMD_CLASSA(stdLINEDEF       );  //
    TELL_STDCMD_CLASSA(stdCOLORDEF      );  //
    TELL_STDCMD_CLASSA(stdFILLDEF       );  //

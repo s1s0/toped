@@ -45,9 +45,9 @@
 // less space - at least a function parameters do not need to be allocated. They
 // are anonymous anyway, so their names can not be used.
 // After implementation of the tell structures however this way looks like more
-// hassle, because of the anonymous _arguments. We need to deal "per case" with
-// the pain of determining the type of those _arguments, and this is not the error
-// proof way. Besides in this case additional virtual method callingConv() has to
+// hussle, because of the anonymous _arguments. We need to deal "per case" with
+// the pain of determining the type of those _arguments, and this is not an error
+// free way. Besides, in this case additional virtual method callingConv() has to
 // be defined for every class.
 //
 // Bottom line, we are using the first way and the parent argsOK method for
