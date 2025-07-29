@@ -31,8 +31,6 @@
 #include "toshader.h"
 namespace trend {
 
-   void setShaderMVP(layprop::DrawProperties* drawprop, const TrxCellRef* refCell);
-
    class Trx3D {
       public:
                               Trx3D(const int4b* pdata, const unsigned psize, const ZDepth& zDepth) :  _cdata(pdata), _csize(psize), _tdata(NULL), _zDepth(zDepth) {/*assert(NO_DEPTH != zDepth);*/}
@@ -40,12 +38,12 @@ namespace trend {
          void                 setTeselData(TessellPoly* tdata) {_tdata = tdata;}
          unsigned             csize() const {return _csize;}
          const TessellChain*  tdata() const {return _tdata->tdata();}
-         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);//       {assert(false);}
+         virtual unsigned     cDataCopy(TPVX3&, unsigned&, const unsigned);
       protected:
          const int4b*          _cdata;  //! the vertexes of the object contour
          unsigned              _csize;  //! the number of vertexes in _cdata
          TessellPoly*          _tdata;  //! polygon tesselation data
-         ZDepth                _zDepth;
+         ZDepth                _zDepth; //! the vertical dimentions of the object
    };
 
    class Trx3DBox : public Trx3D { // the difference with TrxNcvx is the destructor!
@@ -83,7 +81,7 @@ namespace trend {
          virtual void      registerWire  (TrxWire*)                              {assert(false);}
          virtual void      registerText  (TrxText*, TrxTextOvlBox*)              {assert(false);}
 
-         virtual void      collect(TPVX&, unsigned int*)                        {assert(false);}
+         virtual void      collect(TPVX&, unsigned int*)                         {assert(false);}
          void              collect(TPVX3&, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*)                   {assert(false);} // TODO move the method away from TrendTV
@@ -119,6 +117,7 @@ namespace trend {
 //         bool              _reusable;
          void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
       private:
+         void              setShaderCTM(layprop::DrawProperties* drawprop, const TrxCellRef* refCell);
          void              DEBUGprintOGL3data(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX3 &point_array, unsigned int *size_index);
    };
 
@@ -135,9 +134,9 @@ namespace trend {
 
          virtual void      newSlice(TrxCellRef* const, bool, bool);
          virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned /*slctd_array_offset*/)      { assert(false); }
-         virtual bool      chunkExists(TrxCellRef* const, bool)                                          { assert(false); }
+         virtual bool      chunkExists(TrxCellRef* const, bool);
 //         void              ppSlice();
-         virtual void      draw(layprop::DrawProperties*);//                                                { assert(false); }
+         virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected()                                                                { assert(false); }
          virtual void      drawTexts(layprop::DrawProperties*)                                           { assert(false); }
          virtual void      collect(GLuint, GLuint);
@@ -190,7 +189,7 @@ namespace trend {
       virtual bool      grdCollect(const layprop::LayoutGrid**)                              {assert(false);}
       virtual bool      rlrCollect(const layprop::RulerList&, int4b, const DBlineList&)      {assert(false);}
 
-      virtual void      draw();//                                                               {assert(false);}
+      virtual void      draw();
       virtual void      grcDraw()                                                            {assert(false);}
       virtual void      rlrDraw()                                                            {assert(false);}
       virtual void      grdDraw()                                                            {assert(false);}
@@ -212,6 +211,7 @@ namespace trend {
       GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
 
    private:
+      void              setShaderMVP();
       void              windowVAO()                                                          {assert(false);}
    };
 }

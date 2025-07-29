@@ -220,6 +220,7 @@ void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reus
    _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, _num_total_points, _num_total_indexs);
 }
 
+#warning: This is the same implementation as in TenderLay
 bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;

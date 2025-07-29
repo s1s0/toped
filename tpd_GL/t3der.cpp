@@ -212,6 +212,7 @@ void trend::T3Der::draw()
 {
    _drawprop->initCtmStack();
    TRENDC->setGlslProg(glslp_3D);
+   setShaderMVP();
    _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -228,55 +229,35 @@ void trend::T3Der::draw()
 //         CLAY->drawTexts(_drawprop);
 //      }
    }
-//   // Lines with stipples
-//   TRENDC->setGlslProg(glslp_VG);
-//   _drawprop->resetCurrentColor();
-//   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
-//   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-//   {// for every layer
-//      if (0 != CLAY->total_slctdx())
-//      {// redraw selected contours only
-//         setLayColor(CLAY());
-//         setLine(true);
-//         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
-//         setShaderCtm(_drawprop, _activeCS);
-//         CLAY->drawSelected();
-//         _drawprop->popCtm();
-//         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0)
-//      }
-//   }
-//   // draw reference boxes
-//   if (0 < _refLayer->total_points())
-//   {
-//      TRENDC->setGlslProg(glslp_VG);
-//      _drawprop->resetCurrentColor();
-//      setLayColor(REF_LAY_DEF);
-//      setLine(false);
-//      float mtrxOrtho [16];
-//      _drawprop->topCtm().oglForm(mtrxOrtho);
-//      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
-//      _refLayer->draw(_drawprop);
-//      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
-//   }
-//   // draw reference marks
-//   if (0 < _marks->total_points())
-//   {
-//      TRENDC->setGlslProg(glslp_PS);
-//      _drawprop->resetCurrentColor(); // required after changing the renderer
-//      setLayColor(REF_LAY_DEF);
-//      TRENDC->setUniVarui(glslu_in_StippleEn , 0);
-//      TRENDC->setUniVarui(glslu_in_LStippleEn, 0);
-//      TRENDC->setUniVarui(glslu_in_MStippleEn, 1);
-//      float mtrxOrtho [16];
-//      _drawprop->topCtm().oglForm(mtrxOrtho);
-//      TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
-//      _marks->draw(_drawprop);
-//   }
-
    checkOGLError("draw");
    _drawprop->clearCtmStack();
 }
 
+void trend::T3Der::setShaderMVP()
+{
+   // manage the Model/View/Projection matrixes-------------------------------------------
+
+   // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+   glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+   // Camera matrix
+   glm::mat4 View       = glm::lookAt(
+                          glm::vec3(0,0,6), // Camera is at (4,3,3), in World Space
+                          glm::vec3(0,0,0), // and looks at the origin
+                          glm::vec3(0,-1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                     );
+//
+//   glm::mat4 View       = glm::lookAt(
+//                          glm::vec3(1,1,1), // Camera is at (4,3,3), in World Space
+//                          glm::vec3(0,0,0), // and looks at the origin
+//                          glm::vec3(0,0,1)  // Head is up (set to 0,-1,0 to look upside-down)
+//                     );
+   // Model matrix : an identity matrix (model will be at the origin)
+   glm::mat4 Model      = glm::mat4(1.0f);
+   // Our ModelViewProjection : multiplication of our 3 matrices
+   glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
+
+   TRENDC->setUniMtrx4fv(glslu_in_MVP, &MVP[0][0]);
+}
 
 bool trend::T3Der::chunkExists(const LayerDef& laydef, bool /*has_selected*/)
 {
@@ -377,6 +358,23 @@ void trend::T3DLay::poly (const int4b* pdata, unsigned psize, const TessellPoly*
 void trend::T3DLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool /*center_only*/)
 {
    static_cast<T3DTV*>(_cslice)->register3DWire(DEBUG_NEW Trx3DWire(pdata, psize, width,_zDepth));
+}
+
+bool trend::T3DLay::chunkExists(TrxCellRef* const ctrans, bool filled)
+{
+   ReusableTTVMap::iterator achunk;
+   if (filled)
+   {
+      if (_reusableFData.end() == ( achunk =_reusableFData.find(ctrans->name()) ) )
+         return false;
+   }
+   else
+   {
+      if (_reusableCData.end() == ( achunk =_reusableCData.find(ctrans->name()) ) )
+         return false;
+   }
+   _reLayData.push_back(DEBUG_NEW TenderReTV(achunk->second, ctrans));
+   return true;
 }
 
 void trend::T3DLay::collect(GLuint pbuf, GLuint ibuf)
@@ -612,7 +610,7 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
       assert(pntindx == controlSize);
       assert(szindx  == _vobjnum[OTncvx]);
 
-      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
+//      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
    }
 
 }
@@ -620,7 +618,7 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
 void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
-   setShaderMVP(drawprop, _refCell);
+   setShaderCTM(drawprop, _refCell);
 //   setAlpha(drawprop);
 //   DBGL_CALL(glEnable, GL_DEPTH_TEST);
 //   DBGL_CALL(glDepthFunc, GL_LESS); // Accept fragment if it is closer to the camera than the former one
@@ -680,7 +678,6 @@ void trend::T3DTV::drawTriQuads()
    }
 }
 
-
 void trend::T3DTV::DEBUGprintOGL3data(const unsigned start, GLuint **firstix, GLsizei **sizesix, unsigned int *index_array, TPVX3 &point_array, unsigned int *size_index)
 {
    unsigned i = start;
@@ -710,10 +707,10 @@ void trend::T3DTV::DEBUGprintOGL3data(const unsigned start, GLuint **firstix, GL
    }
 }
 
-void trend::setShaderMVP(layprop::DrawProperties* drawprop, const TrxCellRef* refCell)
+void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCellRef* refCell)
 {
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-   TRENDC->setUniMtrx4fv(glslu_in_MVP, mtrxOrtho);
+   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
 }

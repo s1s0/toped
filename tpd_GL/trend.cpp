@@ -545,6 +545,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_PS][glslu_in_MStippleEn] = "in_MStippleEn";
    
+   _glslUniVarNames[glslp_3D][glslu_in_CTM]        = "CTM";
    _glslUniVarNames[glslp_3D][glslu_in_MVP]        = "MVP";
    _glslUniVarNames[glslp_3D][glslu_in_Color]      = "in_Color";
    //
