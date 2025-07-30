@@ -739,7 +739,7 @@ namespace trend {
          void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
          void              wirem(int4b*, unsigned, WireWidth, const SGBitSet*);
          void              wiret(const PointVector&, WireWidth);
-         void              grcwire (int4b*, unsigned, WireWidth);
+         virtual void      grcwire (int4b*, unsigned, WireWidth);
          virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool) = 0;
          virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool) = 0;
          void              textt(const std::string*, const CTM&, const TP&);
