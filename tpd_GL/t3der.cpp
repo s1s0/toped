@@ -246,8 +246,7 @@ void trend::T3DTV::collect(TPVX3& point_array, unsigned int* index_array)
       assert(pntindx == controlSize);
       assert(szindx  == _vobjnum[OTncvx]);
 
-      
-      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
+//      DEBUGprintOGL3data(_point_array_offset, _firstix, _sizesix, index_array, point_array, size_index);
    }
 
 }
@@ -259,7 +258,7 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
-   size_t koko = sizeof(TPX) * _point_array_offset;
+   size_t koko = sizeof(TPX3) * _point_array_offset;
 //   assert(0==koko);
    /*printf("Offset in the vertex buffer: %d\n", koko)*/;
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 3, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
