@@ -251,6 +251,7 @@ private:
 > PSP     operator *  (PSP* op1)  Multiplication PSP = CTM*PSP
 ******************************************************************************/
 class TP;
+class DoublePoint;
 class   CTM
 {
 public:
@@ -270,6 +271,7 @@ public:
    CTM  Rotate(const real, const TP&);
    CTM  Rotate(const TP&);
    CTM  Reversed() const;
+   void Decompose(DoublePoint&, real&, real&, real&, bool&) const;
    void Decompose(TP&, real&, real&, bool&) const;
    void oglForm(real* const) const;
    void oglForm(float* const) const;
@@ -329,10 +331,13 @@ private:
 //
 class DoublePoint {
 public:
+   DoublePoint(const double x, const double y) : _x(x), _y(y) {};
    DoublePoint(const TP& tp);
    DoublePoint(int4b x, int4b y);
    double   x() {return _x;}
    double   y() {return _y;}
+   void   setX(const double x) {_x=x;}
+   void   setY(const double y) {_y=y;}
 private:
    double _x;
    double _y;

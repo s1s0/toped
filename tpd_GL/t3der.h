@@ -85,17 +85,14 @@ namespace trend {
          void              collect(TPVX3&, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*)                   {assert(false);} // TODO move the method away from TrendTV
-//         TrxCellRef*       swapRefCells(TrxCellRef*);
 
-         unsigned          num_total_points();
-         unsigned          num_total_indexs();
 ///         unsigned          num_total_strings()  {return _num_total_strings;}
       protected:
          virtual void      setAlpha(layprop::DrawProperties*)                    {assert(false);}
          void              drawTriQuads();
-//         TrxCellRef*       _refCell;
+         void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
          // collected data lists
-//         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
+///         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
          Slice3DPolygons   _ncvx_data; //! Non convex data
 
          GLsizei*          _sizesvx[OBJ_TYPES]; //! arrays of sizes for vertex sets
@@ -105,17 +102,8 @@ namespace trend {
          // offsets in the VBO
          unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
          unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
-         // vertex related data
-//         unsigned          _vrtxnum[OBJ_TYPES]; //! array with the total number of vertexes
-//         unsigned          _vobjnum[OBJ_TYPES]; //! array with the total number of objects that will be drawn with vertex related functions
-         // index related data for non-convex polygons
-//         unsigned          _indxnum[IDX_TYPES]; //! array with the total number of indexes
-//         unsigned          _iobjnum[IDX_TYPES]; //! array with the total number of objects that will be drawn with index related functions
          //
 ///         unsigned          _num_total_strings;
-//         bool              _filled;
-//         bool              _reusable;
-         void              collectIndexs(unsigned int*, const TessellChain*, unsigned*, unsigned*, const unsigned);
       private:
          void              setShaderCTM(layprop::DrawProperties* drawprop, const TrxCellRef* refCell);
          void              DEBUGprintOGL3data(const unsigned start, GLuint **_firstix, GLsizei **_sizesix, unsigned int *index_array, TPVX3 &point_array, unsigned int *size_index);
@@ -125,8 +113,8 @@ namespace trend {
    //===========================================================================
    class T3DLay : public TrendLay{
       public:
-                           T3DLay(const ZDepth&);
-         virtual          ~T3DLay();
+                           T3DLay(const ZDepth& zDepth) :TrendLay () ,_zDepth ( zDepth ) {}
+         virtual          ~T3DLay() {};
          virtual void      box  (const int4b*);
          virtual void      poly (const int4b*, unsigned, const TessellPoly*);
          virtual void      wire (int4b*, unsigned, WireWidth, bool);
@@ -149,26 +137,6 @@ namespace trend {
       protected:
          GLuint            _pbuffer;
          GLuint            _ibuffer;
-
-//         void              registerSBox  (TrxSBox*);
-//         void              registerSPoly (TrxSNcvx*);
-//         void              registerSWire (TrxSWire*);
-//         void              registerSOBox (TrxTextSOvlBox*);
-
-//         ReusableTTVMap    _reusableFData; // reusable filled chunks
-//         ReusableTTVMap    _reusableCData; // reusable contour chunks
-//         TrendTVList       _layData;
-//         TrendReTVList     _reLayData;
-//         TrendTV*          _cslice;    //!Working variable pointing to the current slice
-//         unsigned          _num_total_points;
-//         unsigned          _num_total_indexs;
-///         unsigned          _num_total_slctdx;
-///         unsigned          _num_total_strings;
-         // Data related to selected objects
-///         SliceSelected     _slct_data;
-///         // index related data for selected objects
-///         unsigned          _asindxs[SLCT_TYPES]; //! array with the total number of indexes of selected objects
-///         unsigned          _asobjix[SLCT_TYPES]; //! array with the total number of selected objects
       private:
          ZDepth          _zDepth;
    };
@@ -177,7 +145,7 @@ namespace trend {
    class T3Der : public TrendBase {
    public:
                         T3Der( layprop::DrawProperties* drawprop, real UU);
-      virtual          ~T3Der();
+      virtual          ~T3Der() {}
       virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       virtual void      setLayer(const LayerDef&, bool);
       virtual void      setHvrLayer(const LayerDef&)                                         {assert(false);}
@@ -194,11 +162,9 @@ namespace trend {
       virtual void      rlrDraw()                                                            {assert(false);}
       virtual void      grdDraw()                                                            {assert(false);}
       virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool)                {assert(false);}
-      virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
+      virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool) {/* do nothing! */}
 
    protected:
-//      unsigned          _cslctd_array_offset; //! Current selected array offset
-
       virtual void      setLayColor(const LayerDef& layer);//                                   {assert(false);}
       virtual void      setStipple()                                                         {assert(false);}
       virtual void      setLine(bool)                                                        {assert(false);}

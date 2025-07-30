@@ -720,6 +720,32 @@ void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
    trans.setY(static_cast<int4b>(_ty));
 }
 
+void CTM::Decompose(DoublePoint& trans, real& rot, real& scaleX, real& scaleY, bool& flipX) const
+{
+   // Assuming that every CTM can be represented as a result
+   // of 4 consecutive operations - flipX, rotate, scale and translate,
+   // this function is extracting the scale, translation, rotation and
+   // flip values of these operations.
+   // Second presumption here is for the scale value returned. It is that
+   // scX and scY are always the same
+   real scX = sqrt(_a * _a + _c * _c);
+   real scY = sqrt(_b * _b + _d * _d);
+   scaleX = scX;
+   scaleY = scY;
+   // rotation
+//   real rot1= atan2(_b , _a);
+   rot = round(atan2(_b , _a) * 180.0 / M_PI);
+   // if (rot < 0) rot = 180 + abs(rot);
+   // flip
+   if (fabs(_a * _d) > fabs(_b * _c))
+      flipX = ((_a * _d) > 0) ? false : true;
+   else
+      flipX = ((_b * _c) < 0) ? false : true;
+   // translation
+   trans.setX(static_cast<double>(_tx));
+   trans.setY(static_cast<double>(_ty));
+}
+
 void CTM::oglForm(real* const oglm) const
 {
    oglm[ 0] =   _a; oglm[ 1] =   _b; oglm[ 2] = 0.0f; oglm[ 3] = 0.0f;
