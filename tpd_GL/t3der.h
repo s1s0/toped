@@ -161,11 +161,11 @@ namespace trend {
       virtual void      grcDraw()                                                            {assert(false);}
       virtual void      rlrDraw()                                                            {assert(false);}
       virtual void      grdDraw()                                                            {assert(false);}
-      virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool)                {assert(false);}
+      virtual void      arefOBox(std::string, const CTM&, const DBbox&, bool)                {/* do nothing !*/}
       virtual void      text (const std::string*, const CTM&, const DBbox&, const TP&, bool) {/* do nothing! */}
 
    protected:
-      virtual void      setLayColor(const LayerDef& layer);//                                   {assert(false);}
+      virtual void      setLayColor(const LayerDef& layer);
       virtual void      setStipple()                                                         {assert(false);}
       virtual void      setLine(bool)                                                        {assert(false);}
       virtual void      cleanUp()                                                            {assert(false);}
