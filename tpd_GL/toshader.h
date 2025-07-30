@@ -97,8 +97,6 @@ namespace trend {
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
-      private:
-         void              windowVAO();
    };
 
 }

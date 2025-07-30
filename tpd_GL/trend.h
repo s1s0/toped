@@ -36,15 +36,6 @@
 
 namespace trend {
 
-   typedef struct {
-      unsigned int   quadVAO   ; // Vertex Array Object
-      unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
-      unsigned int   texture   ; // The texture we're generating; effectively our layout view
-      unsigned int   RBO       ; // The RenderBuffer ID
-      unsigned int   FBO       ; // The FrameBuffer ID
-   } FrameBuffProps;
-
-
    /**
     * This class contains a raw symbol data from the GLF font files. It is used to
     * parse the symbol data from the file and if the current renderer is the rtTolder
@@ -181,9 +172,6 @@ namespace trend {
          void                   setUniColor(GLfloat*) const;
          void                   setUniStipple(GLuint*) const;
          void                   setUniVarui(const glsl_Uniforms, GLuint) const;
-         bool                   setFrameBuffer(int W, int H);
-         void                   drawFrameBuffer();
-         void                   clearFrameBuffer();
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
@@ -191,7 +179,6 @@ namespace trend {
          char*                  loadFile(const std::string&, GLint&);
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);
-         void                   windowVAO();
          GLint                  getUniformLoc(const glsl_Uniforms) const;
          std::string            _fnShdrVertex;
          std::string            _fnShdrGeometry;
@@ -214,7 +201,31 @@ namespace trend {
          GlslUniVarAllLoc       _glslUniVarLoc;
          glsl_Programs          _curProgram;
          bool                   _status;
-         FrameBuffProps         _fbProps;
+   };
+   
+   class FrameBuffer {
+      public:
+         typedef struct {
+            unsigned int   quadVAO   ; // Vertex Array Object
+            unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
+            unsigned int   texture   ; // The texture we're generating; effectively our layout view
+            unsigned int   RBO       ; // The RenderBuffer ID
+            unsigned int   FBO       ; // The FrameBuffer ID
+         } FrameBuffProps;
+
+                         FrameBuffer(int W, int H);
+         void            drawFrameBuffer();
+                        ~FrameBuffer();
+
+      private:
+         bool            setFrameBuffer();
+         void            clearFrameBuffer();
+         void            windowVAO();
+         FrameBuffProps  _fbProps;
+         int             _W;
+         int             _H;
+
+
    };
 
    
@@ -226,7 +237,9 @@ namespace trend {
          virtual               ~TrendCenter();
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      makeCRenderer(int W, int H, bool rend3D = false);         //!Get current renderer
+         void                   initFrameBuffer(int W, int H);
+         void                   drawFrameBuffer();
+         trend::TrendBase*      makeCRenderer(bool rend3D = false);  //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
          trend::TrendBase*      makeHRenderer();                     //!Get hover renderer
@@ -257,7 +270,6 @@ namespace trend {
          void                   setUniStipple(GLuint*) const;
          void                   setUniVarui(const glsl_Uniforms, GLuint) const;
          void                   setGlslProg(const glsl_Programs) const;
-         void                   drawFrameBuffer();
          bool                   shaderAvailable() const {return _cShaders->status();}
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
@@ -268,6 +280,7 @@ namespace trend {
          trend::TrendBase*      _dRenderer;    //! DRC     renderer
          trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
+         trend::FrameBuffer*    _frameBuf;
          std::string            _activeFontName;
    };
 }

@@ -44,7 +44,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-//extern trend::TrendCenter*       TRENDC;
 extern console::TllCmdLine*      Console;
 extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern trend::TrendCenter*       TRENDC;
@@ -488,8 +487,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
          updateViewport();
-         DATC->renderOGLBuffer(W, H);
-//         DATC->render3D(W, H);
+
+//         int W, H;
+//         Toped->view()->glRC()->getWSize(W, H);
+         TRENDC->initFrameBuffer(W, H);
+
+//         DATC->renderOGLBuffer();
+         DATC->render3D();
          if (0 == _blinkInterval) DATC->grcDraw();
          _invalidWindow = false;
          drawOGLBuffer();
@@ -1284,7 +1288,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 //      DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
-      DATC->renderOGLBuffer(/*W,H*/0,0);    // draw data
+      DATC->renderOGLBuffer();    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
       _canvas->drawOGLBuffer();

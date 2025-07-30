@@ -425,16 +425,17 @@ unsigned trend::TrendMarks::total_points()
 // class TrendBase
 //
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
-   _drawprop             ( drawprop  ),
-   _UU                   (        UU ),
-   _clayer               (      NULL ),
-   _grcLayer             (      NULL ),
+   _drawprop             ( drawprop  )
+  ,_UU                   (        UU )
+  ,_clayer               (      NULL )
+  ,_grcLayer             (      NULL )
+  ,_activeCS             (      NULL )
+  ,_dovCorrection        (         0 )
+  ,_rmm                  (      NULL )
+
 //   _refLayer             (      NULL ),
 //   _cslctd_array_offset  (        0u ),
-   _activeCS             (      NULL ),
-   _dovCorrection        (         0 ),
 //   _marks                (      NULL ),
-   _rmm                  (      NULL )
 //   _num_grid_points      (        0u ),
 
 {

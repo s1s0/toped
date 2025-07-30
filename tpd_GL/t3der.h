@@ -149,8 +149,8 @@ namespace trend {
       virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       virtual void      setLayer(const LayerDef&, bool);
       virtual void      setHvrLayer(const LayerDef&)                                         {assert(false);}
-      virtual void      setGrcLayer(bool, const LayerDef&) {}//                                   {assert(false);}
-      virtual void      grcwire (int4b*, unsigned, WireWidth) {}
+      virtual void      setGrcLayer(bool, const LayerDef&)                                   {/* do nothing !*/}
+      virtual void      grcwire (int4b*, unsigned, WireWidth)                                {/* do nothing !*/}
       virtual bool      chunkExists(const LayerDef&, bool);
 
       virtual bool      collect();
@@ -179,7 +179,6 @@ namespace trend {
 
    private:
       void              setShaderMVP();
-      void              windowVAO()                                                          {assert(false);}
    };
 }
 

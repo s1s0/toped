@@ -69,6 +69,7 @@ namespace tui {
       bool           resizeGL(int, int);
       bool           useVboRendering() const          { return _useVboRendering;             }
       bool           useShaders() const               { return _useShaders;                  }
+//      void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
    private:
       bool           _oglVersion14;             //! OpenGL version >= 1.4 detected
       bool           _oglVersion33;             //! OpenGL version >= 3.3 detected

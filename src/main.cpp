@@ -151,6 +151,9 @@ bool TopedApp::OnInit()
       // First thing after initialising openGL - load the shaders (eventually)
       std::string stdShaderDir(_tpdShadersDir.mb_str(wxConvFile));
       TRENDC->initShaders(stdShaderDir);
+//      int W, H;
+//      Toped->view()->glRC()->getWSize(W, H);
+//      TRENDC->initFrameBuffer(W, H);
       // and then - load available layout fonts
       loadGlfFonts();
       // at this stage - the tool shall be considered fully functional

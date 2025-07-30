@@ -829,14 +829,14 @@ void DataCenter::setRecoverWire(bool rcv)
    unlockTDT(dbLibDir, true);
 }
 
-void DataCenter::renderOGLBuffer(int W, int H)
+void DataCenter::renderOGLBuffer()
 {
    DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
    DBGL_CALL(glEnable, GL_BLEND)
    DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
    if (_TEDLIB())
    {
-      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H);
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer();
       if (NULL != cRenderer)
       {
          // grid
@@ -886,15 +886,14 @@ void DataCenter::renderOGLBuffer(int W, int H)
    }
 }
 
-void DataCenter::render3D(int W, int H)
+void DataCenter::render3D()
 {
    DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
    DBGL_CALL(glEnable, GL_BLEND)
    DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
    if (_TEDLIB())
    {
-//      TRENDC->set3D(true);
-      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H, true);
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(true);
       if (NULL != cRenderer)
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
