@@ -203,32 +203,6 @@ namespace trend {
          bool                   _status;
    };
    
-   class FrameBuffer {
-      public:
-         typedef struct {
-            unsigned int   quadVAO   ; // Vertex Array Object
-            unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
-            unsigned int   texture   ; // The texture we're generating; effectively our layout view
-            unsigned int   RBO       ; // The RenderBuffer ID
-            unsigned int   FBO       ; // The FrameBuffer ID
-         } FrameBuffProps;
-
-                         FrameBuffer(int W, int H);
-         void            drawFrameBuffer();
-                        ~FrameBuffer();
-
-      private:
-         bool            setFrameBuffer();
-         void            clearFrameBuffer();
-         void            windowVAO();
-         FrameBuffProps  _fbProps;
-         int             _W;
-         int             _H;
-
-
-   };
-
-   
    /// Toped Renderer Center
    ///
    class TrendCenter {
@@ -237,8 +211,6 @@ namespace trend {
          virtual               ~TrendCenter();
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         void                   initFrameBuffer(int W, int H);
-         void                   drawFrameBuffer();
          trend::TrendBase*      makeCRenderer(bool rend3D = false);  //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
@@ -280,7 +252,6 @@ namespace trend {
          trend::TrendBase*      _dRenderer;    //! DRC     renderer
          trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
-         trend::FrameBuffer*    _frameBuf;
          std::string            _activeFontName;
    };
 }

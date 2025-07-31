@@ -70,7 +70,19 @@ namespace tui {
       bool           useVboRendering() const          { return _useVboRendering;             }
       bool           useShaders() const               { return _useShaders;                  }
 //      void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
+      bool           initFrameBuffer();
+      void           drawFrameBuffer();
    private:
+      typedef struct {
+         unsigned int   quadVAO   ; // Vertex Array Object
+         unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
+         unsigned int   texture   ; // The texture we're generating; effectively our layout view
+         unsigned int   RBO       ; // The RenderBuffer ID
+         unsigned int   FBO       ; // The FrameBuffer ID
+      } FrameBuffProps;
+      void           windowVAO();
+      void           clearFrameBuffer();
+      FrameBuffProps _fbProps;
       bool           _oglVersion14;             //! OpenGL version >= 1.4 detected
       bool           _oglVersion33;             //! OpenGL version >= 3.3 detected
       bool           _oglExtMultiDrawArrays;    //! GL_EXT_multi_draw_arrays feature is supported
@@ -138,7 +150,6 @@ namespace tui {
 
       void           viewshift();
    private:
-      TpdOglContext* _glRC;
       void           cursorControl(bool, bool);
       void           pointUpdate(int nX, int nY);
       void           updateViewport();
@@ -156,6 +167,7 @@ namespace tui {
       DBbox*         zoomUp();
       DBbox*         zoomDown();
 //      void           drawInterim(const TP&);
+      TpdOglContext* _glRC;
       CTM            _layCTM;        //! Layout translation matrix
       TP             _scrMark;       //! Current marker position in DB units
       TP             _scrMarkOld;    //! Old marker position  in DB units
