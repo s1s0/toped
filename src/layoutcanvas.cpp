@@ -304,6 +304,42 @@ void tui::TpdOglContext::drawFrameBuffer()
    DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
 }
 
+void tui::TpdOglContext::animateFrameBuffer(unsigned size)
+{
+   float K = float(size)/100.0f;
+   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+   std::vector<glm::vec4> quadVertices= {
+      // positions   // texCoords
+       glm::vec4(-1.0f * K,  1.0f * K,  0.0f, 1.0f)
+      ,glm::vec4(-1.0f * K, -1.0f * K,  0.0f, 0.0f)
+      ,glm::vec4( 1.0f * K, -1.0f * K,  1.0f, 0.0f)
+      
+      ,glm::vec4(-1.0f * K,  1.0f * K,  0.0f, 1.0f)
+      ,glm::vec4( 1.0f * K, -1.0f * K,  1.0f, 0.0f)
+      ,glm::vec4( 1.0f * K,  1.0f * K,  1.0f, 1.0f)
+   };
+   // screen quad VAO
+   DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
+   DBGL_CALL(glGenBuffers, 1, &_fbProps.quadVBO)
+   DBGL_CALL(glBindVertexArray,_fbProps.quadVAO)
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, byteSize(quadVertices), &quadVertices[0], GL_DYNAMIC_DRAW)
+   DBGL_CALL(glEnableVertexAttribArray, 0)
+   DBGL_CALL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0)
+   DBGL_CALL(glEnableVertexAttribArray, 1)
+   DBGL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)))
+   
+   DBGL_CALL(glBindFramebuffer,GL_FRAMEBUFFER, 0)
+   DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
+   // clear all relevant buffers
+   DBGL_CALL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f) // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+
+//   TRENDC->setGlslProg(trend::glslp_FB);
+   DBGL_CALL(glBindVertexArray, _fbProps.quadVAO)
+   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)   // use the color attachment texture as the texture of the quad plane
+   DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
+}
 
 void tui::TpdOglContext::clearFrameBuffer()
 {
@@ -505,26 +541,6 @@ void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
 }
 
 
-void tui::LayoutCanvas::viewshift()
-{
-   //@TODO screen sliding. Some rough ideas.
-   int Wcl, Hcl;
-   const int slide_step = 100;
-   GetClientSize(&Wcl,&Hcl);
-   wxPaintDC dc(this);
-   glAccum(GL_RETURN, 1.0);
-//   glReadBuffer(GL_FRONT);
-//   glDrawBuffer(GL_BACK);
-/*   glRasterPos2i (_lpBL.x(), _lpBL.y());
-   glCopyPixels (_lpBL.x() + slide_step, _lpBL.y(), _lpTR.x() - _lpBL.x() -slide_step, _lpTR.y() - _lpBL.y(), GL_COLOR);*/
-   glRasterPos2i (1, 1);
-   glCopyPixels (slide_step, 0, Wcl - slide_step, Hcl, GL_COLOR);
-   glAccum(GL_LOAD, 1.0);
-   SwapBuffers();
-   /*   slide = false;*/
-}
-
-
 void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& /*event*/) {
 //   // this is also necessary to update the context on some platforms
 //   wxGLCanvas::OnSize(event);
@@ -536,6 +552,20 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& /*event*/) {
    _invalidWindow |= _glRC->resizeGL(w,h);
 }
 
+void tui::LayoutCanvas::animateDraw()
+{
+   TRENDC->setGlslProg(trend::glslp_FB);
+
+   for (unsigned boza = 0; boza<=100; boza+=10)
+   {
+//   unsigned boza = 100;
+      _glRC->animateFrameBuffer(boza);
+      glFlush();
+      SwapBuffers();
+//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+   }
+
+}
 
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
 {
@@ -558,9 +588,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
         
-         int W, H;
-         GetClientSize(&W,&H);
-
          GLuint VertexArrayID;
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
@@ -1062,7 +1089,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
 void tui::LayoutCanvas::updateViewport()
 {
    int W, H;
-   GetClientSize(&W,&H);
+   _glRC->getWSize(W, H);
    _lpBL = TP(0,0)  * _layCTM;
    _lpTR = TP(W, H) * _layCTM;
 //   _status_line.update(W, _LayCTM);

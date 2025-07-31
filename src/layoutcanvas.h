@@ -69,9 +69,10 @@ namespace tui {
       bool           resizeGL(int, int);
       bool           useVboRendering() const          { return _useVboRendering;             }
       bool           useShaders() const               { return _useShaders;                  }
-//      void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
+      void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
       bool           initFrameBuffer();
       void           drawFrameBuffer();
+      void           animateFrameBuffer(unsigned size);
    private:
       typedef struct {
          unsigned int   quadVAO   ; // Vertex Array Object
@@ -148,7 +149,7 @@ namespace tui {
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
 
-      void           viewshift();
+//      void           viewshift();
    private:
       void           cursorControl(bool, bool);
       void           pointUpdate(int nX, int nY);
@@ -166,6 +167,7 @@ namespace tui {
       DBbox*         zoomRight();
       DBbox*         zoomUp();
       DBbox*         zoomDown();
+      void           animateDraw();
 //      void           drawInterim(const TP&);
       TpdOglContext* _glRC;
       CTM            _layCTM;        //! Layout translation matrix
