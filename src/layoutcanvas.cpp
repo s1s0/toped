@@ -47,6 +47,7 @@ extern layprop::PropertyCenter*  PROPC;
 extern console::TllCmdLine*      Console;
 extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern trend::TrendCenter*       TRENDC;
+extern tui::TopedFrame*          Toped;
 
 //-----------------------------------------------------------------------------
 // Static members
@@ -353,24 +354,84 @@ void tui::TpdOglContext::clearFrameBuffer()
 
 
 //=============================================================================
+tui::AnimationData::AnimationData() :
+   wxEvtHandler()
+  ,_animationTimer  ( this, CPS_ANIMATION_TIMER)
+  ,_counter         (   0                      )
+  ,_event           ( wxID_NONE                )
+{
+}
+
+void tui::AnimationData::setAnimation(int event)
+{
+   Bind(wxEVT_TIMER       ,&tui::LayoutCanvas::OnAnimationTimer  , Toped->view() , CPS_ANIMATION_TIMER);
+   _counter = _allSteps;
+   _event = event;
+   _animationTimer.Start(20 );
+}
+
+void tui::AnimationData::stepDown()
+{
+   if (0 > (_counter-=5))
+   {
+      _animationTimer.Stop();
+      Unbind(wxEVT_TIMER  ,&tui::LayoutCanvas::OnAnimationTimer  , Toped->view() , CPS_ANIMATION_TIMER);
+      _event = wxID_NONE;
+   }
+   else
+   {
+#warning: TODO different effects depending on the current and next zoom window
+      switch (_event)
+      {
+         case ZOOM_WINDOW : break;
+         case ZOOM_WINDOWM: break;
+         case ZOOM_IN     : break;
+         case ZOOM_OUT    : break;
+         case ZOOM_LEFT   : break;
+         case ZOOM_RIGHT  : break;
+         case ZOOM_UP     : break;
+         case ZOOM_DOWN   : break;
+         case ZOOM_EMPTY  : break;
+         case ZOOM_REFRESH: break;
+         default: assert(false); break;
+      }
+   }
+}
+
+bool tui::AnimationData::active()
+{
+   return (_counter > 0);
+}
+
+unsigned tui::AnimationData::scale()
+{
+   return (_allSteps - _counter);
+}
+//void tui::AnimationData::setEvent(int event)
+//{
+//   _event = event;
+//}
+
+
+//=============================================================================
 // class LayoutCanvas
 //=============================================================================
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size, wxGLAttributes attr):
-   wxGLCanvas(parent, attr, ID_TPD_CANVAS, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas")),
-   _whRatio         (     1 ),
-   _apTrigger       ( 10    ),
-   _tmpWnd          ( false ),
-   _invalidWindow   ( false ),
-   _mouseInput      ( false ),
-   _rubberBand      ( false ),
-   _restrictedMove  ( false ),
-   _reperX          ( false ),
-   _reperY          ( false ),
-   _longCursor      ( false ),
-   _oglThread       ( false ),
-   _blinkInterval   ( 0     ),
-   _blinkOn         ( false ),
-   _initialised     ( false )
+   wxGLCanvas(parent, attr, ID_TPD_CANVAS, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas"))
+  ,_whRatio         (     1 )
+  ,_apTrigger       ( 10    )
+  ,_tmpWnd          ( false )
+  ,_invalidWindow   ( false )
+  ,_mouseInput      ( false )
+  ,_rubberBand      ( false )
+  ,_restrictedMove  ( false )
+  ,_reperX          ( false )
+  ,_reperY          ( false )
+  ,_longCursor      ( false )
+  ,_oglThread       ( false )
+  ,_blinkInterval   ( 0     )
+  ,_blinkOn         ( false )
+  ,_initialised     ( false )
 #ifdef __WXGTK__
   ,_xVisual         ( NULL  )
 #endif
@@ -552,27 +613,11 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& /*event*/) {
    _invalidWindow |= _glRC->resizeGL(w,h);
 }
 
-void tui::LayoutCanvas::animateDraw()
-{
-   TRENDC->setGlslProg(trend::glslp_FB);
-
-   for (unsigned boza = 0; boza<=100; boza+=10)
-   {
-//   unsigned boza = 100;
-      _glRC->animateFrameBuffer(boza);
-      glFlush();
-      SwapBuffers();
-//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-   }
-
-}
-
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
 {
    if (!_initialised) return;
    if (_invalidWindow)
-   {
-      // _invalidWindow indicates zooming or refreshing after a tell operation.
+   { // _invalidWindow indicates zooming or refreshing after a tell operation.
       if (_oglThread)
       {
          tui::DrawThread *dthrd = DEBUG_NEW tui::DrawThread(this);
@@ -598,24 +643,35 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          DATC->renderOGLBuffer();
 //         DATC->render3D();
          if (0 == _blinkInterval) DATC->grcDraw();
-         _invalidWindow = false;
-         drawOGLBuffer();
-         SwapBuffers();
          DBGL_CALL(glBindVertexArray, 0);
          DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
-
-         if (0 < _blinkInterval)
-         {
-            _blinkOn = false;
-            _blinkTimer.Start(_blinkInterval,wxTIMER_CONTINUOUS);
-         }
+         _invalidWindow = false;
+         
+//         if (!_animationData.active())
+//         {
+            drawOGLBuffer();
+            SwapBuffers();
+            if (0 < _blinkInterval)
+            {
+               _blinkOn = false;
+               _blinkTimer.Start(_blinkInterval,wxTIMER_CONTINUOUS);
+            }
+//         }
       }
    }
    else
    {
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
-      drawOGLBuffer();
+
+      if (_animationData.active())
+      {
+         _glRC->animateFrameBuffer(_animationData.scale());
+//         drawOGLBuffer();
+//         printf("redraw effect \n");
+      }
+      else
+         drawOGLBuffer();
       if       (_tmpWnd)              wndPaint();
       SwapBuffers();
    }
@@ -1083,6 +1139,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    setScrCTM(*box);
    delete box;
    _invalidWindow = true;
+   _animationData.setAnimation(evt.GetInt());
    Refresh();
 }
 
@@ -1262,6 +1319,12 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    }
    SwapBuffers();
    _blinkOn = !_blinkOn;
+}
+
+void tui::LayoutCanvas::OnAnimationTimer(wxTimerEvent& WXUNUSED(event))
+{
+   _animationData.stepDown();
+   Refresh(true);
 }
 
 DBbox* tui::LayoutCanvas::zoomIn()

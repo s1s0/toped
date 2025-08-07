@@ -267,7 +267,8 @@ namespace tui
       CPS_AUTOPAN         ,
       CPS_ZERO_CROSS      ,
       CPS_LONG_CURSOR     ,
-      CPS_BOLD_ON_HOVER
+      CPS_BOLD_ON_HOVER   ,
+      CPS_ANIMATION_TIMER
    } CANVAS_PROPERTY_ENUMS;
 
    typedef enum

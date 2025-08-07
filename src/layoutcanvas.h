@@ -95,6 +95,24 @@ namespace tui {
       int            _wh;
   };
   
+   
+   class AnimationData : public wxEvtHandler
+   {
+   public:
+                     AnimationData();
+      void           setAnimation(int);
+      void           stepDown();
+      bool           active();
+      unsigned       scale();
+//      void           setEvent(int);
+   protected:
+      wxTimer        _animationTimer;//!
+      int            _counter;
+      int            _event;
+      const int      _allSteps = 100;
+      
+   };
+   
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public:
@@ -120,6 +138,7 @@ namespace tui {
 #endif
       }
       void           setBlinkInterval(word bi)   {_blinkInterval = bi;}
+      void           OnAnimationTimer(wxTimerEvent& WXUNUSED(event));
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
@@ -148,7 +167,6 @@ namespace tui {
       void           OnDrcCollect(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
-
 //      void           viewshift();
    private:
       void           cursorControl(bool, bool);
@@ -167,8 +185,6 @@ namespace tui {
       DBbox*         zoomRight();
       DBbox*         zoomUp();
       DBbox*         zoomDown();
-      void           animateDraw();
-//      void           drawInterim(const TP&);
       TpdOglContext* _glRC;
       CTM            _layCTM;        //! Layout translation matrix
       TP             _scrMark;       //! Current marker position in DB units
@@ -194,6 +210,7 @@ namespace tui {
       bool           _oglThread;     //! Run the openGL drawing in a separate thread
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
+      AnimationData  _animationData; //!
       bool           _blinkOn;
       bool           _initialised;   //!
 #ifdef __WXGTK__
