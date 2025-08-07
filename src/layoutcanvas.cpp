@@ -319,26 +319,11 @@ void tui::TpdOglContext::animateFrameBuffer(unsigned size)
       ,glm::vec4( 1.0f * K, -1.0f * K,  1.0f, 0.0f)
       ,glm::vec4( 1.0f * K,  1.0f * K,  1.0f, 1.0f)
    };
-   // screen quad VAO
-   DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
-   DBGL_CALL(glGenBuffers, 1, &_fbProps.quadVBO)
-   DBGL_CALL(glBindVertexArray,_fbProps.quadVAO)
+   
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, byteSize(quadVertices), &quadVertices[0], GL_DYNAMIC_DRAW)
-   DBGL_CALL(glEnableVertexAttribArray, 0)
-   DBGL_CALL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0)
-   DBGL_CALL(glEnableVertexAttribArray, 1)
-   DBGL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)))
    
-   DBGL_CALL(glBindFramebuffer,GL_FRAMEBUFFER, 0)
-   DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
-   // clear all relevant buffers
-   DBGL_CALL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f) // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
    DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
-
-//   TRENDC->setGlslProg(trend::glslp_FB);
-   DBGL_CALL(glBindVertexArray, _fbProps.quadVAO)
-   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)   // use the color attachment texture as the texture of the quad plane
    DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
 }
 

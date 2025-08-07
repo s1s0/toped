@@ -344,6 +344,7 @@ void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCell
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
+#warning: TODO! Figure-out WHY I need such scalig gactor on the Z axis?
    mtrxOrtho[10] = 0.1f; // TODO! this is Zscale. WHY???
 //   printf("---------------------------------------------\n");
 //   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 0], mtrxOrtho[ 1], mtrxOrtho[ 2], mtrxOrtho[ 3]);
