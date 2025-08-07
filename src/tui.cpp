@@ -2631,6 +2631,8 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnGridOn2     , this, CDGRID_CBOX2       );
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnGridOn3     , this, CDGRID_CBOX3       );
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor  , this, CDMISC_LONGCURSOR  );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnAnimateZoom , this, CDMISC_ANIMATEZOOM );
+   Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnRend3D      , this, CDMISC_REND3D      );
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnAutoPan     , this, CDMISC_AUTOPAN     );
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover, this, CDMISC_BOLDONHOOVER);
    Bind(wxEVT_CHECKBOX  , &tui::TopedPropertySheets::CanvasPSheet::OnZeroCross   , this, CDMISC_ZEROCROSS   );
@@ -2739,6 +2741,8 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
       wxCheckBox* autoPan      = DEBUG_NEW wxCheckBox(this, CDMISC_AUTOPAN     , wxT("Auto Pan"));
       wxCheckBox* boldOnHover  = DEBUG_NEW wxCheckBox(this, CDMISC_BOLDONHOOVER, wxT("Highlight on hover"));
       wxCheckBox* zeroCross    = DEBUG_NEW wxCheckBox(this, CDMISC_ZEROCROSS   , wxT("Mark the (0,0) position"));
+      wxCheckBox* animateZoom  = DEBUG_NEW wxCheckBox(this, CDMISC_ANIMATEZOOM , wxT("Animate on zoom"));
+      wxCheckBox* rend3D       = DEBUG_NEW wxCheckBox(this, CDMISC_REND3D      , wxT("3D rendering"));
 
    // Pack everything
    topSizer->Add( markerSizer   , 0, wxEXPAND | wxALL, 2);
@@ -2748,6 +2752,8 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
    topSizer->Add( autoPan       , 0, wxEXPAND | wxALL, 2);
    topSizer->Add( boldOnHover   , 0, wxEXPAND | wxALL, 2);
    topSizer->Add( zeroCross     , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( animateZoom   , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( rend3D        , 0, wxEXPAND | wxALL, 2);
 //
    SetSizer(topSizer);
    topSizer->Fit(this);
@@ -2890,6 +2896,24 @@ void tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor(wxCommandEvent& cmdEve
    TpdPost::parseCommand(ost);
 }
 
+void tui::TopedPropertySheets::CanvasPSheet::OnAnimateZoom(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("animatezoom( ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(" );");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnRend3D(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("rend3d( ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(" );");
+   TpdPost::parseCommand(ost);
+}
+
 void tui::TopedPropertySheets::CanvasPSheet::OnAutoPan(wxCommandEvent& cmdEvent)
 {
    wxString ost;
@@ -2970,6 +2994,14 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
          break;
       case CPS_LONG_CURSOR    :
          targetControl = FindWindow(CDMISC_LONGCURSOR);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
+         break;
+      case CPS_ANIMATE_ZOOM  :
+         targetControl = FindWindow(CDMISC_ANIMATEZOOM);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
+         break;
+      case CPS_REND3D  :
+         targetControl = FindWindow(CDMISC_REND3D);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_AUTOPAN   :

@@ -127,6 +127,8 @@ namespace tui {
       CDRECOVER_POLY      ,
       CDRECOVER_WIRE      ,
       CDMISC_LONGCURSOR   ,
+      CDMISC_ANIMATEZOOM  ,
+      CDMISC_REND3D       ,
       CDMISC_AUTOPAN      ,
       CDMISC_BOLDONHOOVER ,
       CDMISC_ZEROCROSS
@@ -706,6 +708,8 @@ namespace tui {
          void                   OnRecoverPoly (wxCommandEvent&);
          void                   OnRecoverWire (wxCommandEvent&);
          void                   OnLongCorsor  (wxCommandEvent&);
+         void                   OnAnimateZoom (wxCommandEvent&);
+         void                   OnRend3D      (wxCommandEvent&);
          void                   OnAutoPan     (wxCommandEvent&);
          void                   OnBoldOnHoover(wxCommandEvent&);
          void                   OnZeroCross   (wxCommandEvent&);

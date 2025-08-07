@@ -413,6 +413,8 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
   ,_reperX          ( false )
   ,_reperY          ( false )
   ,_longCursor      ( false )
+  ,_wndAnimation    ( false )
+  ,_rend3D          ( false )
   ,_oglThread       ( false )
   ,_blinkInterval   ( 0     )
   ,_blinkOn         ( false )
@@ -436,6 +438,8 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
    Bind(tui::wxEVT_CANVAS_ZOOM   ,&tui::LayoutCanvas::OnZoom            , this);
    Bind(tui::wxEVT_MOUSE_INPUT   ,&tui::LayoutCanvas::OnMouseIN         , this);
    Bind(tui::wxEVT_CANVAS_CURSOR ,&tui::LayoutCanvas::OnCursorType      , this);
+   Bind(tui::wxEVT_ANIMATE_ZOOM  ,&tui::LayoutCanvas::OnWndAnimation    , this);
+   Bind(tui::wxEVT_REND3D        ,&tui::LayoutCanvas::OnRend3D          , this);
    Bind(tui::wxEVT_DRCDRAWPREP   ,&tui::LayoutCanvas::OnDrcCollect      , this);
    Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMrulerState         ,this ,          CM_RULER);
    Bind(wxEVT_MENU               ,&LayoutCanvas::OnCMchangeLayer        ,this ,          CM_CHLAY);
@@ -625,9 +629,11 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
 
          _glRC->initFrameBuffer();
 
-         DATC->renderOGLBuffer();
-//         DATC->render3D();
-         if (0 == _blinkInterval) DATC->grcDraw();
+         if (_rend3D)   DATC->render3D();
+         else
+         {  DATC->renderOGLBuffer();
+            if (0 == _blinkInterval) DATC->grcDraw();
+         }
          DBGL_CALL(glBindVertexArray, 0);
          DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
          _invalidWindow = false;
@@ -1124,7 +1130,8 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    setScrCTM(*box);
    delete box;
    _invalidWindow = true;
-   _animationData.setAnimation(evt.GetInt());
+   if (_wndAnimation)
+      _animationData.setAnimation(evt.GetInt());
    Refresh();
 }
 
@@ -1208,6 +1215,16 @@ void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
 {
    _longCursor = (1 == event.GetInt());
    _reperX = _reperY = _longCursor;
+}
+
+void tui::LayoutCanvas::OnWndAnimation(wxCommandEvent& event)
+{
+   _wndAnimation = (1 == event.GetInt());
+}
+
+void tui::LayoutCanvas::OnRend3D(wxCommandEvent& event)
+{
+   _rend3D = (1 == event.GetInt());
 }
 
 void tui::LayoutCanvas::OnDrcCollect(wxCommandEvent& event)

@@ -66,6 +66,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   );
    TELL_STDCMD_CLASSA(stdCLEARRULERS   );
    TELL_STDCMD_CLASSA(stdLONGCURSOR    );  //
+   TELL_STDCMD_CLASSA(stdWNDANIMATION  );  //
+   TELL_STDCMD_CLASSA(stdREND3D        );  //
    TELL_STDCMD_CLASSA(stdEXEC          );  //
    TELL_STDCMD_CLASSA(stdEXIT          );  //
    //

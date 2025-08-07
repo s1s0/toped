@@ -922,6 +922,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("addruler"         ,(DEBUG_NEW               tellstdfunc::stdDISTANCE_D(telldata::tn_void, true)));
    mblock->addFUNC("clearrulers"      ,(DEBUG_NEW              tellstdfunc::stdCLEARRULERS(telldata::tn_void, true)));
    mblock->addFUNC("longcursor"       ,(DEBUG_NEW               tellstdfunc::stdLONGCURSOR(telldata::tn_void, true)));
+   mblock->addFUNC("animatezoom"      ,(DEBUG_NEW             tellstdfunc::stdWNDANIMATION(telldata::tn_void, true)));
+   mblock->addFUNC("rend3d"           ,(DEBUG_NEW                   tellstdfunc::stdREND3D(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(DEBUG_NEW                  tellstdfunc::stdZOOMWIN(telldata::tn_void, true)));
    mblock->addFUNC("zoom"             ,(DEBUG_NEW                 tellstdfunc::stdZOOMWINb(telldata::tn_void, true)));
    mblock->addFUNC("zoomall"          ,(DEBUG_NEW                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));

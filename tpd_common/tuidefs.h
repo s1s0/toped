@@ -57,6 +57,8 @@ namespace tui
    wxDECLARE_EVENT(wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_TECHEDITUPDATE    , wxCommandEvent);
    wxDECLARE_EVENT(wxEVT_DRCDRAWPREP       , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_ANIMATE_ZOOM      , wxCommandEvent);
+   wxDECLARE_EVENT(wxEVT_REND3D            , wxCommandEvent);
    
    typedef enum
    {
@@ -267,6 +269,8 @@ namespace tui
       CPS_AUTOPAN         ,
       CPS_ZERO_CROSS      ,
       CPS_LONG_CURSOR     ,
+      CPS_ANIMATE_ZOOM    ,
+      CPS_REND3D          ,
       CPS_BOLD_ON_HOVER   ,
       CPS_ANIMATION_TIMER
    } CANVAS_PROPERTY_ENUMS;

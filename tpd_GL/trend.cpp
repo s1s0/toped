@@ -1156,6 +1156,8 @@ trend::TrendBase* trend::TrendCenter::getDRenderer()
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
+   if ((rtT3Der == _cRenderer->drawprop()->renderType()))
+      _cRenderer->drawprop()->setRenderType(rtToshader);
    PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
    if (_cRenderer->grcDataEmpty())
    {

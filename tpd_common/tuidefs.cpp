@@ -52,5 +52,7 @@ wxDEFINE_EVENT(tui::wxEVT_EXECEXTDONE       , wxCommandEvent);
 wxDEFINE_EVENT(tui::wxEVT_RELOADTELLFUNCS   , wxCommandEvent);
 wxDEFINE_EVENT(tui::wxEVT_TECHEDITUPDATE    , wxCommandEvent);
 wxDEFINE_EVENT(tui::wxEVT_DRCDRAWPREP       , wxCommandEvent);
+wxDEFINE_EVENT(tui::wxEVT_ANIMATE_ZOOM      , wxCommandEvent);
+wxDEFINE_EVENT(tui::wxEVT_REND3D            , wxCommandEvent);
 
 

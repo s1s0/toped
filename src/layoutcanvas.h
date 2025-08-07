@@ -164,6 +164,8 @@ namespace tui {
       void           OnCMFlip(wxCommandEvent&);
       void           OnCMRotate(wxCommandEvent&);
       void           OnCursorType(wxCommandEvent&);
+      void           OnWndAnimation(wxCommandEvent&);
+      void           OnRend3D(wxCommandEvent&);
       void           OnDrcCollect(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
@@ -207,6 +209,8 @@ namespace tui {
       bool           _reperX;        //! Draw a cursor line across the window parallel to the X axis
       bool           _reperY;        //! Draw a cursor line across the window parallel to the Y axis
       bool           _longCursor;    //! Stretch the cursor across the entire canvas
+      bool           _wndAnimation;  //! Use window animation on all kinds of zoom
+      bool           _rend3D;        //! Draw 3D view of the layout
       bool           _oglThread;     //! Run the openGL drawing in a separate thread
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images

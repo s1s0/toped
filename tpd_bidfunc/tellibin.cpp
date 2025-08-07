@@ -292,6 +292,55 @@ int tellstdfunc::stdLONGCURSOR::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdWNDANIMATION::stdWNDANIMATION(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+}
+
+int tellstdfunc::stdWNDANIMATION::execute()
+{
+   bool        animation  = getBoolValue();
+
+   wxCommandEvent eventGRIDUPD(tui::wxEVT_CANVAS_PARAMS);
+   eventGRIDUPD.SetId(tui::CPS_ANIMATE_ZOOM);
+   eventGRIDUPD.SetInt((animation ? 1 : 0));
+   wxPostEvent(TopedMainW, eventGRIDUPD);
+
+   wxCommandEvent eventANIM(tui::wxEVT_ANIMATE_ZOOM);
+   eventANIM.SetInt((animation ? 1 : 0));
+   wxPostEvent(TopedCanvasW, eventANIM);
+
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(animation) << ");"; LogFile.flush();
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+tellstdfunc::stdREND3D::stdREND3D(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+}
+
+int tellstdfunc::stdREND3D::execute()
+{
+   bool        rend3D  = getBoolValue();
+
+   wxCommandEvent eventGRIDUPD(tui::wxEVT_CANVAS_PARAMS);
+   eventGRIDUPD.SetId(tui::CPS_REND3D);
+   eventGRIDUPD.SetInt((rend3D ? 1 : 0));
+   wxPostEvent(TopedMainW, eventGRIDUPD);
+
+   wxCommandEvent eventREND3D(tui::wxEVT_REND3D);
+   eventREND3D.SetInt((rend3D ? 1 : 0));
+   wxPostEvent(TopedCanvasW, eventREND3D);
+
+   LogFile << LogFile.getFN() << "(" << LogFile._2bool(rend3D) << ");"; LogFile.flush();
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
