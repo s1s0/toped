@@ -33,7 +33,7 @@
 #include <wx/cursor.h>
 #include <wx/image.h>
 #include <string>
-#include "ttt.h"
+#include "trendat.h"
 #include "tuidefs.h"
 
 namespace tui {
@@ -60,6 +60,8 @@ namespace tui {
    //      TP             _cp;
    //};
    class LayoutCanvas;
+   typedef std::array<TPX,4> ANIVX4;
+
    //=============================================================================
    class TpdOglContext : public wxGLContext {
    public:
@@ -72,7 +74,7 @@ namespace tui {
       void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
       bool           initFrameBuffer();
       void           drawFrameBuffer();
-      void           animateFrameBuffer(unsigned size);
+      void           animateFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords);
    private:
       typedef struct {
          unsigned int   quadVAO   ; // Vertex Array Object
@@ -96,21 +98,24 @@ namespace tui {
   };
   
    
-   class AnimationData : public wxEvtHandler
-   {
+   class AnimationData : public wxEvtHandler {
    public:
                      AnimationData();
-      void           setAnimation(int);
+      void           setAnimation(const int event, const DBbox& nw, const DBbox& ow);
       void           stepDown();
-      bool           active();
-      unsigned       scale();
-//      void           setEvent(int);
+      bool           active() const    {return (_counter > 0);}
+      const ANIVX4&  wndCoords() const {return _wndCoords;}
+      const ANIVX4&  texCoords() const {return _texCoords;}
    protected:
-      wxTimer        _animationTimer;//!
-      int            _counter;
-      int            _event;
-      const int      _allSteps = 100;
-      
+      void           zWin(const DBbox& nw, const DBbox& ow);
+      wxTimer        _animationTimer   ;//! The timer used during the animation
+      int            _counter          ;//! Current animation step. Counting from _allSteps downto 0
+      TPX            _stepBL           ;//! Animation step of the bottom left corner of the window
+      TPX            _stepTR           ;//! Animation step of the top right corner of the window
+      ANIVX4         _wndCoords        ;//! Coordinated of the window to be drawn
+      ANIVX4         _texCoords        ;//! Coordinated of the texture which will fill the window
+      const int      _allSteps     = 20;//! The total animation steps
+      const int      _timeInterval = 20;//! Time interval between the steps (in ms)
    };
    
    //=============================================================================
@@ -214,7 +219,7 @@ namespace tui {
       bool           _oglThread;     //! Run the openGL drawing in a separate thread
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
-      AnimationData  _animationData; //!
+      AnimationData  _animation;     //! 
       bool           _blinkOn;
       bool           _initialised;   //!
 #ifdef __WXGTK__

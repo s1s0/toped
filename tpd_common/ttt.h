@@ -334,8 +334,8 @@ public:
    DoublePoint(const double x, const double y) : _x(x), _y(y) {};
    DoublePoint(const TP& tp);
    DoublePoint(int4b x, int4b y);
-   double   x() {return _x;}
-   double   y() {return _y;}
+   double   x() const {return _x;}
+   double   y() const {return _y;}
    void   setX(const double x) {_x=x;}
    void   setY(const double y) {_y=y;}
 private:
@@ -351,7 +351,7 @@ private:
 //
 class DBbox {
 public:
-         DBbox(const TP& p) :        _p1(p)       , _p2(p)    {};
+         DBbox(const TP& p=TP()) :        _p1(p)       , _p2(p)    {};
          DBbox(int4b x1, int4b y1) : _p1(x1,y1) , _p2(x1,y1)  {};
          DBbox(int4b x1, int4b y1, int4b x2, int4b y2) : _p1(x1,y1) , _p2(x2,y2)  {};
          DBbox(const DBbox& bx) :    _p1(bx.p1()) , _p2(bx.p2())    {};
@@ -363,7 +363,7 @@ public:
    void  normalize();
    int8b cliparea(const DBbox& bx, bool calculate = false) const;
    int   clipbox(DBbox& bx);
-   bool  inside(const TP& );
+   bool  inside(const TP& ) const;
    int8b boxarea() const;
    bool  visible(const CTM&, int8b) const;
    DBbox getcorner(QuadIdentificators corner);

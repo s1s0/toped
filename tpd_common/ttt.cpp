@@ -317,7 +317,7 @@ int DBbox::clipbox(DBbox& bx) {
    return 1;
 }
 
-bool DBbox::inside(const TP& pnt) {
+bool DBbox::inside(const TP& pnt) const {
    // using Cohen-Sutherland quotation, determine the location of pnt
    // towards (this)
    char A_place;

@@ -305,35 +305,32 @@ void tui::TpdOglContext::drawFrameBuffer()
    DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
 }
 
-void tui::TpdOglContext::animateFrameBuffer(unsigned size)
+void tui::TpdOglContext::animateFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords)
 {
-   float K = float(size)/100.0f;
+//   float K = float(size)/100.0f;
    // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
    std::vector<glm::vec4> quadVertices= {
-      // positions   // texCoords
-       glm::vec4(-1.0f * K,  1.0f * K,  0.0f, 1.0f)
-      ,glm::vec4(-1.0f * K, -1.0f * K,  0.0f, 0.0f)
-      ,glm::vec4( 1.0f * K, -1.0f * K,  1.0f, 0.0f)
-      
-      ,glm::vec4(-1.0f * K,  1.0f * K,  0.0f, 1.0f)
-      ,glm::vec4( 1.0f * K, -1.0f * K,  1.0f, 0.0f)
-      ,glm::vec4( 1.0f * K,  1.0f * K,  1.0f, 1.0f)
+      //          positions     texture coordinates
+      glm::vec4 (wndCoords[0], texCoords[0])
+     ,glm::vec4 (wndCoords[1], texCoords[1])
+     ,glm::vec4 (wndCoords[2], texCoords[2])
+     ,glm::vec4 (wndCoords[3], texCoords[3])
    };
    
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, byteSize(quadVertices), &quadVertices[0], GL_DYNAMIC_DRAW)
    
    DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
-   DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
+   DBGL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4)
 }
 
 void tui::TpdOglContext::clearFrameBuffer()
 {
-   DBGL_CALL(glDeleteVertexArrays,1, &_fbProps.quadVAO)
-   DBGL_CALL(glDeleteBuffers, 1, &_fbProps.quadVBO)
-   DBGL_CALL(glDeleteTextures, 1, &_fbProps.texture)
-   DBGL_CALL(glDeleteRenderbuffers, 1, &_fbProps.RBO)
-   DBGL_CALL(glDeleteFramebuffers, 1, &_fbProps.FBO)
+   DBGL_CALL(glDeleteVertexArrays   , 1, &_fbProps.quadVAO  )
+   DBGL_CALL(glDeleteBuffers        , 1, &_fbProps.quadVBO  )
+   DBGL_CALL(glDeleteTextures       , 1, &_fbProps.texture  )
+   DBGL_CALL(glDeleteRenderbuffers  , 1, &_fbProps.RBO      )
+   DBGL_CALL(glDeleteFramebuffers   , 1, &_fbProps.FBO      )
    _fbProps = {0,0,0,0,0};
 }
 
@@ -343,60 +340,124 @@ tui::AnimationData::AnimationData() :
    wxEvtHandler()
   ,_animationTimer  ( this, CPS_ANIMATION_TIMER)
   ,_counter         (   0                      )
-  ,_event           ( wxID_NONE                )
+  ,_stepBL          ( 0.0f, 0.0f               )
+  ,_stepTR          ( 0.0f, 0.0f               )
+  ,_wndCoords       ( { TPX(-1.0f, -1.0f)
+                       ,TPX( 1.0f, -1.0f)
+                       ,TPX(-1.0f,  1.0f)
+                       ,TPX( 1.0f,  1.0f) }    )
+  ,_texCoords       ( { TPX( 0.0f,  0.0f)
+                       ,TPX( 1.0f,  0.0f)
+                       ,TPX( 0.0f,  1.0f)
+                       ,TPX( 1.0f,  1.0f) }    )
 {
 }
 
-void tui::AnimationData::setAnimation(int event)
+void tui::AnimationData::setAnimation(const int event, const DBbox& nw, const DBbox& ow)
 {
    Bind(wxEVT_TIMER       ,&tui::LayoutCanvas::OnAnimationTimer  , Toped->view() , CPS_ANIMATION_TIMER);
-   _counter = _allSteps;
-   _event = event;
-   _animationTimer.Start(20 );
+   _counter    = _allSteps;
+
+   DBbox newWin = nw; newWin.normalize();
+   DBbox oldWin = ow; oldWin.normalize();
+
+   switch (event)
+   {
+      case ZOOM_WINDOW : printf("==>> ZOOM_WINDOW\n") ; zWin(newWin, oldWin); break;
+      case ZOOM_WINDOWM: printf("==>> ZOOM_WINDOWM\n"); zWin(newWin, oldWin); break;
+      case ZOOM_IN     : printf("==>> ZOOM_IN\n")     ; zWin(newWin, oldWin); break;
+      case ZOOM_OUT    : printf("==>> ZOOM_OUT\n")    ; zWin(newWin, oldWin); break;
+      case ZOOM_LEFT   : printf("==>> ZOOM_LEFT\n")   ; break;
+      case ZOOM_RIGHT  : printf("==>> ZOOM_RIGHT\n")  ; break;
+      case ZOOM_UP     : printf("==>> ZOOM_UP\n")     ; break;
+      case ZOOM_DOWN   : printf("==>> ZOOM_DOWN\n")   ; break;
+      case ZOOM_EMPTY  : break;
+      case ZOOM_REFRESH: printf("==>> ZOOM_REFRESH\n"); break;
+      default: assert(false); break;
+   }
+   _animationTimer.Start(_timeInterval);
+}
+
+void tui::AnimationData::zWin(const DBbox& nw, const DBbox& ow)
+{
+   // figure-out whether the new window overlaps the old window, or vice versa
+   char magnify = 0;
+   DBbox big, small;
+   if       ( ow.inside(nw.p1())  &&  ow.inside(nw.p2()) )
+   {
+      magnify  =  1; big = ow; small = nw;
+   }
+   else if  ( nw.inside(ow.p1())  &&  nw.inside(ow.p2()) )
+   {
+      magnify  = -1; big = nw; small = ow;
+   }
+   else return;
+   assert(magnify);
+
+   float scaleX = 2.0f / ((float)big.p2().x() - (float)big.p1().x());
+   float scaleY = 2.0f / ((float)big.p2().y() - (float)big.p1().y());
+   
+   float shiftX = -(scaleX * (float)big.p1().x() + 1);
+   float shiftY = -(scaleY * (float)big.p1().y() + 1);
+   
+   // window coordinates converted to -1/+1 window
+   // just for debugging purposes ( expected ±1 )
+//   float oblx = scaleX * (float)big.p1().x() + shiftX;
+//   float oblY = scaleY * (float)big.p1().y() + shiftY;
+//
+//   float otrx = scaleX * (float)big.p2().x() + shiftX;
+//   float otrY = scaleY * (float)big.p2().y() + shiftY;
+
+   // new window coordinates converted to ±1 window
+   float nBLx = scaleX * (float)small.p1().x() + shiftX;
+   float nBLy = scaleY * (float)small.p1().y() + shiftY;
+   float nTRx = scaleX * (float)small.p2().x() + shiftX;
+   float nTRy = scaleY * (float)small.p2().y() + shiftY;
+   
+   float stepBLx = magnify * (-1.0f - nBLx) / _allSteps;
+   float stepBLy = magnify * (-1.0f - nBLy) / _allSteps;
+   float stepTRx = magnify * ( 1.0f - nTRx) / _allSteps;
+   float stepTRy = magnify * ( 1.0f - nTRy) / _allSteps;
+   //   printf("BL Step=> X: %10f; Y: %10f ||  TR step=> X: %10f; Y: %10f\n", stepBLx, stepBLy, stepTRx, stepTRy);
+   _stepBL = {stepBLx, stepBLy};
+   _stepTR = {stepTRx, stepTRy};
+
+   if (magnify)
+      _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+//   printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
+
 }
 
 void tui::AnimationData::stepDown()
 {
-   if (0 > (_counter-=5))
+   if (0 > (_counter--))
    {
       _animationTimer.Stop();
       Unbind(wxEVT_TIMER  ,&tui::LayoutCanvas::OnAnimationTimer  , Toped->view() , CPS_ANIMATION_TIMER);
-      _event = wxID_NONE;
+      _stepBL      =    { 0.0f, 0.0f        };
+      _stepTR      =    { 0.0f, 0.0f        };
+      _wndCoords   =    { TPX(-1.0f, -1.0f)
+                         ,TPX( 1.0f, -1.0f)
+                         ,TPX(-1.0f,  1.0f)
+                         ,TPX( 1.0f,  1.0f) };
+      _texCoords   =    { TPX( 0.0f,  0.0f)
+                         ,TPX( 1.0f,  0.0f)
+                         ,TPX( 0.0f,  1.0f)
+                         ,TPX( 1.0f,  1.0f) };
+
    }
    else
    {
-#warning: TODO different effects depending on the current and next zoom window
-      switch (_event)
-      {
-         case ZOOM_WINDOW : break;
-         case ZOOM_WINDOWM: break;
-         case ZOOM_IN     : break;
-         case ZOOM_OUT    : break;
-         case ZOOM_LEFT   : break;
-         case ZOOM_RIGHT  : break;
-         case ZOOM_UP     : break;
-         case ZOOM_DOWN   : break;
-         case ZOOM_EMPTY  : break;
-         case ZOOM_REFRESH: break;
-         default: assert(false); break;
-      }
+
+      float nBLx = _wndCoords[0].x + _stepBL.x;
+      float nBLy = _wndCoords[0].y + _stepBL.y;
+      float nTRx = _wndCoords[3].x + _stepTR.x;
+      float nTRy = _wndCoords[3].y + _stepTR.y;
+
+      _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+//      printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
    }
 }
-
-bool tui::AnimationData::active()
-{
-   return (_counter > 0);
-}
-
-unsigned tui::AnimationData::scale()
-{
-   return (_allSteps - _counter);
-}
-//void tui::AnimationData::setEvent(int event)
-//{
-//   _event = event;
-//}
-
 
 //=============================================================================
 // class LayoutCanvas
@@ -638,16 +699,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
          _invalidWindow = false;
          
-//         if (!_animationData.active())
-//         {
-            drawOGLBuffer();
-            SwapBuffers();
-            if (0 < _blinkInterval)
-            {
-               _blinkOn = false;
-               _blinkTimer.Start(_blinkInterval,wxTIMER_CONTINUOUS);
-            }
-//         }
+         drawOGLBuffer();
+         SwapBuffers();
+         if (0 < _blinkInterval)
+         {
+            _blinkOn = false;
+            _blinkTimer.Start(_blinkInterval,wxTIMER_CONTINUOUS);
+         }
       }
    }
    else
@@ -655,12 +713,8 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
 
-      if (_animationData.active())
-      {
-         _glRC->animateFrameBuffer(_animationData.scale());
-//         drawOGLBuffer();
-//         printf("redraw effect \n");
-      }
+      if (_animation.active())
+         _glRC->animateFrameBuffer(_animation.wndCoords(), _animation.texCoords());
       else
          drawOGLBuffer();
       if       (_tmpWnd)              wndPaint();
@@ -1128,10 +1182,10 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       default: assert(false); break;
    }
    setScrCTM(*box);
-   delete box;
    _invalidWindow = true;
    if (_wndAnimation)
-      _animationData.setAnimation(evt.GetInt());
+      _animation.setAnimation(evt.GetInt(), *box, DBbox(_lpBL, _lpTR));
+   delete box;
    Refresh();
 }
 
@@ -1325,7 +1379,7 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
 
 void tui::LayoutCanvas::OnAnimationTimer(wxTimerEvent& WXUNUSED(event))
 {
-   _animationData.stepDown();
+   _animation.stepDown();
    Refresh(true);
 }
 
