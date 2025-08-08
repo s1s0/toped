@@ -73,7 +73,7 @@ namespace tui {
       bool           useShaders() const               { return _useShaders;                  }
       void           getWSize(int& W, int& H)         { W=_ww; H=_wh;                        }
       bool           initFrameBuffer();
-      void           drawFrameBuffer();
+      void           drawFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords);
       void           animateFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords);
    private:
       typedef struct {
@@ -83,7 +83,7 @@ namespace tui {
          unsigned int   RBO       ; // The RenderBuffer ID
          unsigned int   FBO       ; // The FrameBuffer ID
       } FrameBuffProps;
-      void           windowVAO();
+      void           windowVAO(const ANIVX4& wndCoords, const ANIVX4& texCoords);
       void           clearFrameBuffer();
       FrameBuffProps _fbProps;
       bool           _oglVersion14;             //! OpenGL version >= 1.4 detected
@@ -107,7 +107,7 @@ namespace tui {
       const ANIVX4&  wndCoords() const {return _wndCoords;}
       const ANIVX4&  texCoords() const {return _texCoords;}
    protected:
-      void           zWin(const DBbox& nw, const DBbox& ow);
+      void           zooming(const DBbox& nw, const DBbox& ow);
       wxTimer        _animationTimer   ;//! The timer used during the animation
       int            _counter          ;//! Current animation step. Counting from _allSteps downto 0
       TPX            _stepBL           ;//! Animation step of the bottom left corner of the window
@@ -175,7 +175,6 @@ namespace tui {
       void           OnDrcCollect(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
-//      void           viewshift();
    private:
       void           cursorControl(bool, bool);
       void           pointUpdate(int nX, int nY);

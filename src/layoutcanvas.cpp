@@ -265,18 +265,15 @@ bool tui::TpdOglContext::initFrameBuffer()
    return true;
 }
 
-void tui::TpdOglContext::windowVAO()
+void tui::TpdOglContext::windowVAO(const ANIVX4& wndCoords, const ANIVX4& texCoords)
 {
    // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
    const std::vector<glm::vec4> quadVertices= {
                 // positions   // texCoords
-       glm::vec4(-1.0f,  1.0f,  0.0f, 1.0f)
-      ,glm::vec4(-1.0f, -1.0f,  0.0f, 0.0f)
-      ,glm::vec4( 1.0f, -1.0f,  1.0f, 0.0f)
-
-      ,glm::vec4(-1.0f,  1.0f,  0.0f, 1.0f)
-      ,glm::vec4( 1.0f, -1.0f,  1.0f, 0.0f)
-      ,glm::vec4( 1.0f,  1.0f,  1.0f, 1.0f)
+      glm::vec4 (wndCoords[0], texCoords[0])
+     ,glm::vec4 (wndCoords[1], texCoords[1])
+     ,glm::vec4 (wndCoords[2], texCoords[2])
+     ,glm::vec4 (wndCoords[3], texCoords[3])
    };
    // screen quad VAO
    DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
@@ -290,9 +287,9 @@ void tui::TpdOglContext::windowVAO()
    DBGL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)))
 }
 
-void tui::TpdOglContext::drawFrameBuffer()
+void tui::TpdOglContext::drawFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords)
 {
-   windowVAO();
+   windowVAO(wndCoords, texCoords);
    DBGL_CALL(glBindFramebuffer,GL_FRAMEBUFFER, 0)
    DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
    // clear all relevant buffers
@@ -302,7 +299,7 @@ void tui::TpdOglContext::drawFrameBuffer()
    TRENDC->setGlslProg(trend::glslp_FB);
    DBGL_CALL(glBindVertexArray, _fbProps.quadVAO)
    DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)   // use the color attachment texture as the texture of the quad plane
-   DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
+   DBGL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4)
 }
 
 void tui::TpdOglContext::animateFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& texCoords)
@@ -364,10 +361,10 @@ void tui::AnimationData::setAnimation(const int event, const DBbox& nw, const DB
 
    switch (event)
    {
-      case ZOOM_WINDOW : printf("==>> ZOOM_WINDOW\n") ; zWin(newWin, oldWin); break;
-      case ZOOM_WINDOWM: printf("==>> ZOOM_WINDOWM\n"); zWin(newWin, oldWin); break;
-      case ZOOM_IN     : printf("==>> ZOOM_IN\n")     ; zWin(newWin, oldWin); break;
-      case ZOOM_OUT    : printf("==>> ZOOM_OUT\n")    ; zWin(newWin, oldWin); break;
+      case ZOOM_WINDOW :
+      case ZOOM_WINDOWM:
+      case ZOOM_IN     :
+      case ZOOM_OUT    : zooming(newWin, oldWin); break;
       case ZOOM_LEFT   : printf("==>> ZOOM_LEFT\n")   ; break;
       case ZOOM_RIGHT  : printf("==>> ZOOM_RIGHT\n")  ; break;
       case ZOOM_UP     : printf("==>> ZOOM_UP\n")     ; break;
@@ -379,7 +376,7 @@ void tui::AnimationData::setAnimation(const int event, const DBbox& nw, const DB
    _animationTimer.Start(_timeInterval);
 }
 
-void tui::AnimationData::zWin(const DBbox& nw, const DBbox& ow)
+void tui::AnimationData::zooming(const DBbox& nw, const DBbox& ow)
 {
    // figure-out whether the new window overlaps the old window, or vice versa
 //   char magnify = 0;
@@ -456,7 +453,7 @@ void tui::AnimationData::stepDown()
 //      printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
    }
    else if (0 > _magnify)
-   {// 
+   {//
       float nBLx = _texCoords[0].x + _stepBL.x;
       float nBLy = _texCoords[0].y + _stepBL.y;
       float nTRx = _texCoords[3].x + _stepTR.x;
@@ -740,7 +737,7 @@ void tui::LayoutCanvas::wndPaint()
 
 void tui::LayoutCanvas::drawOGLBuffer()
 {
-   _glRC->drawFrameBuffer();
+   _glRC->drawFrameBuffer(_animation.wndCoords(), _animation.texCoords());
    DBlineList repers;
    if (_reperX)
    {
@@ -1264,7 +1261,6 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 
 void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
 {
-  //viewshift();
    CTM tmpmtrx;
    TP center((_lpTR.x() + _lpBL.x())/2, (_lpTR.y() + _lpBL.y())/2);
    tmpmtrx.Translate(_scrMark - center);
