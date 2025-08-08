@@ -114,6 +114,7 @@ namespace tui {
       TPX            _stepTR           ;//! Animation step of the top right corner of the window
       ANIVX4         _wndCoords        ;//! Coordinated of the window to be drawn
       ANIVX4         _texCoords        ;//! Coordinated of the texture which will fill the window
+      char           _magnify          ;//! 
       const int      _allSteps     = 20;//! The total animation steps
       const int      _timeInterval = 20;//! Time interval between the steps (in ms)
    };

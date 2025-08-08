@@ -350,6 +350,7 @@ tui::AnimationData::AnimationData() :
                        ,TPX( 1.0f,  0.0f)
                        ,TPX( 0.0f,  1.0f)
                        ,TPX( 1.0f,  1.0f) }    )
+  ,_magnify         ( 0                        )
 {
 }
 
@@ -381,49 +382,45 @@ void tui::AnimationData::setAnimation(const int event, const DBbox& nw, const DB
 void tui::AnimationData::zWin(const DBbox& nw, const DBbox& ow)
 {
    // figure-out whether the new window overlaps the old window, or vice versa
-   char magnify = 0;
+//   char magnify = 0;
    DBbox big, small;
+   float scK; // scale factor
+   float shK; // shift factor
    if       ( ow.inside(nw.p1())  &&  ow.inside(nw.p2()) )
    {
-      magnify  =  1; big = ow; small = nw;
+      _magnify  =  1; big = ow; small = nw; scK = 2.0f; shK = -1.0f;
    }
    else if  ( nw.inside(ow.p1())  &&  nw.inside(ow.p2()) )
    {
-      magnify  = -1; big = nw; small = ow;
+      _magnify  = -1; big = nw; small = ow; scK = 1.0f; shK = 0.0f;
    }
    else return;
-   assert(magnify);
 
-   float scaleX = 2.0f / ((float)big.p2().x() - (float)big.p1().x());
-   float scaleY = 2.0f / ((float)big.p2().y() - (float)big.p1().y());
+   float scaleX = scK / ((float)big.p2().x() - (float)big.p1().x());
+   float scaleY = scK / ((float)big.p2().y() - (float)big.p1().y());
    
-   float shiftX = -(scaleX * (float)big.p1().x() + 1);
-   float shiftY = -(scaleY * (float)big.p1().y() + 1);
+   float shiftX = -(scaleX * (float)big.p1().x()) + shK;
+   float shiftY = -(scaleY * (float)big.p1().y()) + shK;
    
-   // window coordinates converted to -1/+1 window
-   // just for debugging purposes ( expected ±1 )
-//   float oblx = scaleX * (float)big.p1().x() + shiftX;
-//   float oblY = scaleY * (float)big.p1().y() + shiftY;
-//
-//   float otrx = scaleX * (float)big.p2().x() + shiftX;
-//   float otrY = scaleY * (float)big.p2().y() + shiftY;
-
    // new window coordinates converted to ±1 window
    float nBLx = scaleX * (float)small.p1().x() + shiftX;
    float nBLy = scaleY * (float)small.p1().y() + shiftY;
    float nTRx = scaleX * (float)small.p2().x() + shiftX;
    float nTRy = scaleY * (float)small.p2().y() + shiftY;
    
-   float stepBLx = magnify * (-1.0f - nBLx) / _allSteps;
-   float stepBLy = magnify * (-1.0f - nBLy) / _allSteps;
-   float stepTRx = magnify * ( 1.0f - nTRx) / _allSteps;
-   float stepTRy = magnify * ( 1.0f - nTRy) / _allSteps;
+   float stepBLx = ( shK  - nBLx) / _allSteps;
+   float stepBLy = ( shK  - nBLy) / _allSteps;
+   float stepTRx = ( 1.0f - nTRx) / _allSteps;
+   float stepTRy = ( 1.0f - nTRy) / _allSteps;
    //   printf("BL Step=> X: %10f; Y: %10f ||  TR step=> X: %10f; Y: %10f\n", stepBLx, stepBLy, stepTRx, stepTRy);
    _stepBL = {stepBLx, stepBLy};
    _stepTR = {stepTRx, stepTRy};
 
-   if (magnify)
+   if (0 < _magnify)
       _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+   else
+      _texCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+      
 //   printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
 
 }
@@ -444,10 +441,11 @@ void tui::AnimationData::stepDown()
                          ,TPX( 1.0f,  0.0f)
                          ,TPX( 0.0f,  1.0f)
                          ,TPX( 1.0f,  1.0f) };
+      _magnify     = 0;
 
    }
-   else
-   {
+   else if (0 < _magnify)
+   {// magnify - i.e. manipulate the window coordinates
 
       float nBLx = _wndCoords[0].x + _stepBL.x;
       float nBLy = _wndCoords[0].y + _stepBL.y;
@@ -456,6 +454,19 @@ void tui::AnimationData::stepDown()
 
       _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
 //      printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
+   }
+   else if (0 > _magnify)
+   {// 
+      float nBLx = _texCoords[0].x + _stepBL.x;
+      float nBLy = _texCoords[0].y + _stepBL.y;
+      float nTRx = _texCoords[3].x + _stepTR.x;
+      float nTRy = _texCoords[3].y + _stepTR.y;
+
+      _texCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+   }
+   else
+   {//shift
+      
    }
 }
 
