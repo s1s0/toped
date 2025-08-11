@@ -347,7 +347,6 @@ tui::AnimationData::AnimationData() :
                        ,TPX( 1.0f,  0.0f)
                        ,TPX( 0.0f,  1.0f)
                        ,TPX( 1.0f,  1.0f) }    )
-//  ,_magnify         ( 0                        )
   ,_event           ( wxID_NONE                )
 {
 }
@@ -371,14 +370,14 @@ void tui::AnimationData::setAnimation(const int event, const DBbox& nw, const DB
       case ZOOM_RIGHT  :
       case ZOOM_UP     :
       case ZOOM_DOWN   : rolling(); break;
-      case ZOOM_EMPTY  : break;
-      case ZOOM_REFRESH: printf("==>> ZOOM_REFRESH\n"); break;
+      case ZOOM_EMPTY  : /* nothing to do*/ break;
+      case ZOOM_REFRESH: /* nothing to do*/ break;
       default: assert(false); break;
    }
    _animationTimer.Start(_timeInterval);
 }
 
-void tui::AnimationData::rolling(/*const DBbox& nw, const DBbox& ow*/)
+void tui::AnimationData::rolling()
 {
    float nBLx    = -1.0f;
    float nBLy    = -1.0f;
@@ -394,26 +393,26 @@ void tui::AnimationData::rolling(/*const DBbox& nw, const DBbox& ow*/)
    float stepBLy =  0.0f;
    float stepTRx =  0.0f;
    float stepTRy =  0.0f;
+   
    switch (_event)
    {
-      case ZOOM_LEFT   :
-         nBLx =  0.0f; tTRx = 0.5f; stepBLx =  1.0f/(float)_allSteps;
-         break;
-      case ZOOM_RIGHT  :
-         nTRx =  0.0f; tBLx = 0.5f; stepTRx = -1.0f/(float)_allSteps;
-         break;
       case ZOOM_DOWN     :
          nTRy =  0.0f; tBLy = 0.5f; stepBLy = stepTRy = 1.0f/(float)_allSteps;
          break;
-      case ZOOM_UP   :
+      case ZOOM_UP     :
          nBLy =  0.0f; tTRy = 0.5f; stepBLy = stepTRy = -1.0f/(float)_allSteps;
+         break;
+      case ZOOM_LEFT   :
+         nTRx =  0.0f; tBLx = 0.5f; stepBLx = stepTRx = 1.0f/(float)_allSteps;
+         break;
+      case ZOOM_RIGHT  :
+         nBLx =  0.0f; tTRx = 0.5f; stepBLx = stepTRx = -1.0f/(float)_allSteps;
          break;
 
       default: assert(false); break;
    }
    _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
    _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
-//   //   printf("BL Step=> X: %10f; Y: %10f ||  TR step=> X: %10f; Y: %10f\n", stepBLx, stepBLy, stepTRx, stepTRy);
    _stepBL = {stepBLx, stepBLy};
    _stepTR = {stepTRx, stepTRy};
 }
@@ -454,7 +453,6 @@ void tui::AnimationData::zooming(const DBbox& nw, const DBbox& ow)
    _stepBL = {stepBLx, stepBLy};
    _stepTR = {stepTRx, stepTRy};
 
-//   if (0 < _magnify)
    if      (ZOOM_IN == _event)
       // on zoomIn - manupulate the screen coordinates
       _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
@@ -462,8 +460,6 @@ void tui::AnimationData::zooming(const DBbox& nw, const DBbox& ow)
       // on zoomOut - manipulate texture coordinates
       _texCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
    else assert(false);
-//   printf("Bottom left=> X: %10f; Y: %10f ||  Top right=> X: %10f; Y: %10f\n", nBLx, nBLy, nTRx, nTRy);
-
 }
 
 void tui::AnimationData::stepDown()
@@ -482,9 +478,7 @@ void tui::AnimationData::stepDown()
                       ,TPX( 1.0f,  0.0f)
                       ,TPX( 0.0f,  1.0f)
                       ,TPX( 1.0f,  1.0f) };
-//      _magnify     =  0        ;
       _event       =  wxID_NONE;
-
    }
    else
    {
@@ -505,59 +499,33 @@ void tui::AnimationData::stepDown()
             nBLy += _stepBL.y;
             nTRx += _stepTR.x;
             nTRy += _stepTR.y;
-            _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
             break;
          case ZOOM_OUT    :
             tBLx += _stepBL.x;
             tBLy += _stepBL.y;
             tTRx += _stepTR.x;
             tTRy += _stepTR.y;
-            _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
-            break;
-         case ZOOM_UP     :
-            nBLy +=  _stepBL.y;
-            tTRy -=  _stepTR.y/2.0f;
-            _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
-            _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
             break;
          case ZOOM_DOWN   :
             nTRy += _stepTR.y;
             tBLy -= _stepBL.y/2.0f;
-            _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
-            _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
+            break;
+         case ZOOM_UP     :
+            nBLy +=  _stepBL.y;
+            tTRy -=  _stepTR.y/2.0f;
             break;
          case ZOOM_LEFT   :
-            nBLx = _wndCoords[0].x + _stepBL.x;
-            nBLy = _wndCoords[0].y + _stepBL.y;
-            nTRx = _wndCoords[3].x + _stepTR.x;
-            nTRy = _wndCoords[3].y + _stepTR.y;
-
-            tBLx = _texCoords[0].x + _stepBL.x/2.0f;
-            tBLy = _texCoords[0].y + _stepBL.y/2.0f;
-            tTRx = _texCoords[3].x + _stepTR.x/2.0f;
-            tTRy = _texCoords[3].y + _stepTR.y/2.0f;
-
-            _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
-            _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
+            nTRx += _stepTR.x;
+            tBLx -= _stepBL.x/2.0f;
             break;
          case ZOOM_RIGHT  :
-            nBLx = _wndCoords[0].x + _stepBL.x;
-            nBLy = _wndCoords[0].y + _stepBL.y;
-            nTRx = _wndCoords[3].x + _stepTR.x;
-            nTRy = _wndCoords[3].y + _stepTR.y;
-
-            tBLx = _texCoords[0].x + _stepBL.x/2.0f;
-            tBLy = _texCoords[0].y + _stepBL.y/2.0f;
-            tTRx = _texCoords[3].x + _stepTR.x/2.0f;
-            tTRy = _texCoords[3].y + _stepTR.y/2.0f;
-
-            _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
-            _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
+            nBLx +=  _stepBL.x;
+            tTRx -=  _stepTR.x/2.0f;
             break;
 //         default: assert(false);
       }
-      //            printf("UP coords WND => BL (X: %10f; Y: %10f) |  TR (X: %10f; Y: %10f)", nBLx, nBLy, nTRx, nTRy);
-      //            printf("|| TEX => BL (X: %10f; Y: %10f) |  TR (X: %10f; Y: %10f) \n", tBLx, tBLy, tTRx, tTRy);
+      _wndCoords = {TPX(nBLx,nBLy), TPX(nTRx,nBLy), TPX(nBLx,nTRy), TPX(nTRx, nTRy)};
+      _texCoords = {TPX(tBLx,tBLy), TPX(tTRx,tBLy), TPX(tBLx,tTRy), TPX(tTRx, tTRy)};
    }
 }
 
