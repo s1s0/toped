@@ -108,14 +108,16 @@ namespace tui {
       const ANIVX4&  texCoords() const {return _texCoords;}
    protected:
       void           zooming(const DBbox& nw, const DBbox& ow);
+      void           rolling();
       wxTimer        _animationTimer   ;//! The timer used during the animation
       int            _counter          ;//! Current animation step. Counting from _allSteps downto 0
       TPX            _stepBL           ;//! Animation step of the bottom left corner of the window
       TPX            _stepTR           ;//! Animation step of the top right corner of the window
       ANIVX4         _wndCoords        ;//! Coordinated of the window to be drawn
       ANIVX4         _texCoords        ;//! Coordinated of the texture which will fill the window
-      char           _magnify          ;//! 
-      const int      _allSteps     = 20;//! The total animation steps
+//      char           _magnify          ;//! 
+      int            _event            ;
+      const int      _allSteps     = 80;//! The total animation steps
       const int      _timeInterval = 20;//! Time interval between the steps (in ms)
    };
    
