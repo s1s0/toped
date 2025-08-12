@@ -176,6 +176,7 @@ namespace tui {
       void           OnDrcCollect(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
+      void           OnCameraMove(wxCommandEvent&);
    private:
       void           cursorControl(bool, bool);
       void           pointUpdate(int nX, int nY);

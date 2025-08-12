@@ -259,6 +259,8 @@ namespace layprop {
       const TPX3&    cameraLocation()  const {return _cameraLocation;}
       const TPX3&    cameraDirection() const {return _cameraDirection;}
       const TPX3&    blahblah()        const {return _blahblah;}
+      void           moveCameraLocation(int direction);
+      const float    _locationStep = 0.1f;
    private:
       TPX3           _cameraLocation;
       TPX3           _cameraDirection;
@@ -402,6 +404,7 @@ namespace layprop {
          void                       setRenderType(trend::RenderType rType) {_renderType = rType;}
          trend::RenderType          renderType() const {return _renderType;}
          Studio3DSetup              studio3D() const {return _studio3D;}
+         void                       moveCameraLocation(int direction) {_studio3D.moveCameraLocation(direction);}
 
       private:
          typedef std::deque<LayStateList>            LayStateHistory;

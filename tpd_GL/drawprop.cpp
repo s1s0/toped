@@ -539,6 +539,22 @@ laydata::WireContourAux::~WireContourAux()
    delete [] _ldata;
 }
 
+
+//=============================================================================
+void layprop::Studio3DSetup::moveCameraLocation(int direction)
+{
+   switch (direction)
+   {
+      case tui::R3D_CAM_XPLUS  : _cameraLocation.x+= _locationStep; break;
+      case tui::R3D_CAM_XMINUS : _cameraLocation.x-= _locationStep; break;
+      case tui::R3D_CAM_YPLUS  : _cameraLocation.y+= _locationStep; break;
+      case tui::R3D_CAM_YMINUS : _cameraLocation.y-= _locationStep; break;
+      case tui::R3D_CAM_ZPLUS  : _cameraLocation.z+= _locationStep; break;
+      case tui::R3D_CAM_ZMINUS : _cameraLocation.z-= _locationStep; break;
+      default: assert(false);
+   }
+}
+
 //=============================================================================
 layprop::DrawProperties::DrawProperties() :
    _layCurSet             (&_laySetScr          ),

@@ -218,7 +218,13 @@ namespace tui
       ZOOM_UP             ,
       ZOOM_DOWN           ,
       ZOOM_EMPTY          ,
-      ZOOM_REFRESH
+      ZOOM_REFRESH        ,
+      R3D_CAM_XPLUS       ,
+      R3D_CAM_XMINUS      ,
+      R3D_CAM_YPLUS       ,
+      R3D_CAM_YMINUS      ,
+      R3D_CAM_ZPLUS       ,
+      R3D_CAM_ZMINUS      ,
    } ZOOM_TYPE;
 
    typedef enum  {

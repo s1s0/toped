@@ -1184,20 +1184,39 @@ void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
 
 void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
 {
-   wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
-   switch(event.GetKeyCode())
+   if (_rend3D)
    {
-      case WXK_LEFT : eventZOOM.SetInt(ZOOM_LEFT ); break;
-      case WXK_RIGHT: eventZOOM.SetInt(ZOOM_RIGHT); break;
-      case WXK_UP   : eventZOOM.SetInt(ZOOM_UP   ); break;
-      case WXK_DOWN : eventZOOM.SetInt(ZOOM_DOWN ); break;
-      case '+'      : eventZOOM.SetInt(ZOOM_IN   ); break;
-      case '-'      : eventZOOM.SetInt(ZOOM_OUT  ); break;
-      case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();return;
-            default : event.Skip(); return;
+      wxCommandEvent eventCAMOVE(tui::wxEVT_CANVAS_ZOOM);
+      switch(event.GetKeyCode())
+      {
+         case 'm':eventCAMOVE.SetInt(R3D_CAM_XPLUS ); break;
+         case 'n':eventCAMOVE.SetInt(R3D_CAM_XMINUS); break;
+         case 'j':eventCAMOVE.SetInt(R3D_CAM_YPLUS ); break;
+         case 'h':eventCAMOVE.SetInt(R3D_CAM_YMINUS); break;
+         case 'u':eventCAMOVE.SetInt(R3D_CAM_ZPLUS ); break;
+         case 'y':eventCAMOVE.SetInt(R3D_CAM_ZMINUS); break;
+         case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();return;
+         default : event.Skip(); return;
+      }
+      OnCameraMove(eventCAMOVE);
    }
-   OnZoom(eventZOOM);
-   pointUpdate(event.GetX(), event.GetY());
+   else
+   {
+      wxCommandEvent eventZOOM(tui::wxEVT_CANVAS_ZOOM);
+      switch(event.GetKeyCode())
+      {
+         case WXK_LEFT : eventZOOM.SetInt(ZOOM_LEFT ); break;
+         case WXK_RIGHT: eventZOOM.SetInt(ZOOM_RIGHT); break;
+         case WXK_UP   : eventZOOM.SetInt(ZOOM_UP   ); break;
+         case WXK_DOWN : eventZOOM.SetInt(ZOOM_DOWN ); break;
+         case '+'      : eventZOOM.SetInt(ZOOM_IN   ); break;
+         case '-'      : eventZOOM.SetInt(ZOOM_OUT  ); break;
+         case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();return;
+         default : event.Skip(); return;
+      }
+      OnZoom(eventZOOM);
+      pointUpdate(event.GetX(), event.GetY());
+   }
 }
 
 void tui::LayoutCanvas::setScrCTM(const DBbox& box)
@@ -1555,6 +1574,19 @@ DBbox* tui::LayoutCanvas::zoomDown()
    return DEBUG_NEW DBbox(_lpBL.x(), static_cast<int4b>(trY),
                           _lpTR.x(), static_cast<int4b>(blY));
 }
+
+
+void tui::LayoutCanvas::OnCameraMove(wxCommandEvent& evt) {
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->moveCameraLocation(evt.GetInt());
+   }
+   PROPC->unlockDrawProp(drawProp, false);
+   _invalidWindow = true;
+   Refresh();
+}
+
 
 tui::LayoutCanvas::~LayoutCanvas()
 {
