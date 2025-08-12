@@ -1368,6 +1368,15 @@ void tui::LayoutCanvas::OnWndAnimation(wxCommandEvent& event)
 void tui::LayoutCanvas::OnRend3D(wxCommandEvent& event)
 {
    _rend3D = (1 == event.GetInt());
+   if (_rend3D)
+   {
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         drawProp->resetCamera();
+      }
+      PROPC->unlockDrawProp(drawProp, false);
+   }
 }
 
 void tui::LayoutCanvas::OnDrcCollect(wxCommandEvent& event)

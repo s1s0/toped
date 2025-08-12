@@ -555,6 +555,14 @@ void layprop::Studio3DSetup::moveCameraLocation(int direction)
    }
 }
 
+
+void layprop::Studio3DSetup::resetCamera()
+{
+   _cameraLocation   = TPX3( 0,-2, 2);
+   _cameraDirection  = TPX3( 0, 0, 0);
+   _blahblah         = TPX3( 0, 1, 0);
+}
+
 //=============================================================================
 layprop::DrawProperties::DrawProperties() :
    _layCurSet             (&_laySetScr          ),
