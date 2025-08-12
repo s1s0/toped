@@ -760,7 +760,8 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
 
          _glRC->initFrameBuffer();
 
-         if (_rend3D)   DATC->render3D();
+         if (_rend3D)
+            DATC->render3D();
          else
          {  DATC->renderOGLBuffer();
             if (0 == _blinkInterval) DATC->grcDraw();

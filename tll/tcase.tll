@@ -488,7 +488,7 @@ hidecellbox(false);
 hidecellmarks(false);
 grid(0,false);
 grid(1,false);
-animatezoom(true);
+rend3d(true);
 
 zoomall();
 /*

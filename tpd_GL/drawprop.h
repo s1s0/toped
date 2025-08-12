@@ -32,6 +32,16 @@
 #include <math.h>
 #include "tedbac.h"
 
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+//using namespace glm;
+typedef glm::vec2               TPX   ; // single 2D verteX
+typedef std::vector<TPX>        TPVX  ; // array of 2D Vertexes
+typedef glm::vec3               TPX3  ; // single 3D verteX
+typedef std::vector<TPX3>       TPVX3 ; // array of 2D Vertexes
+
 namespace laydata {
    const word _lmnone   = 0x0000;
    const word _lmbox    = 0x0001;
@@ -243,6 +253,18 @@ namespace layprop {
       bool                _filled;
    };
 
+   class Studio3DSetup {
+   public:
+                     Studio3DSetup() : _cameraLocation(0,-2,2), _cameraDirection(0,0,0), _blahblah(0,1,0) {}
+      const TPX3&    cameraLocation()  const {return _cameraLocation;}
+      const TPX3&    cameraDirection() const {return _cameraDirection;}
+      const TPX3&    blahblah()        const {return _blahblah;}
+   private:
+      TPX3           _cameraLocation;
+      TPX3           _cameraDirection;
+      TPX3           _blahblah;
+   };
+   
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
    typedef  std::map<std::string, const byte*   >        FillMap;
@@ -378,7 +400,8 @@ namespace layprop {
          LayerDef                   getLayerNo(std::string name) const;
       
          void                       setRenderType(trend::RenderType rType) {_renderType = rType;}
-         trend::RenderType          renderType() {return _renderType;}
+         trend::RenderType          renderType() const {return _renderType;}
+         Studio3DSetup              studio3D() const {return _studio3D;}
 
       private:
          typedef std::deque<LayStateList>            LayStateHistory;
@@ -419,6 +442,7 @@ namespace layprop {
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          PropertyState              _propertyState; //type of drawing
          trend::RenderType          _renderType;
+         Studio3DSetup              _studio3D;
 
       public:
          static const tellRGB       _dfltColor;

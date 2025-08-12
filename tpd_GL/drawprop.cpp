@@ -560,7 +560,8 @@ layprop::DrawProperties::DrawProperties() :
    _refStack              ( NULL                ),
    _drawingLayer          ( TLL_LAY_DEF         ),
    _drawingLayerValid     ( false               ),
-   _propertyState         ( prsSCR              )
+   _propertyState         ( prsSCR              ),
+   _studio3D              (                     )
 {
 }
 

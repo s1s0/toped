@@ -259,8 +259,6 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
    size_t koko = sizeof(TPX3) * _point_array_offset;
-//   assert(0==koko);
-   /*printf("Offset in the vertex buffer: %d\n", koko)*/;
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 3, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
    // ... and here we go ...
    drawTriQuads();
@@ -610,14 +608,14 @@ void trend::T3Der::setShaderMVP()
    DBGL_CALL(glDepthFunc, GL_LESS); // Accept fragment if it is closer to the camera than the former one
 
    // manage the Model/View/Projection matrixes-------------------------------------------
-
+   layprop::Studio3DSetup studio = _drawprop->studio3D();
    // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
    // Camera matrix
    glm::mat4 View       = glm::lookAt(
-                          glm::vec3(0,-2,1), // Camera is at (4,3,3), in World Space
-                          glm::vec3(0,0,0), // and looks at the origin
-                          glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                          studio.cameraLocation() , //glm::vec3(0,-2,2), // Camera coordinates, in World Space
+                          studio.cameraDirection(),//glm::vec3(0,0,0), // Camera direction in the world space (looks at the origin)
+                          studio.blahblah()        //glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                      );
 //
 //   glm::mat4 View       = glm::lookAt(

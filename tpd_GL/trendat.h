@@ -40,16 +40,6 @@
    #define TNDR_GLENUMT GL_INT
 #endif
 
-// Include GLM
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_float3x3.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-//using namespace glm;
-typedef glm::vec2               TPX   ; // single 2D verteX
-typedef std::vector<TPX>        TPVX  ; // array of 2D Vertexes
-typedef glm::vec3               TPX3  ; // single 3D verteX
-typedef std::vector<TPX3>       TPVX3 ; // array of 2D Vertexes
-
 //=============================================================================
 //
 // Tesselation classes
