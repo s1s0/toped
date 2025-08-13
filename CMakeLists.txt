@@ -104,6 +104,7 @@ file(GLOB TPD_ICONS_16   "icons/16x16/*")
 file(GLOB TPD_ICONS_24   "icons/24x24/*")
 file(GLOB TPD_ICONS_32   "icons/32x32/*")
 file(GLOB TPD_ICONS_48   "icons/48x48/*")
+file(GLOB TPD_TEXTURES   "textures/*jpg")
 file(GLOB TPD_UTILS      "user_functions/general/*.tll")
 
 source_group(tll                   FILES ${TPD_TLL}     )
@@ -115,7 +116,7 @@ source_group(Resources/Icons/32    FILES ${TPD_ICONS_32})
 source_group(Resources/Icons/48    FILES ${TPD_ICONS_48})
 source_group(Resources/Icons/Icons FILES ${TPD_ICONS}   )
 source_group(Resources/Pixmaps     FILES ${TPD_PIXMAPS} )
-
+source_group(Resources/Textures    FILES ${TPD_TEXTURES})
 
 set_source_files_properties(${APP_ICON} PROPERTIES
                              MACOSX_PACKAGE_LOCATION "Resources")
@@ -150,6 +151,9 @@ set_source_files_properties( ${TPD_ICONS_48} PROPERTIES
 set_source_files_properties( ${TPD_UTILS} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/tll/utils
 )
+set_source_files_properties( ${TPD_TEXTURES} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/textures
+)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h)
 
@@ -158,6 +162,7 @@ add_executable(${PRJ_NAME} MACOSX_BUNDLE
                       ${top_sources} ${top_headers}
                       ${TPD_FONTS} ${TPD_TLL} ${TPD_RESOURCES} ${TPD_UTILS} ${TPD_SHADERS}
                       ${APP_ICON} ${TPD_ICONS_16} ${TPD_ICONS_24} ${TPD_ICONS_32} ${TPD_ICONS_48}
+                      ${TPD_TEXTURES}
 )
 
 # Set a custom plist file for the app bundle - needed for Mac OS Retina display

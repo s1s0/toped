@@ -308,6 +308,7 @@ class TopedApp : public wxApp
       bool                 getLogFileName();
       bool                 getOGLLogFileName();
       void                 loadGlfFonts();
+      void                 loadTextures();
       void                 defaultStartupScript();
       void                 loadPlugIns();
       bool                 checkCrashLog();
@@ -326,6 +327,7 @@ class TopedApp : public wxApp
       wxString             _tpdResourceDir;
       wxString             _tpdPlugInDir;
       wxString             _tpdShadersDir;
+      wxString             _tpdTextureDir;
       wxString             _globalDir;
       wxString             _localDir;
       wxString             _inputTellFile;

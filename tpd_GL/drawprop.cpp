@@ -31,8 +31,8 @@
 #include "drawprop.h"
 #include "tuidefs.h"
 
-const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127, 127, 127, 127);
-const layprop::LineSettings   layprop::DrawProperties::_dfltLine("", 0xffff, 1, 1);
+const layprop::tellRGB        layprop::DrawProperties::_dfltColor   (127, 127, 127, 127);
+const layprop::LineSettings   layprop::DrawProperties::_dfltLine    ("", 0xffff, 1, 1);
 const layprop::LineSettings   layprop::DrawProperties::_dfltSLine   ("", 0xffff, 1, 3);
 const layprop::LineSettings   layprop::DrawProperties::_dfltCellBnd ("", 0xf18f, 1, 1);
 const layprop::LineSettings   layprop::DrawProperties::_dfltCellSBnd("", 0xf18f, 1, 3);
@@ -698,6 +698,16 @@ void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
 }
 
 
+void layprop::DrawProperties::loadTexture(const std::string fname, const std::string tname, GLenum texUnit)
+{
+   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname, texUnit);
+   if (texture->Load())
+   {
+      _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
+   }
+}
+
+
 bool layprop::DrawProperties::setCurrentColor(const LayerDef& laydef, layprop::tellRGB& theColor)
 {
    if (_drawingLayerValid && (_drawingLayer == laydef))
@@ -1228,6 +1238,8 @@ layprop::DrawProperties::~DrawProperties() {
       delete LMI->second;
    for (LineMap::iterator LMI = _lineSetScr.begin(); LMI != _lineSetScr.end(); LMI++)
       delete LMI->second;
+   for (TextureMap::iterator TXI = _textures.begin(); TXI != _textures.end(); TXI++)
+      delete TXI->second;
 //   if (NULL != _refStack) delete _refStack; -> deleted in EditObject
 }
 
