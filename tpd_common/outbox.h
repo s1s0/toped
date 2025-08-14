@@ -96,7 +96,8 @@ namespace console {
    typedef enum {
       TEU_COLORS          ,
       TEU_FILLS           ,
-      TEU_LINES
+      TEU_LINES           ,
+      TEU_TEXTURE
    } TECHEDIT_UPDATE_EVT_ENUMS;
 
 

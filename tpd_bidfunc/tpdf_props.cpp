@@ -298,7 +298,52 @@ int tellstdfunc::stdFILLDEF::execute() {
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdTEXTUREDEF::stdTEXTUREDEF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+}
 
+int tellstdfunc::stdTEXTUREDEF::execute() {
+   std::string  fname = getStringValue(); // fileName
+   std::string  tname = getStringValue(); // textureName
+   
+   wxFileName texFile(fname);
+   texFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
+   if (!texFile.Exists())
+   {
+      texFile.SetPath(DATC->localDir());
+      texFile.AppendDir("textures");
+      texFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
+      wxString koko = texFile.GetFullPath();
+      if (!texFile.Exists())
+      {
+         texFile.SetPath(DATC->globalDir());
+         texFile.AppendDir("textures");
+         texFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
+         if (!texFile.Exists())
+         {
+            std::ostringstream info;
+            info << "Can't find the file named \""<< fname <<"\" in the current, local or global Toped directories";
+            tell_log(console::MT_ERROR,info.str());
+            return EXEC_NEXT;
+         }
+      }
+   }
+   
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->loadTexture(texFile.GetFullPath(), tname, GL_TEXTURE0);
+      LogFile << LogFile.getFN() << "(\""<< fname << "\",\"" << tname << "\");"; LogFile.flush();
+#warning: TODO post a message to the layer setup GUI window
+//      TpdPost::techEditUpdate(console::TEU_TEXTURE); //TODO!
+   }
+   PROPC->unlockDrawProp(drawProp, true);
+   return EXEC_NEXT;
+}
 //=============================================================================
 tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)

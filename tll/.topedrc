@@ -339,6 +339,14 @@ void lineSetup() {
    defineline("selected3", "", 0xcfcf,   2  ,   5);
 }
 
+
+void textureSetup() {
+   definetexture("tex1", "shot1.jpg" );
+   definetexture("tex2", "shotA1.jpg");
+   definetexture("tex3", "shotA2.jpg");
+   definetexture("tex4", "shotA3.jpg");
+}
+
 void screenSetup() {
 //   grid No, step in UU, color
    definegrid(0, .25 , "white"   );
@@ -386,6 +394,7 @@ void layerSetup() {
 colorSetup();
 fillSetup();
 lineSetup();
+textureSetup();
 screenSetup();
 layerSetup();
 // toolbar test remainders

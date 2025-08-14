@@ -274,7 +274,6 @@ namespace layprop {
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
    typedef  std::map<std::string, const byte*   >        FillMap;
    typedef  std::map<std::string, LineSettings* >        LineMap;
-   typedef  std::map<std::string, trend::Texture*>       TextureMap;
    typedef  laydata::LayerContainer<LayerSettings*>      LaySetList;
    typedef  std::pair <LayerDef, std::list<LayerState> > LayStateList;
 
@@ -355,7 +354,7 @@ namespace layprop {
          LayerDef                   addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
          void                       addFill(std::string name, const byte *ptrn);
-         void                       loadTexture(const std::string fname, const std::string tname, GLenum texUnit);
+         void                       loadTexture(const wxString fname, const std::string tname, GLenum texUnit);
          void                       addLine(std::string, std::string, word, byte, byte);
          void                       hideLayer(const LayerDef&, bool);
          void                       lockLayer(const LayerDef&, bool lock);
@@ -429,7 +428,6 @@ namespace layprop {
          LaySetList*                _layCurSet            ; // all layer   definitions  for the current mode
          ColorMap*                  _layCurColors         ; // all colour  definitions  for the current mode
          FillMap*                   _layCurFill           ; // all fill    definitions  for the current mode
-         TextureMap                 _textures             ; // all textures
          LineMap*                   _lineCurSet           ; // all line    definitions  for the current mode
          LayerDef                   _curlay               ; // current drawing layer
          DBbox                      _clipRegion;

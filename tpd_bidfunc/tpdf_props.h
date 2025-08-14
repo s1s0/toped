@@ -41,6 +41,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdLINEDEF       );  //
    TELL_STDCMD_CLASSA(stdCOLORDEF      );  //
    TELL_STDCMD_CLASSA(stdFILLDEF       );  //
+   TELL_STDCMD_CLASSA(stdTEXTUREDEF    );  //
    TELL_STDCMD_CLASSA(stdGRIDDEF       );  //
    TELL_STDCMD_CLASSA(stdSETPARAMETER  );  //
    TELL_STDCMD_CLASSA(stdSETPARAMETERS );  //

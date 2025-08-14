@@ -33,10 +33,11 @@
 #include "textures.h"
 #include "basetrend.h"
 
+trend::TextureVault* trend::TextureVault::_singleton = NULL;
 
 //=====================================================================================
-trend::Texture::Texture(GLenum texTarget, const std::string& fName, GLenum texUnit) :
-   _fileName      ( fName        )
+trend::Texture::Texture(GLenum texTarget, const wxString& fName, GLenum texUnit) :
+   _fileName( fName        )
  , _tType   ( texTarget    )
  , _tUnit   ( texUnit      )
 {
@@ -120,4 +121,27 @@ void trend::Texture::Bind() const
    DBGL_CALL(glBindTexture, _tType, _tID);
 }
 
+//=====================================================================================
+trend::TextureVault*  trend::TextureVault::getInstance()
+{
+   if(NULL == _singleton)
+   {
+      _singleton = new TextureVault();
+      wxInitAllImageHandlers();
+   }
+//   else {
+//      assert(false); //This class is supposed to have a single instance!
+//   }
+   return _singleton;
+}
+
+
+void trend::TextureVault::addTexture(const wxString fname, const std::string tname, GLenum texUnit)
+{
+   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), texUnit);
+   if (texture->Load())
+   {
+      _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
+   }
+}
 

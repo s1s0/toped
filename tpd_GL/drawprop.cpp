@@ -698,13 +698,10 @@ void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
 }
 
 
-void layprop::DrawProperties::loadTexture(const std::string fname, const std::string tname, GLenum texUnit)
+void layprop::DrawProperties::loadTexture(const wxString fname, const std::string tname, GLenum texUnit)
 {
-   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname, texUnit);
-   if (texture->Load())
-   {
-      _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
-   }
+   trend::TextureVault* tmap = trend::TextureVault::getInstance();
+   tmap->addTexture(fname, tname, texUnit);
 }
 
 
@@ -1238,8 +1235,6 @@ layprop::DrawProperties::~DrawProperties() {
       delete LMI->second;
    for (LineMap::iterator LMI = _lineSetScr.begin(); LMI != _lineSetScr.end(); LMI++)
       delete LMI->second;
-   for (TextureMap::iterator TXI = _textures.begin(); TXI != _textures.end(); TXI++)
-      delete TXI->second;
 //   if (NULL != _refStack) delete _refStack; -> deleted in EditObject
 }
 

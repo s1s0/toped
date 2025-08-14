@@ -153,7 +153,6 @@ bool TopedApp::OnInit()
       TRENDC->initShaders(stdShaderDir);
       // and then - load available layout fonts
       loadGlfFonts();
-      loadTextures();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
       // Put a rendering info in the log
@@ -324,34 +323,6 @@ void TopedApp::loadGlfFonts()
       TRENDC->selectFont("Arial Normal 1");
    }
 }
-
-void TopedApp::loadTextures()
-{
-   if (!TRENDC->shaderAvailable()) return;
-   wxDir textureDirectory(_tpdTextureDir);
-   if (textureDirectory.IsOpened())
-   {
-      wxString curFN;
-      layprop::DrawProperties* drawprop;
-      PROPC->lockDrawProp(drawprop);
-      if (textureDirectory.GetFirst(&curFN, wxT("*.jpg"), wxDIR_FILES))
-      {
-         wxInitAllImageHandlers();
-         GLenum TextureUnit = GL_TEXTURE0;
-         do
-         {
-            std::string ffname(_tpdTextureDir.mb_str(wxConvFile));
-            ffname += curFN.mb_str(wxConvFile);
-            wxFileName nameOnly(curFN);
-            std::string tname(nameOnly.GetName().mb_str(wxConvFile));
-            drawprop->loadTexture(ffname, tname, TextureUnit);
-            TextureUnit++;
-         } while (textureDirectory.GetNext(&curFN));
-      }
-      PROPC->unlockDrawProp(drawprop, true);
-   }
-}
-
 
 //=============================================================================
 void TopedApp::defaultStartupScript()
@@ -677,23 +648,6 @@ void TopedApp::getGlobalDirs()
    else
       // Don't generate a noise about shaders directory.
       _tpdShadersDir = wxT("");
-   //-------------------------------------
-   // Check textures directory
-   wxFileName textureFolder(_globalDir);
-   textureFolder.AppendDir(wxT("textures"));
-   textureFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
-   if (textureFolder.DirExists())
-      _tpdTextureDir = textureFolder.GetFullPath();
-   else
-   {
-#warning: TODO! Those messages never appear on the screen, because the LOG window is not yet created?
-      // Don't generate a noise about texture directory.
-      info = wxT("Directory \"");
-      info << textureFolder.GetFullPath() << wxT("\" doesn't exists.");
-      info << wxT(" Looking for textures in the current directory \"");
-      tell_log(console::MT_WARNING,info);
-      _tpdTextureDir = wxT("");
-   }
 }
 
 void TopedApp::getTellPathDirs()
@@ -992,6 +946,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("restorelaystatus" ,(DEBUG_NEW              tellstdfunc::stdLOADLAYSTAT(telldata::tn_void, true)));
    mblock->addFUNC("deletelaystatus"  ,(DEBUG_NEW               tellstdfunc::stdDELLAYSTAT(telldata::tn_void, true)));
    mblock->addFUNC("definecolor"      ,(DEBUG_NEW                 tellstdfunc::stdCOLORDEF(telldata::tn_void, true)));
+   mblock->addFUNC("definetexture"    ,(DEBUG_NEW               tellstdfunc::stdTEXTUREDEF(telldata::tn_void, true)));
    mblock->addFUNC("definefill"       ,(DEBUG_NEW                  tellstdfunc::stdFILLDEF(telldata::tn_void, true)));
    mblock->addFUNC("defineline"       ,(DEBUG_NEW                  tellstdfunc::stdLINEDEF(telldata::tn_void, true)));
    mblock->addFUNC("definegrid"       ,(DEBUG_NEW                  tellstdfunc::stdGRIDDEF(telldata::tn_void, true)));

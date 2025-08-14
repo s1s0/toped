@@ -29,13 +29,16 @@
 #define TEXTURES_H
 
 #include <string>
+#include <map>
 #include <GL/glew.h>
 
 namespace trend {
+   
+   
    class Texture
    {
    public:
-               Texture(GLenum texTarget, const std::string& fName, GLenum texUnit);
+      Texture(GLenum texTarget, const wxString& fName, GLenum texUnit);
       bool     Load();
       void     Bind() const;
       void     GetImageSize(int& imageWidth, int& imageHeight) const;
@@ -49,6 +52,22 @@ namespace trend {
       int                 _imageWidth  = 0;
       int                 _imageHeight = 0;
    };
+   
+   typedef  std::map<std::string, trend::Texture*>       TextureMap;
+
+   class TextureVault {
+      public:
+         static TextureVault*      getInstance();
+         void                      addTexture(const wxString fname, const std::string tname, GLenum texUnit);
+      private:
+                                 TextureVault() {}
+         static TextureVault*    _singleton;
+         TextureMap              _textures;
+
+   };
+
+
+
 }
 
 #endif //TEXTURES
