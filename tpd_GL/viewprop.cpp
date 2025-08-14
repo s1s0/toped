@@ -83,7 +83,7 @@ layprop::PropertyCenter::PropertyCenter() :
    // ... then build-in stipple lines ...
    _drawprop->addLine("zoomW","zoomW", 0x5555,1,1);
    // ... and finally build-in layers
-   _drawprop->addLayer("zoomW", ZOM_LAY_DEF,"zoomW", "zoomW", "zoomW", NO_DEPTH);
+   _drawprop->addLayer("zoomW", ZOM_LAY_DEF,"zoomW", "zoomW", "zoomW", NO_DEPTH, "");
    //
    _drawprop->setState(prsDB);
 }

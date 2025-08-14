@@ -53,12 +53,13 @@ namespace trend {
       int                 _imageHeight = 0;
    };
    
-   typedef  std::map<std::string, trend::Texture*>       TextureMap;
 
    class TextureVault {
       public:
-         static TextureVault*      getInstance();
-         void                      addTexture(const wxString fname, const std::string tname, GLenum texUnit);
+         typedef  std::map<std::string, trend::Texture*>       TextureMap;
+         static TextureVault*    getInstance();
+         void                    addTexture(const wxString fname, const std::string tname, GLenum texUnit);
+         bool                    texDefined(const std::string texture) const {return (_textures.end() != _textures.find(texture));}
       private:
                                  TextureVault() {}
          static TextureVault*    _singleton;

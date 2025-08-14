@@ -210,8 +210,9 @@ namespace layprop {
    //
    class LayerSettings  {
       public:
-                           LayerSettings(std::string name, std::string color, std::string filltype, std::string sline, const ZDepth& zDepth):
-                           _name(name), _color(color), _fill(filltype), _sline(sline),
+                           LayerSettings(std::string name, std::string color, std::string filltype, std::string sline,
+                                         const ZDepth& zDepth, std::string texture):
+                           _name(name), _color(color), _fill(filltype), _sline(sline), _texture(texture), 
                                  _hidden(false), _locked(false), _filled(filltype != ""), _zDepth(zDepth) {};
          std::string       color()    const {return _color;}
          std::string       fill()     const {return _fill;}
@@ -228,6 +229,7 @@ namespace layprop {
          std::string       _color;
          std::string       _fill;
          std::string       _sline;
+         std::string       _texture;
          bool              _hidden;
          bool              _locked;
          bool              _filled; //define filling visualisation
@@ -348,7 +350,7 @@ namespace layprop {
          void                       allUnselectable(LayerDefSet&);
          void                       allInvisible(LayerDefSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
-         bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string, const ZDepth&);
+         bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string, const ZDepth&, std::string);
          bool                       addLayer(std::string, const LayerDef&);
          bool                       addLayer(const LayerDef&);
          LayerDef                   addLayer(std::string);
@@ -429,6 +431,7 @@ namespace layprop {
          ColorMap*                  _layCurColors         ; // all colour  definitions  for the current mode
          FillMap*                   _layCurFill           ; // all fill    definitions  for the current mode
          LineMap*                   _lineCurSet           ; // all line    definitions  for the current mode
+         trend::TextureVault*       _layTextures          ; 
          LayerDef                   _curlay               ; // current drawing layer
          DBbox                      _clipRegion;
          CTM                        _scrCtm;

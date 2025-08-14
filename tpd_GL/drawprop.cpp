@@ -569,6 +569,7 @@ layprop::DrawProperties::DrawProperties() :
    _layCurColors          (&_layColorsScr       ),
    _layCurFill            (&_layFillScr         ),
    _lineCurSet            (&_lineSetScr         ),
+   _layTextures           ( NULL                ),
    _curlay                ( TLL_LAY_DEF         ),
    _clipRegion            ( 0,0                 ),
    _visualLimit           ( 40                  ),
@@ -595,12 +596,12 @@ bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
       return false;
    std::ostringstream lname;
    lname << defaultLaySuffix[_propertyState] << laydef.num() << "_" << laydef.typ();
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","","",NO_DEPTH));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","","",NO_DEPTH,""));
    return true;
 }
 
 bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef, std::string col,
-                                       std::string fill, std::string sline, const ZDepth& zDepth)
+                                       std::string fill, std::string sline, const ZDepth& zDepth, std::string texture)
 {
    if ((col != "") && (_layCurColors->end() == _layCurColors->find(col)))
    {
@@ -620,6 +621,12 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef,
       ost << "Warning! Line \""<<sline<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
+   if ((texture != "") && ( (NULL == _layTextures) || (!_layTextures->texDefined(texture)) ))
+   {
+      std::ostringstream ost;
+      ost << "Warning! Texture \""<<texture<<"\" is not defined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
    //
    assert(prsDRC != _propertyState);
    bool new_layer = true;
@@ -632,7 +639,7 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef,
       ost << "Warning! Layer "<<laydef<<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline, zDepth));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline, zDepth, texture));
 
    return new_layer;
 }
@@ -641,7 +648,7 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
 {
    if (_layCurSet->end() != _layCurSet->find(laydef))
       return false;
-   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,"","","",NO_DEPTH));
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,"","","",NO_DEPTH,""));
    return true;
 }
 
@@ -700,8 +707,8 @@ void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
 
 void layprop::DrawProperties::loadTexture(const wxString fname, const std::string tname, GLenum texUnit)
 {
-   trend::TextureVault* tmap = trend::TextureVault::getInstance();
-   tmap->addTexture(fname, tname, texUnit);
+   _layTextures = trend::TextureVault::getInstance();
+   _layTextures->addTexture(fname, tname, texUnit);
 }
 
 

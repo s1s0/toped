@@ -99,7 +99,7 @@ int tellstdfunc::stdLAYPROP::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH);
+      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH,"");
       TpdPost::layer_add(name,laydef);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*tlay) << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
@@ -131,7 +131,7 @@ int tellstdfunc::stdLAYPROP_T::execute() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH);
+      drawProp->addLayer(name, laydef, col, fill, sline, NO_DEPTH, "");
       TpdPost::layer_add(name,laydef);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << telldata::TtLayer(laydef) << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
@@ -151,6 +151,7 @@ tellstdfunc::stdLAYPROP_D::stdLAYPROP_D(telldata::typeID retype, bool eor) :
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdLAYPROP_D::execute() {
@@ -160,6 +161,7 @@ int tellstdfunc::stdLAYPROP_D::execute() {
 //   int4b ztop = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
 //   op = OPstack.top();OPstack.pop();
 //   int4b zbot = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
+   std::string texture = getStringValue();
    float zbot = getOpValue();
    float ztop = getOpValue();
    std::string sline = getStringValue();
@@ -172,10 +174,11 @@ int tellstdfunc::stdLAYPROP_D::execute() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, laydef, col, fill, sline, {zbot, ztop});
+      drawProp->addLayer(name, laydef, col, fill, sline, {zbot, ztop}, texture);
       TpdPost::layer_add(name,laydef);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*tlay) << ",\"" <<
-            col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+            col << "\",\"" << fill <<"\",\"" << sline <<"\"," <<
+           ztop << "," << zbot << ",\"" << texture <<"\");";LogFile.flush();
    }
    PROPC->unlockDrawProp(drawProp, true);
    delete tlay;
