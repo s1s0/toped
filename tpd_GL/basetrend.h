@@ -198,6 +198,9 @@ namespace trend {
                        , glslu_in_ScreenSize
                        , glslu_in_PatScale
                        , glslu_in_MVP
+                       , glslu_in_Texture
+                       , glslu_in_TextureOn
+                       , glslu_in_TEXMAT
                       };
    enum glsl_Programs { glslp_NULL
                        ,glslp_VF  //! Vertex and Fragment (default)

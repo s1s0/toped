@@ -38,19 +38,21 @@ namespace trend {
    class Texture
    {
    public:
-      Texture(GLenum texTarget, const wxString& fName, GLenum texUnit);
+               Texture(GLenum texTarget, const wxString& fName, GLenum texUnit);
       bool     Load();
       void     Bind() const;
       void     GetImageSize(int& imageWidth, int& imageHeight) const;
-      GLuint   GetTexture() const { return _tID; }
+      unsigned scaleFactor() const {return _scaleFactor;}
+      GLuint   GetOglTID() const { return _oglTID; }
       
    private:
       std::string         _fileName;
       GLenum              _tType = 0;
-      GLuint              _tID   = 0;
+      GLuint              _oglTID   = 0;
       GLenum              _tUnit = GL_TEXTURE0;
       int                 _imageWidth  = 0;
       int                 _imageHeight = 0;
+      unsigned            _scaleFactor = 1;
    };
    
 
@@ -58,12 +60,14 @@ namespace trend {
       public:
          typedef  std::map<std::string, trend::Texture*>       TextureMap;
          static TextureVault*    getInstance();
-         void                    addTexture(const wxString fname, const std::string tname, GLenum texUnit);
+         void                    addTexture(const wxString fname, const std::string tname);
          bool                    texDefined(const std::string texture) const {return (_textures.end() != _textures.find(texture));}
+         const Texture*          getTexture(const std::string) const;
       private:
-                                 TextureVault() {}
+                                 TextureVault() { _curTexUnit = 0;}
          static TextureVault*    _singleton;
          TextureMap              _textures;
+         GLushort                _curTexUnit;
 
    };
 

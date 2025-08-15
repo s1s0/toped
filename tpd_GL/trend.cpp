@@ -546,6 +546,9 @@ trend::Shaders::Shaders() :
    
    _glslUniVarNames[glslp_3D][glslu_in_CTM]        = "CTM";
    _glslUniVarNames[glslp_3D][glslu_in_MVP]        = "MVP";
+   _glslUniVarNames[glslp_3D][glslu_in_Texture]    = "layTexture";
+   _glslUniVarNames[glslp_3D][glslu_in_TextureOn]  = "textureON";
+   _glslUniVarNames[glslp_3D][glslu_in_TEXMAT]     = "TEXMAT";
    _glslUniVarNames[glslp_3D][glslu_in_Color]      = "in_Color";
    //
    _idPrograms[glslp_VF] = -1;
@@ -594,6 +597,11 @@ void trend::Shaders::setUniMtrx4fv(const glsl_Uniforms varName, GLfloat* varValu
    DBGL_CALL(glUniformMatrix4fv,getUniformLoc(varName), 1, GL_FALSE, varValue)
 }
 
+void trend::Shaders::setUniMtrx3fv(const glsl_Uniforms varName, GLfloat* varValue) const
+{
+   DBGL_CALL(glUniformMatrix3fv,getUniformLoc(varName), 1, GL_FALSE, varValue)
+}
+
 void trend::Shaders::setUniColor(/*const glsl_Uniforms varName, */GLfloat* varValue) const
 {
    DBGL_CALL(glUniform4fv,getUniformLoc(glslu_in_Color), 1, varValue)
@@ -602,6 +610,11 @@ void trend::Shaders::setUniColor(/*const glsl_Uniforms varName, */GLfloat* varVa
 void trend::Shaders::setUniVarui(const glsl_Uniforms varName, GLuint varValue) const
 {
    DBGL_CALL(glUniform1ui, getUniformLoc(varName), varValue)
+}
+
+void trend::Shaders::setUniVari(const glsl_Uniforms varName, GLuint varValue) const
+{
+   DBGL_CALL(glUniform1i, getUniformLoc(varName), varValue)
 }
 
 void trend::Shaders::setUniStipple(/*const glsl_Uniforms varName,*/ GLuint* varValue) const
@@ -1302,6 +1315,12 @@ void trend::TrendCenter::setUniMtrx4fv(const glsl_Uniforms varName, GLfloat* var
    return _cShaders->setUniMtrx4fv(varName, varValue);
 }
 
+void trend::TrendCenter::setUniMtrx3fv(const glsl_Uniforms varName, GLfloat* varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniMtrx3fv(varName, varValue);
+}
+
 void trend::TrendCenter::setUniColor(/*const glsl_Uniforms varName,*/ GLfloat* varValue) const
 {
    assert(_cShaders);
@@ -1320,6 +1339,11 @@ void trend::TrendCenter::setUniVarui(const glsl_Uniforms varName, GLuint varValu
    return _cShaders->setUniVarui(varName, varValue);
 }
 
+void trend::TrendCenter::setUniVari(const glsl_Uniforms varName, GLuint varValue) const
+{
+   assert(_cShaders);
+   return _cShaders->setUniVari(varName, varValue);
+}
 
 void trend::TrendCenter::setGlslProg(const glsl_Programs prog) const
 {

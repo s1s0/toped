@@ -216,6 +216,7 @@ namespace layprop {
                                  _hidden(false), _locked(false), _filled(filltype != ""), _zDepth(zDepth) {};
          std::string       color()    const {return _color;}
          std::string       fill()     const {return _fill;}
+         std::string       texture()  const {return _texture;}
          bool              filled()   const {return _filled;}
          std::string       name()     const {return _name;}
          std::string       sline()    const {return _sline;}
@@ -299,6 +300,7 @@ namespace layprop {
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
          void                       resetCurrentColor();
          const byte*                getCurrentFill() const;
+         const trend::Texture*      getCurrentTexture() const;
          void                       getCurrentLine(LineSettings&, bool) const;
          const ZDepth               getLayDepth(const LayerDef&) const;
          bool                       getAlpha(word factor, layprop::tellRGB& theColor);
@@ -356,7 +358,7 @@ namespace layprop {
          LayerDef                   addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
          void                       addFill(std::string name, const byte *ptrn);
-         void                       loadTexture(const wxString fname, const std::string tname, GLenum texUnit);
+         void                       loadTexture(const wxString fname, const std::string tname);
          void                       addLine(std::string, std::string, word, byte, byte);
          void                       hideLayer(const LayerDef&, bool);
          void                       lockLayer(const LayerDef&, bool lock);

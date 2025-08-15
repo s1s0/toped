@@ -45,16 +45,12 @@ trend::Texture::Texture(GLenum texTarget, const wxString& fName, GLenum texUnit)
 
 bool trend::Texture::Load()
 {
-   if(!wxFileExists(_fileName))
-   {
-      wxMessageBox( _("Failed to load resource image") );
-      return false;
-   }
-    
+   assert(wxFileExists(_fileName));
+
    wxImage* img = DEBUG_NEW wxImage( _fileName );
    
-   DBGL_CALL(glGenTextures,1, &_tID);
-   DBGL_CALL(glBindTexture, _tType, _tID);
+   DBGL_CALL(glGenTextures,      1, &_oglTID);
+   DBGL_CALL(glBindTexture, _tType,  _oglTID);
 
    
    _imageWidth    = img->GetWidth();
@@ -84,8 +80,8 @@ bool trend::Texture::Load()
 
    DBGL_CALL(  glTexImage2D
              , _tType
-             , 0
-             , bytesPerPixel
+             , 0                                   // level of detail
+             , img->HasAlpha() ?  GL_RGBA : GL_RGB //bytesPerPixel
              , _imageWidth
              , _imageHeight
              , 0
@@ -118,7 +114,7 @@ void trend::Texture::GetImageSize(int& ImageWidth, int& ImageHeight) const
 void trend::Texture::Bind() const
 {
    DBGL_CALL(glActiveTexture, _tUnit);
-   DBGL_CALL(glBindTexture, _tType, _tID);
+   DBGL_CALL(glBindTexture, _tType, _oglTID);
 }
 
 //=====================================================================================
@@ -136,12 +132,23 @@ trend::TextureVault*  trend::TextureVault::getInstance()
 }
 
 
-void trend::TextureVault::addTexture(const wxString fname, const std::string tname, GLenum texUnit)
+void trend::TextureVault::addTexture(const wxString fname, const std::string tname)
 {
-   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), texUnit);
+   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), GL_TEXTURE0+_curTexUnit);
    if (texture->Load())
    {
       _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
+      _curTexUnit++;
    }
+}
+
+const trend::Texture* trend::TextureVault::getTexture(const std::string tname) const
+{
+//   trend::Texture* result = _textures.find(tname);
+   
+   if (_textures.end() == _textures.find(tname))
+      return nullptr;
+   else
+      return _textures.find(tname)->second;
 }
 

@@ -27,17 +27,22 @@
 #version 330 core
 
 uniform vec4  in_Color                        ;
+uniform sampler2D layTexture;
+uniform bool textureON = false;
+
 // Interpolated values from the vertex shaders
 in vec2 UV;
-
-// Ouput data
 out vec4 color;
 
-// Values that stay constant for the whole mesh.
-uniform sampler2D myTextureSampler;
-
-void main(){
-
+void main()
+{
 	// Output color = color of the texture at the specified UV
-	color = /*texture( myTextureSampler, UV ).rgb * */ in_Color/*.rgb*/;
+   //color = /*texture( myTextureSampler, UV ).rgb * */ in_Color/*.rgb*/;
+   vec4 colorOnly = in_Color;
+	vec4 colorANDtexture = texture( layTexture, UV ) * in_Color ;
+   if (textureON)
+      color = colorANDtexture;
+   else
+      color = colorOnly;
+      
 }

@@ -369,7 +369,7 @@ void layerSetup() {
    layprop("LAYER0"     ,{ 0, 0} ,"past_cyan"   ,"FatDots2"       , "selected3" );
    layprop("ACTIVE"     ,{ 2, 0} ,"blue"        ,"diagStripeBack" , "selected3" ,  0.0,  0.1, "tex2");
    layprop("UNKWN_1"    ,{ 3, 0} ,"darkGray"    ,""               , "selected3" );
-   layprop("POLY"       ,{ 4, 0} ,"red"         ,"checkerboards"  , "selected2" ,  0.1,  0.2, "tex1");
+   layprop("POLY"       ,{ 4, 0} ,"red"         ,"checkerboards"  , "selected2" ,  0.1,  0.2, "tex2");
    layprop("N_IMPL"     ,{ 5, 0} ,"white"       ,""               , "selected3" , -0.15, 0.0, "tex2");
    layprop("P_IMPL"     ,{ 6, 0} ,"magenta"     ,""               , "selected3" , -0.1,  0.0, "tex2");
    layprop("CONTACT"    ,{ 7, 0} ,"white"       ,"diagStripeForw" , "selected3" ,  0.1,  0.3, "tex3");

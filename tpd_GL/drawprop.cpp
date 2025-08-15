@@ -705,10 +705,10 @@ void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
 }
 
 
-void layprop::DrawProperties::loadTexture(const wxString fname, const std::string tname, GLenum texUnit)
+void layprop::DrawProperties::loadTexture(const wxString fname, const std::string tname)
 {
    _layTextures = trend::TextureVault::getInstance();
-   _layTextures->addTexture(fname, tname, texUnit);
+   _layTextures->addTexture(fname, tname);
 }
 
 
@@ -753,6 +753,24 @@ const byte* layprop::DrawProperties::getCurrentFill() const
    else return NULL;
 }
 
+const trend::Texture* layprop::DrawProperties::getCurrentTexture() const
+{
+   assert((REF_LAY_DEF != _drawingLayer) &&
+          (GRC_LAY_DEF != _drawingLayer)    );
+   // Retrive the layer settings
+   const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
+   if (NULL != ilayset)
+   {
+      std::string tname = ilayset->texture();
+      if (!tname.empty())
+      {
+         assert (_layTextures);
+         return _layTextures->getTexture(tname);
+      }
+      else return nullptr;
+   }
+   return nullptr;
+}
 
 const ZDepth layprop::DrawProperties::getLayDepth(const LayerDef& laydef) const
 {

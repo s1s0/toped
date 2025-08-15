@@ -342,7 +342,7 @@ void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCell
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-#warning: TODO! Figure-out WHY I need such scalig gactor on the Z axis?
+#warning: TODO! CTM doesn;t care about the Z coordinate! That's why Z dimentions are out of scale! Fix that!
    mtrxOrtho[10] = 0.1f; // TODO! this is Zscale. WHY???
 //   printf("---------------------------------------------\n");
 //   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 0], mtrxOrtho[ 1], mtrxOrtho[ 2], mtrxOrtho[ 3]);
@@ -458,6 +458,10 @@ void trend::T3DLay::collect(GLuint pbuf, GLuint ibuf)
 //   if (0 != _ibuffer)
       DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 
+   // prepare data for texel coordinates, which will be produced in the vetex shader directly
+   auto [minXY, maxXY] = minmaxXY(cpoint_array);
+   _cOffset = minXY;
+   _cSpan   = TPX(maxXY.x - minXY.x, maxXY.y - minXY.y );
 }
 
 
@@ -482,6 +486,53 @@ void trend::T3DLay::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    if (0 != _ibuffer)
       DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
+}
+
+void trend::T3DLay::setTexture(layprop::DrawProperties* drawprop)
+{
+   DBbox screenSize = drawprop->clipRegion() * drawprop->scrCtm();
+   screenSize.normalize();
+   const trend::Texture* ctexture = drawprop->getCurrentTexture();
+   if (ctexture)
+   {
+      int texWidth, texHeight;
+      ctexture->GetImageSize(texWidth, texHeight);
+      float xTexScale = (float)screenSize.p2().x() / ((float)texWidth  * (float)ctexture->scaleFactor());
+      float yTexScale = (float)screenSize.p2().y() / ((float)texHeight * (float)ctexture->scaleFactor());
+
+      CTM dodo;
+      dodo.Translate( -_cOffset.x, -_cOffset.y );
+      dodo.Scale(xTexScale/_cSpan.x,yTexScale/_cSpan.y );
+      glm::mat3 tcMatrix = glm::mat3(
+                                     dodo.a() , dodo.b(), 0.0f,
+                                     dodo.c() , dodo.d(), 0.0f,
+                                     dodo.tx(),dodo.ty(), 1.0f
+      );
+      
+      TRENDC->setUniMtrx3fv(glslu_in_TEXMAT, &tcMatrix[0][0]);
+//      DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer);
+//      float* cpoint_array = (float*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//      
+//      GLint bufferSize;
+//      DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
+//      
+//      for (int i = 0; i < bufferSize/sizeof(float); i+=3)
+//      {
+//         TPX3 boza(cpoint_array[i], cpoint_array[i+1], cpoint_array[i+2]);
+//         TPX3 koko = tcMatrix * boza;
+//         printf("<%6i> X:%10f, Y:%10f, Z:%10f || X:%10f, Y:%10f, Z:%10f\n", i, boza.x, boza.y, boza.z, koko.x, koko.y, koko.z);
+//      }
+
+      ctexture->Bind();
+      TRENDC->setUniVari(glslu_in_Texture, ctexture->GetOglTID());
+      TRENDC->setUniVarui(glslu_in_TextureOn, 1);
+   }
+   else
+   {
+      TRENDC->setUniVarui(glslu_in_TextureOn, 0);
+   }
+   
+   
 }
 
 
@@ -592,12 +643,15 @@ void trend::T3Der::draw()
    _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      setLayColor(CLAY());
-      // draw everything
       if (0 != CLAY->total_points())
+      {// draw everything
+         setLayColor(CLAY());
+         static_cast<trend::T3DLay*>(*CLAY)->setTexture(_drawprop);
+//         setStipple(static_cast<trend::T3DLay*>(*CLAY)->cOffset(), static_cast<trend::T3DLay*>(*CLAY)->cSpan());
          CLAY->draw(_drawprop);
+      }
    }
-   checkOGLError("draw");
+//   checkOGLError("draw");
    _drawprop->clearCtmStack();
 }
 
@@ -687,3 +741,29 @@ void trend::T3Der::setLayColor(const LayerDef& layer)
       delete[] oglColor;
    }
 }
+
+//void trend::T3Der::setStipple(/*const TPX& cOffset, const TPX& cSpan*/)
+//{
+//   DBbox screenSize = _drawprop->clipRegion() * _drawprop->scrCtm();
+//   screenSize.normalize();
+//   const trend::Texture* ctexture = _drawprop->getCurrentTexture();
+//   if (ctexture)
+//   {
+//      int texWidth, texHeight;
+//      ctexture->GetImageSize(texWidth, texHeight);
+//      float xTexScale = (float)screenSize.p2().x() / ((float)texWidth  * (float)ctexture->scaleFactor());
+//      float yTexScale = (float)screenSize.p2().y() / ((float)texHeight * (float)ctexture->scaleFactor());
+//      ctexture->Bind();
+//      TRENDC->setUniVari(glslu_in_Texture, ctexture->GetOglTID());
+//      TRENDC->setUniVarui(glslu_in_TextureOn, 1);
+//   }
+//   else
+//   {
+//      TRENDC->setUniVarui(glslu_in_TextureOn, 0);
+//   }
+//   //   // for every coordinate...
+//      float xTexCoord = (objCoordX - xOffset) * (xTexScale/xSpan);
+//      float yTexCoord = (objCoordY - yOffset) * (yTexScale/ySpan);
+//   
+//   
+//}

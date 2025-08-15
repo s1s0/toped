@@ -31,6 +31,24 @@
 #include "toshader.h"
 namespace trend {
 
+   template <typename T>
+   auto minmaxXY(std::vector<T> inData)
+   {
+      glm::vec2 minXY(inData[0].x, inData[0].y);
+      glm::vec2 maxXY(inData[0].x, inData[0].y);
+      
+      auto compare = [&maxXY, &minXY] (const T& item)
+      {
+         maxXY.x = (item.x > maxXY.x) ? item.x: maxXY.x;
+         maxXY.y = (item.y > maxXY.y) ? item.y: maxXY.y;
+         minXY.x = (item.x < minXY.x) ? item.x: minXY.x;
+         minXY.y = (item.y < minXY.y) ? item.y: minXY.y;
+      };
+      std::for_each(inData.cbegin(), inData.cend(), compare);
+      
+      return std::make_tuple(minXY,maxXY);
+   }
+
    class Trx3D {
       public:
                               Trx3D(const int4b* pdata, const unsigned psize, const ZDepth& zDepth) :  _cdata(pdata), _csize(psize), _tdata(NULL), _zDepth(zDepth) {/*assert(NO_DEPTH != zDepth);*/}
@@ -133,12 +151,16 @@ namespace trend {
 //         unsigned          total_indexs() {return _num_total_indexs;}
 ///         unsigned          total_slctdx();
 ///         unsigned          total_strings(){return _num_total_strings;}
+         void              setTexture(layprop::DrawProperties* drawprop);
 
       protected:
          GLuint            _pbuffer;
          GLuint            _ibuffer;
       private:
-         ZDepth          _zDepth;
+         ZDepth            _zDepth;
+         TPX               _cOffset;
+         TPX               _cSpan;
+         
    };
    
    //===========================================================================

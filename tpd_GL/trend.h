@@ -169,9 +169,11 @@ namespace trend {
          void                   useProgram(const glsl_Programs);
          void                   setUniVarf(const glsl_Uniforms, GLfloat) const;
          void                   setUniMtrx4fv(const glsl_Uniforms, GLfloat*) const;
+         void                   setUniMtrx3fv(const glsl_Uniforms, GLfloat*) const;
          void                   setUniColor(GLfloat*) const;
          void                   setUniStipple(GLuint*) const;
          void                   setUniVarui(const glsl_Uniforms, GLuint) const;
+         void                   setUniVari(const glsl_Uniforms, GLuint) const;
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
@@ -238,9 +240,11 @@ namespace trend {
          //Shader handling
          void                   setUniVarf(const glsl_Uniforms, GLfloat) const;
          void                   setUniMtrx4fv(const glsl_Uniforms, GLfloat*) const;
+         void                   setUniMtrx3fv(const glsl_Uniforms, GLfloat*) const;
          void                   setUniColor(GLfloat*) const;
          void                   setUniStipple(GLuint*) const;
          void                   setUniVarui(const glsl_Uniforms, GLuint) const;
+         void                   setUniVari(const glsl_Uniforms, GLuint) const;
          void                   setGlslProg(const glsl_Programs) const;
          bool                   shaderAvailable() const {return _cShaders->status();}
       private:
