@@ -531,10 +531,14 @@ void trend::T3DLay::setTexture(layprop::DrawProperties* drawprop)
    {
       TRENDC->setUniVarui(glslu_in_TextureOn, 0);
    }
-   
-   
 }
 
+void trend::T3DLay::clearTexture(layprop::DrawProperties *drawprop)
+{
+   const trend::Texture* ctexture = drawprop->getCurrentTexture();
+   if (ctexture)
+      ctexture->unBind();
+}
 
 //===========================================================================
 //
@@ -649,6 +653,7 @@ void trend::T3Der::draw()
          static_cast<trend::T3DLay*>(*CLAY)->setTexture(_drawprop);
 //         setStipple(static_cast<trend::T3DLay*>(*CLAY)->cOffset(), static_cast<trend::T3DLay*>(*CLAY)->cSpan());
          CLAY->draw(_drawprop);
+         static_cast<trend::T3DLay*>(*CLAY)->clearTexture(_drawprop);
       }
    }
 //   checkOGLError("draw");

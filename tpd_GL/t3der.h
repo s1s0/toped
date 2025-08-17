@@ -152,6 +152,7 @@ namespace trend {
 ///         unsigned          total_slctdx();
 ///         unsigned          total_strings(){return _num_total_strings;}
          void              setTexture(layprop::DrawProperties* drawprop);
+         void              clearTexture(layprop::DrawProperties* drawprop);
 
       protected:
          GLuint            _pbuffer;

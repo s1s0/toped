@@ -51,7 +51,7 @@ bool trend::Texture::Load()
    
    DBGL_CALL(glGenTextures,      1, &_oglTID);
    DBGL_CALL(glBindTexture, _tType,  _oglTID);
-
+   printf("Texture buffer %2d generated\n",_oglTID);
    
    _imageWidth    = img->GetWidth();
    _imageHeight   = img->GetHeight();
@@ -115,6 +115,12 @@ void trend::Texture::Bind() const
 {
    DBGL_CALL(glActiveTexture, _tUnit);
    DBGL_CALL(glBindTexture, _tType, _oglTID);
+}
+
+void trend::Texture::unBind() const
+{
+//   DBGL_CALL(glActiveTexture, _tUnit);
+   DBGL_CALL(glBindTexture, _tType, 0);
 }
 
 //=====================================================================================

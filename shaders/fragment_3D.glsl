@@ -39,7 +39,7 @@ void main()
 	// Output color = color of the texture at the specified UV
    //color = /*texture( myTextureSampler, UV ).rgb * */ in_Color/*.rgb*/;
    vec4 colorOnly = in_Color;
-	vec4 colorANDtexture = texture( layTexture, UV ) * in_Color ;
+	vec4 colorANDtexture = texture( layTexture, UV );// * in_Color ;
    if (textureON)
       color = colorANDtexture;
    else

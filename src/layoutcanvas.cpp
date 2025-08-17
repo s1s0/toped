@@ -246,6 +246,8 @@ bool tui::TpdOglContext::initFrameBuffer()
    DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.FBO)
    // create a color attachment texture
    DBGL_CALL(glGenTextures, 1, &_fbProps.texture)
+printf("Frame buffer %2d generated\n",_fbProps.FBO);
+
    DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)
    DBGL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, _ww, _wh, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr)
    DBGL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)

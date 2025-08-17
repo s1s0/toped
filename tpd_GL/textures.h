@@ -41,6 +41,7 @@ namespace trend {
                Texture(GLenum texTarget, const wxString& fName, GLenum texUnit);
       bool     Load();
       void     Bind() const;
+      void     unBind() const;
       void     GetImageSize(int& imageWidth, int& imageHeight) const;
       unsigned scaleFactor() const {return _scaleFactor;}
       GLuint   GetOglTID() const { return _oglTID; }
