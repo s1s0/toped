@@ -246,7 +246,7 @@ bool tui::TpdOglContext::initFrameBuffer()
    DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.FBO)
    // create a color attachment texture
    DBGL_CALL(glGenTextures, 1, &_fbProps.texture)
-printf("Frame buffer %2d generated\n",_fbProps.FBO);
+//printf("Frame buffer %2d generated\n",_fbProps.FBO);
 
    DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)
    DBGL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, _ww, _wh, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr)
@@ -295,11 +295,14 @@ void tui::TpdOglContext::drawFrameBuffer(const ANIVX4& wndCoords, const ANIVX4& 
    DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
    // clear all relevant buffers
    DBGL_CALL(glClearColor, 0.0f, 0.0f, 0.0f, 0.0f) // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
-   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
    TRENDC->setGlslProg(trend::glslp_FB);
    DBGL_CALL(glBindVertexArray, _fbProps.quadVAO)
    DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)   // use the color attachment texture as the texture of the quad plane
+   DBGL_CALL(glActiveTexture, GL_TEXTURE0);
+#warning: TODO WHY?!? I need the -1 below?!? This is the number of the sampler
+   TRENDC->setUniVari(trend::glslu_in_Texture, _fbProps.texture-1);
    DBGL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4)
 }
 

@@ -358,7 +358,8 @@ namespace layprop {
          LayerDef                   addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
          void                       addFill(std::string name, const byte *ptrn);
-         void                       loadTexture(const wxString fname, const std::string tname);
+         void                       registerTexture(const wxString fname, const std::string tname);
+         void                       loadTextures();
          void                       addLine(std::string, std::string, word, byte, byte);
          void                       hideLayer(const LayerDef&, bool);
          void                       lockLayer(const LayerDef&, bool lock);

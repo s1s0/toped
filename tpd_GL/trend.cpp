@@ -550,6 +550,8 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_3D][glslu_in_TextureOn]  = "textureON";
    _glslUniVarNames[glslp_3D][glslu_in_TEXMAT]     = "TEXMAT";
    _glslUniVarNames[glslp_3D][glslu_in_Color]      = "in_Color";
+   
+   _glslUniVarNames[glslp_FB][glslu_in_Texture]    = "layTexture";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;

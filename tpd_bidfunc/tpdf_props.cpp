@@ -339,7 +339,7 @@ int tellstdfunc::stdTEXTUREDEF::execute() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->loadTexture(texFile.GetFullPath(), tname);
+      drawProp->registerTexture(texFile.GetFullPath(), tname);
       LogFile << LogFile.getFN() << "(\""<< fname << "\",\"" << tname << "\");"; LogFile.flush();
 #warning: TODO post a message to the layer setup GUI window
 //      TpdPost::techEditUpdate(console::TEU_TEXTURE); //TODO!

@@ -705,10 +705,16 @@ void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
 }
 
 
-void layprop::DrawProperties::loadTexture(const wxString fname, const std::string tname)
+void layprop::DrawProperties::registerTexture(const wxString fname, const std::string tname)
 {
    _layTextures = trend::TextureVault::getInstance();
-   _layTextures->addTexture(fname, tname);
+   _layTextures->registerTexture(fname, tname);
+}
+
+void layprop::DrawProperties::loadTextures()
+{
+   _layTextures = trend::TextureVault::getInstance();
+   _layTextures->loadAllTextures();
 }
 
 

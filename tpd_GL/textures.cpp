@@ -37,9 +37,10 @@ trend::TextureVault* trend::TextureVault::_singleton = NULL;
 
 //=====================================================================================
 trend::Texture::Texture(GLenum texTarget, const wxString& fName, GLenum texUnit) :
-   _fileName( fName        )
- , _tType   ( texTarget    )
- , _tUnit   ( texUnit      )
+   _fileName      ( fName        )
+ , _tType         ( texTarget    )
+ , _tUnit         ( texUnit      )
+ , _tLoaded       ( false        )
 {
 }
 
@@ -51,7 +52,7 @@ bool trend::Texture::Load()
    
    DBGL_CALL(glGenTextures,      1, &_oglTID);
    DBGL_CALL(glBindTexture, _tType,  _oglTID);
-   printf("Texture buffer %2d generated\n",_oglTID);
+//   printf("Texture buffer %2d generated\n",_oglTID);
    
    _imageWidth    = img->GetWidth();
    _imageHeight   = img->GetHeight();
@@ -102,6 +103,7 @@ bool trend::Texture::Load()
 
    delete [] imageData;
    delete img;
+   _tLoaded = true;
    return true;
 }
 
@@ -113,6 +115,7 @@ void trend::Texture::GetImageSize(int& ImageWidth, int& ImageHeight) const
 
 void trend::Texture::Bind() const
 {
+   assert(_tLoaded);
    DBGL_CALL(glActiveTexture, _tUnit);
    DBGL_CALL(glBindTexture, _tType, _oglTID);
 }
@@ -120,6 +123,7 @@ void trend::Texture::Bind() const
 void trend::Texture::unBind() const
 {
 //   DBGL_CALL(glActiveTexture, _tUnit);
+   assert(_tLoaded);
    DBGL_CALL(glBindTexture, _tType, 0);
 }
 
@@ -128,8 +132,8 @@ trend::TextureVault*  trend::TextureVault::getInstance()
 {
    if(NULL == _singleton)
    {
-      _singleton = new TextureVault();
       wxInitAllImageHandlers();
+      _singleton = new TextureVault();
    }
 //   else {
 //      assert(false); //This class is supposed to have a single instance!
@@ -138,14 +142,19 @@ trend::TextureVault*  trend::TextureVault::getInstance()
 }
 
 
-void trend::TextureVault::addTexture(const wxString fname, const std::string tname)
+void trend::TextureVault::registerTexture(const wxString fname, const std::string tname)
 {
-   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), GL_TEXTURE0+_curTexUnit);
-   if (texture->Load())
-   {
-      _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
-      _curTexUnit++;
-   }
+   trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), GL_TEXTURE1+_curTexUnit);
+   _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
+   _curTexUnit++;
+}
+
+void trend::TextureVault::loadAllTextures()
+{
+   for(auto texture:_textures)
+      if (!texture.second->loaded())
+         texture.second->Load();
+   
 }
 
 const trend::Texture* trend::TextureVault::getTexture(const std::string tname) const
@@ -155,6 +164,10 @@ const trend::Texture* trend::TextureVault::getTexture(const std::string tname) c
    if (_textures.end() == _textures.find(tname))
       return nullptr;
    else
+   {
+      trend::Texture* result = _textures.find(tname)->second;
+      assert(result->loaded());
       return _textures.find(tname)->second;
+   }
 }
 

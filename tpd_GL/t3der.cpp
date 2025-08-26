@@ -342,7 +342,7 @@ void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCell
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-#warning: TODO! CTM doesn;t care about the Z coordinate! That's why Z dimentions are out of scale! Fix that!
+#warning: TODO! CTM doesn't care about the Z coordinate! That's why Z dimentions are out of scale! Fix that!
    mtrxOrtho[10] = 0.1f; // TODO! this is Zscale. WHY???
 //   printf("---------------------------------------------\n");
 //   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 0], mtrxOrtho[ 1], mtrxOrtho[ 2], mtrxOrtho[ 3]);
@@ -524,7 +524,9 @@ void trend::T3DLay::setTexture(layprop::DrawProperties* drawprop)
 //      }
 
       ctexture->Bind();
-      TRENDC->setUniVari(glslu_in_Texture, ctexture->GetOglTID());
+//      GLuint texSampler = ctexture->GetOglTID();
+#warning: TODO WHY?!? I need the -1 below?!? This is the number of the sampler
+      TRENDC->setUniVari(glslu_in_Texture, ctexture->GetOglTID()-1);
       TRENDC->setUniVarui(glslu_in_TextureOn, 1);
    }
    else
@@ -553,6 +555,7 @@ trend::T3Der::T3Der(layprop::DrawProperties *drawprop, real UU) :
 //  ,_sbuffer              (       0u   )
 {
 //   _refLayer = DEBUG_NEW ToshaderRefLay();
+   drawprop->loadTextures();
 }
 
 void trend::T3Der::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool /*selected*/)
