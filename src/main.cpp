@@ -79,7 +79,9 @@ bool TopedApp::OnInit()
    _noLog               = false;
    _gui                 = true;
    _toolbarIconSize     = 32;
-   wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
+   wxImage::AddHandler(DEBUG_NEW wxPNGHandler);  // for icons
+   wxImage::AddHandler(DEBUG_NEW wxJPEGHandler); // for textures
+//   wxInitAllImageHandlers();
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database

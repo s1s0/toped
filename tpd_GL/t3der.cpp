@@ -497,12 +497,13 @@ void trend::T3DLay::setTexture(layprop::DrawProperties* drawprop)
    {
       int texWidth, texHeight;
       ctexture->GetImageSize(texWidth, texHeight);
-      float xTexScale = (float)screenSize.p2().x() / ((float)texWidth  * (float)ctexture->scaleFactor());
-      float yTexScale = (float)screenSize.p2().y() / ((float)texHeight * (float)ctexture->scaleFactor());
+      float xTexScale = ((float)screenSize.p2().x() / ((float)texWidth  * (float)ctexture->scaleFactor())) / _cSpan.x;
+      float yTexScale = ((float)screenSize.p2().y() / ((float)texHeight * (float)ctexture->scaleFactor())) / _cSpan.y;
+      float texScale = (xTexScale > yTexScale) ? xTexScale : yTexScale;
 
       CTM dodo;
       dodo.Translate( -_cOffset.x, -_cOffset.y );
-      dodo.Scale(xTexScale/_cSpan.x,yTexScale/_cSpan.y );
+      dodo.Scale( texScale,texScale );
       glm::mat3 tcMatrix = glm::mat3(
                                      dodo.a() , dodo.b(), 0.0f,
                                      dodo.c() , dodo.d(), 0.0f,

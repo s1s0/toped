@@ -132,7 +132,6 @@ trend::TextureVault*  trend::TextureVault::getInstance()
 {
    if(NULL == _singleton)
    {
-      wxInitAllImageHandlers();
       _singleton = new TextureVault();
 //      printf("TextureVault created\n");
    }
