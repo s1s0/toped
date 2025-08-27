@@ -134,6 +134,7 @@ trend::TextureVault*  trend::TextureVault::getInstance()
    {
       wxInitAllImageHandlers();
       _singleton = new TextureVault();
+//      printf("TextureVault created\n");
    }
 //   else {
 //      assert(false); //This class is supposed to have a single instance!
@@ -146,6 +147,7 @@ void trend::TextureVault::registerTexture(const wxString fname, const std::strin
 {
    trend::Texture* texture = DEBUG_NEW trend::Texture(GL_TEXTURE_2D, fname.mb_str(), GL_TEXTURE1+_curTexUnit);
    _textures.insert(std::pair<std::string, trend::Texture*>(tname, texture));
+//   printf("Texture %d registered\n", _curTexUnit);
    _curTexUnit++;
 }
 

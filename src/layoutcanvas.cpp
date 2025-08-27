@@ -758,7 +758,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          SetCurrent(*_glRC);
         
          updateViewport();
-
+//         printf("> new FB; mode: %s \n", _rend3D ? "3D":"2D");
          _glRC->initFrameBuffer();
 
          if (_rend3D)
@@ -784,6 +784,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
 
+//      printf("> old FB; mode: %s \n", _rend3D ? "3D":"2D");
       drawFrameBuffer();
 
       if       (_tmpWnd)              wndPaint();

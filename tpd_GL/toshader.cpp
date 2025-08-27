@@ -405,6 +405,7 @@ trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU) :
 {
    _refLayer = DEBUG_NEW ToshaderRefLay();
    _marks    = DEBUG_NEW ToshaderMarks();
+   drawprop->loadTextures();
 }
 
 bool trend::Toshader::chunkExists(const LayerDef& laydef, bool has_selected)
