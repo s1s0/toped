@@ -1266,6 +1266,10 @@ layprop::DrawProperties::~DrawProperties() {
       delete LMI->second;
    for (LineMap::iterator LMI = _lineSetScr.begin(); LMI != _lineSetScr.end(); LMI++)
       delete LMI->second;
+   // clean-up the textures
+   _layTextures = trend::TextureVault::getInstance();
+   delete _layTextures;
+
 //   if (NULL != _refStack) delete _refStack; -> deleted in EditObject
 }
 

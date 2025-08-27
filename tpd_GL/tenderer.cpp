@@ -1352,7 +1352,6 @@ void trend::Tenderer::cleanUp()
 {
    // Clean-up the buffers
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
-   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
    if (NULL != _ogl_buffers)
    {

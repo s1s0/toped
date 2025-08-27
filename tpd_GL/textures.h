@@ -63,6 +63,7 @@ namespace trend {
       public:
          typedef  std::map<std::string, trend::Texture*>       TextureMap;
          static TextureVault*    getInstance();
+                                ~TextureVault();
          void                    registerTexture(const wxString fname, const std::string tname);
          void                    loadAllTextures();
          bool                    texDefined(const std::string texture) const {return (_textures.end() != _textures.find(texture));}

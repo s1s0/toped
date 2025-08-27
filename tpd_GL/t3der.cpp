@@ -751,6 +751,34 @@ void trend::T3Der::setLayColor(const LayerDef& layer)
    }
 }
 
+trend::T3Der::~T3Der()
+{
+   cleanUp();
+//   grcCleanUp();
+//   grdCleanUp();
+//   rlrCleanUp();
+//   if (_refLayer) delete _refLayer;
+//   if (_marks)    delete _marks;
+}
+
+void trend::T3Der::cleanUp() { 
+   // Clean-up the buffers
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
+   if (NULL != _ogl_buffers)
+   {
+      DBGL_CALL(glDeleteBuffers,_num_ogl_buffers, _ogl_buffers)
+      delete [] _ogl_buffers;
+      _ogl_buffers = NULL;
+   }
+   TrendBase::cleanUp();
+//   for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
+//      delete (*CSH);
+//   _hiddenRefBoxes.clear();
+   _activeCS = NULL;
+}
+
+
 //void trend::T3Der::setStipple(/*const TPX& cOffset, const TPX& cSpan*/)
 //{
 //   DBbox screenSize = _drawprop->clipRegion() * _drawprop->scrCtm();

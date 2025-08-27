@@ -168,7 +168,7 @@ namespace trend {
    class T3Der : public TrendBase {
    public:
                         T3Der( layprop::DrawProperties* drawprop, real UU);
-      virtual          ~T3Der() {}
+      virtual          ~T3Der();
       virtual void      pushCell(std::string, const CTM&, const DBbox&, bool, bool);
       virtual void      setLayer(const LayerDef&, bool);
       virtual void      setHvrLayer(const LayerDef&)                                         {assert(false);}
@@ -192,7 +192,7 @@ namespace trend {
       virtual void      setLayColor(const LayerDef& layer);
       virtual void      setStipple()                                                         {assert(false);}
       virtual void      setLine(bool)                                                        {assert(false);}
-      virtual void      cleanUp()                                                            {assert(false);}
+      virtual void      cleanUp();
       virtual void      grdCleanUp()                                                         {assert(false);}
       virtual void      rlrCleanUp()                                                         {assert(false);}
 

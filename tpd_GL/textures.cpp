@@ -172,3 +172,10 @@ const trend::Texture* trend::TextureVault::getTexture(const std::string tname) c
    }
 }
 
+trend::TextureVault::~TextureVault()
+{
+   for(auto texture:_textures)
+      delete texture.second;
+}
+
+
