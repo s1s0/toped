@@ -182,7 +182,7 @@ namespace tui {
       void           pointUpdate(int nX, int nY);
       void           updateViewport();
       void           wndPaint();
-      void           drawOGLBuffer();
+      void           drawFrameBuffer();
       void           boldOnHover();
       void           drawZeroMark();
       void           updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);

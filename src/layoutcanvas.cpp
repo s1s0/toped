@@ -241,6 +241,8 @@ bool tui::TpdOglContext::resizeGL(int w, int h)
 bool tui::TpdOglContext::initFrameBuffer()
 {
    clearFrameBuffer();
+   DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
+   DBGL_CALL(glBindVertexArray,_fbProps.quadVAO)
 
    DBGL_CALL(glGenFramebuffers, 1, &_fbProps.FBO)
    DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.FBO)
@@ -277,9 +279,7 @@ void tui::TpdOglContext::windowVAO(const ANIVX4& wndCoords, const ANIVX4& texCoo
      ,glm::vec4 (wndCoords[3], texCoords[3])
    };
    // screen quad VAO
-   DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
    DBGL_CALL(glGenBuffers, 1, &_fbProps.quadVBO)
-   DBGL_CALL(glBindVertexArray,_fbProps.quadVAO)
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, byteSize(quadVertices), &quadVertices[0], GL_STATIC_DRAW)
    DBGL_CALL(glEnableVertexAttribArray, 0)
@@ -321,7 +321,7 @@ void tui::TpdOglContext::animateFrameBuffer(const ANIVX4& wndCoords, const ANIVX
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
    DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, byteSize(quadVertices), &quadVertices[0], GL_DYNAMIC_DRAW)
    
-   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
    DBGL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4)
 }
 
@@ -757,9 +757,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
         
-         GLuint VertexArrayID;
-         DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
-         DBGL_CALL(glBindVertexArray, VertexArrayID)
          updateViewport();
 
          _glRC->initFrameBuffer();
@@ -767,14 +764,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          if (_rend3D)
             DATC->render3D();
          else
-         {  DATC->renderOGLBuffer();
+         {
+            DATC->renderOGLBuffer();
             if (0 == _blinkInterval) DATC->grcDraw();
          }
-         DBGL_CALL(glBindVertexArray, 0);
-         DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
          _invalidWindow = false;
          
-         drawOGLBuffer();
+         drawFrameBuffer();
          SwapBuffers();
          if (0 < _blinkInterval)
          {
@@ -788,10 +784,8 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
 
-      if (_animation.active())
-         _glRC->animateFrameBuffer(_animation.wndCoords(), _animation.texCoords());
-      else
-         drawOGLBuffer();
+      drawFrameBuffer();
+
       if       (_tmpWnd)              wndPaint();
       SwapBuffers();
    }
@@ -802,9 +796,10 @@ void tui::LayoutCanvas::wndPaint()
    DATC->zoomDraw(_pressPoint, _nScrMark);
 }
 
-void tui::LayoutCanvas::drawOGLBuffer()
+void tui::LayoutCanvas::drawFrameBuffer()
 {
    _glRC->drawFrameBuffer(_animation.wndCoords(), _animation.texCoords());
+   if (_animation.active()) return;
    DBlineList repers;
    if (_reperX)
    {
@@ -1465,7 +1460,7 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    {
       glAccum(GL_RETURN, 1.0);
       if       (_tmpWnd)              wndPaint();
-      drawOGLBuffer();
+      drawFrameBuffer();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
    }
    else
@@ -1628,7 +1623,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DATC->renderOGLBuffer();    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
-      _canvas->drawOGLBuffer();
+      _canvas->drawFrameBuffer();
 //      if (_canvas->_rubberBand) _canvas->rubberPaint();
 //      if (_canvas->_reperX || _canvas->_reperY) _canvas->longCursor();
       _canvas->SwapBuffers();
