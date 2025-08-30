@@ -499,7 +499,7 @@ void trend::T3DLay::setTexture(layprop::DrawProperties* drawprop)
       ctexture->GetImageSize(texWidth, texHeight);
       float xTexScale = ((float)screenSize.p2().x() / ((float)texWidth  * (float)ctexture->scaleFactor())) / _cSpan.x;
       float yTexScale = ((float)screenSize.p2().y() / ((float)texHeight * (float)ctexture->scaleFactor())) / _cSpan.y;
-      float texScale = (xTexScale > yTexScale) ? xTexScale : yTexScale;
+      float texScale = (xTexScale < yTexScale) ? xTexScale : yTexScale;
 
       CTM dodo;
       dodo.Translate( -_cOffset.x, -_cOffset.y );

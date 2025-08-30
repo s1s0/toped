@@ -26,24 +26,19 @@
 //===========================================================================
 #version 330 core
 
-// Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vertexStream;
-//layout(location = 1) in vec2 vertexUV;
-
-// Output data ; will be interpolated for each fragment.
-out vec2 UV;
+layout(location = 0) in vec3 vertexStream; // Input vertex data
+out vec2 UV         ; // texture coordinates
 
 // Values that stay constant for the whole mesh.
-uniform mat4 MVP;
-uniform mat4 CTM;
-uniform mat3 TEXMAT;
+uniform mat4 MVP    ; // world matrix
+uniform mat4 CTM    ; // current translation matrix (i.e. model matrix)
+uniform mat3 TEXMAT ; // matrix for translation of texture coordinates
 
 void main(){
 
 	// Output position of the vertex, in clip space : MVP * position
 	gl_Position =  MVP * CTM * vec4(vertexStream,1);
-	vec3 texPos = TEXMAT * vertexStream;
-	// UV of the vertex. No special space for this one.
-	UV = texPos.xy;
+   // UV of the vertex. Just copy the X/Y object vertices.
+   UV = (TEXMAT * vertexStream).xy;
 }
 
