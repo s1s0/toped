@@ -131,7 +131,7 @@ namespace trend {
    //===========================================================================
    class T3DLay : public TrendLay{
       public:
-                           T3DLay(const ZDepth& zDepth) :TrendLay () ,_zDepth ( zDepth ) {}
+                           T3DLay(const ZDepth& zDepth, float dpthScale) :TrendLay () ,_zDepth ( {zDepth.bottom * dpthScale, zDepth.top * dpthScale} ) {}
          virtual          ~T3DLay() {};
          virtual void      box  (const int4b*);
          virtual void      poly (const int4b*, unsigned, const TessellPoly*);

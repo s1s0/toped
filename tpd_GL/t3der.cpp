@@ -28,15 +28,16 @@
 #include "tpdph.h"
 #include "t3der.h"
 #include "trend.h"
+#include "viewprop.h"
 
-extern trend::TrendCenter*         TRENDC;
+extern trend::TrendCenter*       TRENDC;
+extern layprop::PropertyCenter*  PROPC;
 
 unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
 {
-   float mFactor = 1;
    for (unsigned z = 0; z < 2; z++) // front and back plane
    {
-      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) ((0==z ? _zDepth.bottom : _zDepth.top) * mFactor);
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
       for ( unsigned i = 0; i < 2*_csize; i+=2)
          array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[i],(TNDR_GLDATAT)_cdata[i+1], zCoord);
    }
@@ -45,11 +46,10 @@ unsigned trend::Trx3D::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned 
 
 unsigned trend::Trx3DBox::cDataCopy(TPVX3& array, unsigned& pindex, const unsigned offset)
 {
-   float mFactor = 1;
    unsigned axs[4][2] = {{0,1},{2,1},{0,3},{2,3}};
    for (unsigned z = 0; z < 2; z++)
    {
-      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) ((0==z ? _zDepth.bottom : _zDepth.top) * mFactor);
+      TNDR_GLDATAT zCoord = (TNDR_GLDATAT) (0==z ? _zDepth.bottom : _zDepth.top);
       for (unsigned i = 0; i < _csize; i++)
          array[offset+pindex++] = TPX3((TNDR_GLDATAT)_cdata[axs[i][0]], (TNDR_GLDATAT)_cdata[axs[i][1]], zCoord);
    }
@@ -342,24 +342,15 @@ void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCell
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-#warning: TODO! CTM doesn't care about the Z coordinate! That's why Z dimentions are out of scale! Fix that!
-   mtrxOrtho[10] = 0.1f; // TODO! this is Zscale. WHY???
-//   printf("---------------------------------------------\n");
-//   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 0], mtrxOrtho[ 1], mtrxOrtho[ 2], mtrxOrtho[ 3]);
-//   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 4], mtrxOrtho[ 5], mtrxOrtho[ 6], mtrxOrtho[ 7]);
-//   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[ 8], mtrxOrtho[ 9], mtrxOrtho[10], mtrxOrtho[11]);
-//   printf("%.10e ,%.10e ,%.10e ,%.10e\n", mtrxOrtho[12], mtrxOrtho[13], mtrxOrtho[14], mtrxOrtho[15]);
-//   printf("---------------------------------------------\n");
-   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
-
-
-/// It appears that the decomposition below is not quite making much sense, becuase it is producing
-/// kind of the same results as the sequence above
-//   DoublePoint translation(0.0f,0.0f);
-//   real scaleX, scaleY;
-//   real rotate;
-//   bool flipX;
-//   drawprop->topCtm().Decompose(translation, rotate, scaleX, scaleY, flipX);
+   // The decomposition below - becaouse of the need to scale Z dimention
+   // CTM works for flat (planar) coordinate system only
+   DoublePoint translation(0.0f,0.0f);
+   real scaleX, scaleY;
+   real rotate;
+   bool flipX;
+   drawprop->topCtm().Decompose(translation, rotate, scaleX, scaleY, flipX);
+   // pick-up bigger scale (of X & Y dirction) and set the Z scale
+   mtrxOrtho[10] = scaleX > scaleY ? scaleX : scaleY;
 //   glm::mat4 glmCTM(1);
 ////   if (flipX)
 ////      glmCTM = {-1,0,0,0};
@@ -375,6 +366,7 @@ void trend::T3DTV::setShaderCTM(layprop::DrawProperties* drawprop, const TrxCell
 //   //   printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
 //
 //   TRENDC->setUniMtrx4fv(glslu_in_CTM, &glmCTM[0][0]);
+   TRENDC->setUniMtrx4fv(glslu_in_CTM, mtrxOrtho);
 }
 
 
@@ -711,7 +703,7 @@ bool trend::T3Der::chunkExists(const LayerDef& laydef, bool /*has_selected*/)
    }
    else
    {
-      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef));
+      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef), PROPC->DBscale());
       _data.add(laydef, _clayer);
    }
    _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true);
@@ -734,7 +726,7 @@ void trend::T3Der::setLayer(const LayerDef& laydef, bool /*has_selected*/)
    }
    else
    {
-      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef));
+      _clayer = DEBUG_NEW T3DLay(_drawprop->getLayDepth(laydef), PROPC->DBscale());
       _data.add(laydef, _clayer);
    }
    _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
