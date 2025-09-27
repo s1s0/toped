@@ -810,7 +810,7 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    if ( item == wxNOT_FOUND )
             return;
    layprop::tellRGB col(255,0,0,0);
-   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
+//   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
 
    std::string lineName(GetString( item ).mb_str(wxConvUTF8));
 

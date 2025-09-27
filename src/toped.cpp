@@ -971,7 +971,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
       wxString ost;
       ost << wxT("tdtread(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
-      wxString ost1;
+//      wxString ost1;
 //      ost1 << wxT("File ") << dlg2.GetPath() << wxT(" loaded");
 //      SetStatusText(ost1);
       SetTitle(dlg2.GetFilename());
@@ -991,7 +991,7 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& /*event*/)
       wxString ost;
       ost << wxT("loadlib(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
-      wxString ost1;
+//      wxString ost1;
       SetTitle(dlg2.GetFilename());
    }
    else SetStatusText(wxT("Loading aborted"));
@@ -2332,8 +2332,8 @@ void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)
 
 void   tui::TopedFrame::OnDRCResults(wxCommandEvent& WXUNUSED(evt))
 {
-   wxRect wnd = GetRect();
-   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+//   wxRect wnd = GetRect();
+//   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    wxFileDialog dlg(this, wxT("Select Calibre DRC Results to open"), wxT(""), wxT(""),
       wxT("DRC file (*.results)|*.results|All files(*.*)|*.*"),
       tpdfOPEN);

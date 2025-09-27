@@ -148,14 +148,14 @@ void console::ted_log_ctrl::DoLogRecord(wxLogLevel level, const wxString& msg, c
       wxCommandEvent eventLOG(tui::wxEVT_LOG_ERRMESSAGE);
       eventLOG.SetString(msg);
       eventLOG.SetInt(static_cast<int>(level));
-      eventLOG.SetExtraLong(info.timestamp);
+      eventLOG.SetExtraLong(info.timestampMS);
       wxPostEvent(_tellLOGW, eventLOG);
    }
    else
    { // text mode
       wxString wxMsg(msg);
       std::string stringmsg(wxMsg.mb_str(wxConvUTF8));
-      cmdLineLog(level, stringmsg, info.timestamp);
+      cmdLineLog(level, stringmsg, info.timestampMS);
    }
 }
 #else

@@ -69,7 +69,7 @@ browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
    _listColor        = /**wxRED;   */   wxColor(128,128,128);
    _editColor        = /**wxYELLOW;*/ *wxBLACK;
    _corrupted        = false;
-   wxColour bgnd = GetBackgroundColour();
+//   wxColour bgnd = GetBackgroundColour();
    SetBackgroundColour(*wxLIGHT_GREY);
    Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, &browsers::CellBrowser::onItemRightClick, this, tui::ID_PNL_CELLS);
 //   Bind(wxEVT_RIGHT_UP             , &browsers::CellBrowser::onBlankRMouseUp , this);

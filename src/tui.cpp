@@ -2248,7 +2248,7 @@ void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& /*event*/)
    if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
-      wxString ost;
+//      wxString ost;
       _displayList->SetValue(filename);
    }
 }
@@ -2261,7 +2261,7 @@ void  tui::cadenceConvert::onTechAdd(wxCommandEvent& /*event*/)
    if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
-      wxString ost;
+//      wxString ost;
       _techList->SetValue(filename);
    }
 }
@@ -2274,7 +2274,7 @@ void  tui::cadenceConvert::onOutputFile(wxCommandEvent& /*event*/)
    if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
-      wxString ost;
+//      wxString ost;
       _outputFile->SetValue(filename);
    }
 }
