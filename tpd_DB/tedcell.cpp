@@ -505,20 +505,30 @@ void laydata::TdtCell::oglTraverse(trend::TrendBase& rend, const CTM& trans,
                        lay->oglTraverse(rend, dlist); break;
          default     :
          {// All editable layers
-            short cltype = lay->clipType(rend);
-            switch (cltype)
+            if ( rend.rend3D() ) 
             {
-               case -1: {// full overlap - conditional rendering
-                  if ( !rend.chunkExists(curLayDef, (NULL != dlist)) )
-                     lay->oglTraverse(rend, dlist);
-                  break;
-               }
-               case  1: {//partial clip - render always
-                  rend.setLayer(curLayDef, (NULL != dlist));
+               // In 3D view - render all layers always
+               if ( !rend.chunkExists(curLayDef, (NULL != dlist)))
                   lay->oglTraverse(rend, dlist);
-                  break;
+            }
+            else 
+            {
+               //in 2D view - render depending on the overlap type
+               short cltype = lay->clipType(rend);
+               switch (cltype)
+               {
+                  case -1: {// full overlap - conditional rendering
+                     if ( !rend.chunkExists(curLayDef, (NULL != dlist)) )
+                        lay->oglTraverse(rend, dlist);
+                     break;
+                  }
+                  case  1: {//partial clip - render always
+                     rend.setLayer(curLayDef, (NULL != dlist));
+                     lay->oglTraverse(rend, dlist);
+                     break;
+                  }
+                  default: assert(0 == cltype);
                }
-               default: assert(0 == cltype);
             }
             break;
          }

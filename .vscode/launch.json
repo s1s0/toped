@@ -17,6 +17,7 @@
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "externalConsole": false,
+            "filterStdout": true,
             "MIMode": "lldb"
         }
 

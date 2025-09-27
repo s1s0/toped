@@ -592,8 +592,12 @@ void laydata::QTreeTmpl<DataT>::oglTraverse(trend::TrendBase& rend, const TObjDa
       }
    }
    // continue traversing down given that the objects exists and are visible
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      if ( 0 != _subQuads[i]->clipType(rend))
+   if (rend.rend3D())
+      for(byte i = 0; i < _props.numSubQuads(); i++)
+         _subQuads[i]->oglTraverse(rend, slst);
+   else  
+      for (byte i = 0; i < _props.numSubQuads(); i++)
+         if ( 0 != _subQuads[i]->clipType(rend))
          _subQuads[i]->oglTraverse(rend, slst);
 }
 

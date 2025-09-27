@@ -1304,6 +1304,8 @@ bool laydata::TdtDesign::editTop() {
    return _target.top();
 }
 
+/// @brief Traverse the design for OpenGL rendering
+/// @param rend target renderer
 void laydata::TdtDesign::oglTraverse(trend::TrendBase& rend)
 {
    if (_target.checkEdit())

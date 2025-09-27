@@ -774,6 +774,7 @@ namespace trend {
          void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
          layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
+         bool              rend3D() const                {return (trend::rtT3Der == _drawprop->renderType()) ;}
          void              setDrawProp(layprop::DrawProperties* drawprop)
                                                          {       _drawprop = drawprop              ;}
          bool              grcDataEmpty()                {return _grcData.empty()                  ;}
