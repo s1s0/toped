@@ -9,13 +9,13 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/build/toped.app",
+            "cwd": "${workspaceRoot}/logs",
             "args": ["tcase.tll"],
             "environment": [
                             { "name": "TPD_GLOBAL", "value":"/Users/siso/github/toped"     },
                             { "name": "TPD_LOCAL" , "value": "/Users/siso/githhub/toped"   }
                         ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
             "externalConsole": false,
             "filterStdout": true,
             "MIMode": "lldb"

@@ -449,9 +449,10 @@ trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontn
 void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
    // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
-   // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, nullptr)
+   TRENDC->enableVrtxAttr(trend::glsla_in_Vertex);
+   // Set-up the offset in the bound Vertex buffer
+   TRENDC->setVrtxAttrPtr( trend::glsla_in_Vertex, 0, nullptr);
+   // ... and here we go ...
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
    {
@@ -483,7 +484,7 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
          right_of += CSI->second->maxX();
       }
    }
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   TRENDC->disableVrtxAttr(trend::glsla_in_Vertex);
 }
 
 
@@ -552,7 +553,12 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_3D][glslu_in_Color]      = "in_Color";
    
    _glslUniVarNames[glslp_FB][glslu_in_Texture]    = "layTexture";
-   //
+
+   _glslVrtxAttrDesc[glsla_in_Vertex]    = { .location=0, .size=2, .type=TNDR_GLENUMT, .normalized=GL_FALSE };
+   _glslVrtxAttrDesc[glsla_vertexStream] = { .location=0, .size=3, .type=TNDR_GLENUMT, .normalized=GL_FALSE };
+   _glslVrtxAttrDesc[glsla_aPos]         = { .location=0, .size=2, .type=TNDR_GLENUMT, .normalized=GL_FALSE };
+   _glslVrtxAttrDesc[glsla_aTexCoord]    = { .location=1, .size=2, .type=TNDR_GLENUMT, .normalized=GL_FALSE };
+
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;
    _idPrograms[glslp_PS] = -1;
@@ -622,6 +628,26 @@ void trend::Shaders::setUniVari(const glsl_Uniforms varName, GLuint varValue) co
 void trend::Shaders::setUniStipple(/*const glsl_Uniforms varName,*/ GLuint* varValue) const
 {
    DBGL_CALL(glUniform1uiv, getUniformLoc(glslu_in_Stipple), 33, varValue)
+}
+
+void trend::Shaders::enableVrtxAttr(const glsl_VrtxAttr attrName) const
+{
+   DBGL_CALL(glEnableVertexAttribArray, _glslVrtxAttrDesc.at(attrName).location)
+}
+
+void trend::Shaders::setVrtxAttrPtr(const glsl_VrtxAttr attrName, GLsizei stride, const GLvoid *pointer) const
+{
+   DBGL_CALL(glVertexAttribPointer, _glslVrtxAttrDesc.at(attrName).location
+                                  , _glslVrtxAttrDesc.at(attrName).size
+                                  , _glslVrtxAttrDesc.at(attrName).type
+                                  , _glslVrtxAttrDesc.at(attrName).normalized
+                                  , stride
+                                  , pointer)
+}
+
+void trend::Shaders::disableVrtxAttr(const glsl_VrtxAttr attrName) const
+{
+   DBGL_CALL(glDisableVertexAttribArray, _glslVrtxAttrDesc.at(attrName).location)
 }
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
@@ -1303,6 +1329,24 @@ void trend::TrendCenter::unbindFont()
 {
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
+}
+
+void trend::TrendCenter::enableVrtxAttr(const glsl_VrtxAttr attrName) const
+{
+   assert(_cShaders);
+   return _cShaders->enableVrtxAttr(attrName);
+}
+
+void trend::TrendCenter::setVrtxAttrPtr(const glsl_VrtxAttr attrName, GLsizei stride, const GLvoid* pointer) const
+{
+   assert(_cShaders);
+   return _cShaders->setVrtxAttrPtr(attrName, stride, pointer);
+}
+
+void trend::TrendCenter::disableVrtxAttr(const glsl_VrtxAttr attrName) const
+{
+   assert(_cShaders);
+   return _cShaders->disableVrtxAttr(attrName);
 }
 
 void trend::TrendCenter::setUniVarf(const glsl_Uniforms varName, GLfloat varValue) const

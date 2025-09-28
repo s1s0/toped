@@ -202,6 +202,15 @@ namespace trend {
                        , glslu_in_TextureOn
                        , glslu_in_TEXMAT
                       };
+                     
+   //! All vertex attributes in the shaders in the form glsla_<attribute_name>
+   enum glsl_VrtxAttr {  glsla_in_Vertex
+                       , glsla_vertexStream
+                       , glsla_aPos
+                       , glsla_aTexCoord
+                      };
+
+   //! All shader programs in the form glslp_<program_name>
    enum glsl_Programs { glslp_NULL
                        ,glslp_VF  //! Vertex and Fragment (default)
                        ,glslp_VG  //! Vertex Geometry and Fragment (line stipple)
@@ -209,13 +218,21 @@ namespace trend {
                        ,glslp_FB  //! Final rendering step when frame buffers are in use
                        ,glslp_3D  //! 3D shader
                       };
+
+   typedef struct {
+      GLint          location    ; //! the attribute location in the shader
+      GLint          size        ; //! size (in bytes) of the data
+      GLenum         type        ; //! data type (GL_FLOAT, GL_INT etc.)
+      GLboolean      normalized  ; //! whether the data is normalized
+   } OGLVertexAttr;
+
    //! The actual location of all uniform variables in the shaders after glLinkProgram
    typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc;
    typedef std::map<glsl_Programs, GlslUniVarLoc>   GlslUniVarAllLoc;
    typedef std::map<glsl_Uniforms, std::string>     GlslUniVarNames;
    typedef std::map<glsl_Programs, GlslUniVarNames> GlslUniVarAllNames;
    typedef std::map<glsl_Programs, GLint>           GlslProgramIDs;
-
+   typedef std::map<glsl_VrtxAttr, OGLVertexAttr>   GlslVrtxAttrDesc;
 
    typedef std::list<TrxCnvx*>      SliceObjects;
    typedef std::list<TrxNcvx*>      SlicePolygons;

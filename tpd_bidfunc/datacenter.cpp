@@ -349,7 +349,7 @@ bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
    return (_tdtReqMxState <= _tdtActMxState);
 }
 
-void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
+void DataCenter::unlockTDT([[maybe_unused]]laydata::TdtLibDir* tdt_db, bool throwexception)
 {
 //   _TEDLIB = tdt_db;
    assert(_tdtActMxState > dbmxs_unlocked);

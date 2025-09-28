@@ -31,9 +31,6 @@
 #include "ttt.h"
 #include "basetrend.h"
 
-#warning: TODO -> get this into something like glslUniVarLoc
-#define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
-
 namespace trend {
 
    /**
@@ -174,6 +171,9 @@ namespace trend {
          void                   setUniStipple(GLuint*) const;
          void                   setUniVarui(const glsl_Uniforms, GLuint) const;
          void                   setUniVari(const glsl_Uniforms, GLuint) const;
+         void                   enableVrtxAttr(const glsl_VrtxAttr attrName) const;
+         void                   setVrtxAttrPtr(const glsl_VrtxAttr attrName, GLsizei stride, const GLvoid* pointer) const;
+         void                   disableVrtxAttr(const glsl_VrtxAttr attrName) const;
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
@@ -188,8 +188,8 @@ namespace trend {
          std::string            _fnShdrFragment;
          std::string            _fnShdrFBVertex;   // for framebuffer rendering
          std::string            _fnShdrFBFragment; // for framebuffer rendering
-         std::string            _fnShdr3DVertex;
-         std::string            _fnShdr3DFragment;
+         std::string            _fnShdr3DVertex;   // 3D rendering
+         std::string            _fnShdr3DFragment; // 3D rendering
          GLint                  _idShdrVertex;
          GLint                  _idShdrGeometry;
          GLint                  _idShdrGeSprite;
@@ -201,6 +201,7 @@ namespace trend {
          GlslProgramIDs         _idPrograms;
          GlslUniVarAllNames     _glslUniVarNames;
          GlslUniVarAllLoc       _glslUniVarLoc;
+         GlslVrtxAttrDesc       _glslVrtxAttrDesc;
          glsl_Programs          _curProgram;
          bool                   _status;
    };
@@ -238,6 +239,9 @@ namespace trend {
          void                   bindFont();
          void                   unbindFont();
          //Shader handling
+         void                   enableVrtxAttr(const glsl_VrtxAttr) const;
+         void                   setVrtxAttrPtr(const glsl_VrtxAttr, GLsizei, const GLvoid*) const;
+         void                   disableVrtxAttr(const glsl_VrtxAttr) const;
          void                   setUniVarf(const glsl_Uniforms, GLfloat) const;
          void                   setUniMtrx4fv(const glsl_Uniforms, GLfloat*) const;
          void                   setUniMtrx3fv(const glsl_Uniforms, GLfloat*) const;

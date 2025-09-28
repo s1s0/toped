@@ -6,6 +6,7 @@ doxygen.log
 toped.xcodeproj/
 .DS_Store
 */.DS_Store
+logs/
 #
 src/wxcocoa_config.h
 #lex/bison products

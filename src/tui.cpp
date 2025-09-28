@@ -2406,7 +2406,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          textSizer->Add(textMarks , 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
          //
          wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
-         wxArrayString allFontNames_wx;
+         // wxArrayString allFontNames_wx;
          NameList allFontNames_std;
 #ifdef __WXOSX_COCOA__
          wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,

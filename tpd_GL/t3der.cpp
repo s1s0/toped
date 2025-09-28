@@ -256,17 +256,17 @@ void trend::T3DTV::draw(layprop::DrawProperties* drawprop)
    // First - deal with openGL translation matrix
    setShaderCTM(drawprop, _refCell);
    // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
+   TRENDC->enableVrtxAttr(trend::glsla_vertexStream);
    // Set-up the offset in the binded Vertex buffer
    size_t koko = sizeof(TPX3) * _point_array_offset;
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 3, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(koko))
+   TRENDC->setVrtxAttrPtr( trend::glsla_vertexStream, 0, (GLvoid*)(koko));
    // ... and here we go ...
    drawTriQuads();
 //   TRENDC->setUniVarui(glslu_in_StippleEn, 0);
 //   drawLines();
 //   TRENDC->setUniVarui(glslu_in_StippleEn, 1);
    // Switch the vertex buffers OFF in the openGL engine ...
-   DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
+   TRENDC->disableVrtxAttr(trend::glsla_vertexStream);
    // ... and finally restore the openGL translation matrix
    drawprop->popCtm();
 }
