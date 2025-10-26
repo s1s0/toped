@@ -4,6 +4,7 @@ build/
 doc/
 doxygen.log
 toped.xcodeproj/
+.cache/
 .DS_Store
 */.DS_Store
 logs/

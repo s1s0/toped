@@ -30,6 +30,7 @@
 
 #include <string>
 #include "tedbac.h"
+#include "outbox.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers

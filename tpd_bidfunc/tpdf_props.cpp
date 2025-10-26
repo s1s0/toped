@@ -320,7 +320,7 @@ int tellstdfunc::stdTEXTUREDEF::execute() {
       texFile.SetPath(DATC->localDir());
       texFile.AppendDir("textures");
       texFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE);
-      wxString koko = texFile.GetFullPath();
+      // wxString koko = texFile.GetFullPath();
       if (!texFile.Exists())
       {
          texFile.SetPath(DATC->globalDir());

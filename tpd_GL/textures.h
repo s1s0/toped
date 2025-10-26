@@ -31,6 +31,7 @@
 #include <string>
 #include <map>
 #include <GL/glew.h>
+#include <wx/wx.h>
 
 namespace trend {
    

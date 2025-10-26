@@ -28,9 +28,6 @@
 #include "tpdph.h"
 #include <sstream>
 #include "basetrend.h"
-#include "tenderer.h"
-#include "viewprop.h"
-#include "trend.h"
 
 trend::ogl_logfile     OGLLogFile;
 

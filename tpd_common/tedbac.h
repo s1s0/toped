@@ -28,7 +28,6 @@
 #define TEDBAC_H_INCLUDED
 
 #include "ttt.h"
-#include "outbox.h"
 
 namespace laydata {
 //   template <typename DataT>

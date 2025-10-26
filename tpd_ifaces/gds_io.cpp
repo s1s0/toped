@@ -35,8 +35,6 @@
 #include <wx/stream.h>
 #include "gds_io.h"
 #include "outbox.h"
-#include "tedat.h"
-#include "tedesign.h"
 
 //==============================================================================
 GDSin::GdsRecord::GdsRecord()
@@ -767,9 +765,8 @@ void GDSin::GdsStructure::collectLayers(ExtLayers& layers_map, bool hier)
    }
    if (!hier) return;
    for (GDSStructureList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
-      if (NULL == (*CSTR)) continue;
-   else
-      (*CSTR)->collectLayers(layers_map, hier);
+      if (NULL != (*CSTR))
+         (*CSTR)->collectLayers(layers_map, hier);
 }
 
 ForeignCellTree* GDSin::GdsStructure::hierOut(ForeignCellTree* Htree, GdsStructure* parent)
@@ -1187,12 +1184,12 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
    int2b       singleType;
    word        ba;
    // initializing
-   word        font           = 0;
-   word        vertJust       = 0;
+   // word        font           = 0;
+   // word        vertJust       = 0;
 //   word        horiJust       = 0; TODO
    word        reflection     = 0;
-   word        absMagn        = 0;
-   word        absAngl        = 0;
+   // word        absMagn        = 0;
+   // word        absAngl        = 0;
    int2b       pathType       = 0;
    int4b       width          = 0;
    double      magnification  = 1.0;
@@ -1225,15 +1222,15 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
                cf->incGdsiiWarnings(); break;
             case gds_PRESENTATION:
                cr->retData(&ba,0,16);
-               font = ba & 0x0030; font >>= 4;
-               vertJust = ba & 0x000C; vertJust >>= 2;
+               // font = ba & 0x0030; font >>= 4;
+               // vertJust = ba & 0x000C; vertJust >>= 2;
 //               horiJust = ba & 0x0003;
                break;
             case gds_STRANS:
                cr->retData(&ba,0,16);
                reflection = ba & 0x8000; reflection >>= 15;//bit 0
-               absMagn    = ba & 0x0004; absMagn    >>= 2; //bit 13
-               absAngl    = ba & 0x0002; absAngl    >>= 1; //bit 14
+               // absMagn    = ba & 0x0004; absMagn    >>= 2; //bit 13
+               // absAngl    = ba & 0x0002; absAngl    >>= 1; //bit 14
                break;
             case gds_MAG: cr->retData(&magnification);
                magnification *= iDB.crossCoeff();

@@ -40,7 +40,6 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "trend.h"
-#include "ps_out.h"
 #include "basetrend.h"
 
 

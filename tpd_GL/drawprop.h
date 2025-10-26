@@ -32,6 +32,7 @@
 #include <math.h>
 #include "tedbac.h"
 #include "textures.h"
+#include "outbox.h"
 
 
 // Include GLM

@@ -579,6 +579,13 @@ int tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
       str.copy(formatChars, length, start);
       formatChars[length] = 0x00;
       int numChars = -1;
+
+      // suppress the non-literal format string warning for the following block. All alternatives look
+      // worse than this. Besides:
+      // -  the format string is coming from user input, so there is no way to know at compile time what it is going to be.
+      // -  the format string is being validated by the regex before getting here, so the risk is minimal.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
       switch (val->get_type())
       {
          case telldata::tn_int    :
@@ -600,6 +607,8 @@ int tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
          }
          default: assert(false); break;
       }
+#pragma GCC diagnostic pop
+      
       if (0 > numChars)
          return -1; //format string found, but there is a discrepancy with the corresponding variable
       else

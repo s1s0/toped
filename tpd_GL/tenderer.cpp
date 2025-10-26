@@ -26,7 +26,6 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <sstream>
 #include "tenderer.h"
 #include "viewprop.h"
 #include "trend.h"
