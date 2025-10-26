@@ -166,15 +166,10 @@
 #include "trendat.h"
 #include <sstream>
 #include <fstream>
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-//#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-// to avoid the compiler warnings the above define was replaced by this below
-// (plus the line in the basetrend.cpp). This is taken from
-// https://stackoverflow.com/questions/23177229/how-to-cast-int-to-const-glvoid
-typedef void (*TFPTR_DrawElementsOffset)(GLenum,GLsizei,GLenum,uintptr_t);
-extern TFPTR_DrawElementsOffset tpd_glDrawElements;
+// This one below is suggested by copilot... the whole idea is to avoid the
+// cast to char* which generates warnings on a number of compilers.
+#define VBO_BUFFER_OFFSET(var) (reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(var)))
 
 // Forward declarations
 namespace layprop { class LayoutGrid;}

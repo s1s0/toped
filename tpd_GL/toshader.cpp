@@ -116,7 +116,7 @@ void trend::ToshaderTV::drawTriQuads()
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
          for (unsigned i= 0; i < _iobjnum[ITtria]; i++)
          {
-            DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, _firstix[ITtria][i])
+            DBGL_CALL(glDrawElements,GL_TRIANGLES, _sizesix[ITtria][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ITtria][i]))
 //            printf("DRAW TRIA: Offset: %d; Size: %d \n", _firstix[ITtria][i], _sizesix[ITtria][i]);
          }
       }
@@ -127,7 +127,7 @@ void trend::ToshaderTV::drawTriQuads()
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
          for (unsigned i= 0; i < _iobjnum[ITtstr]; i++)
          {
-            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, _firstix[ITtstr][i])
+            DBGL_CALL(glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ITtstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ITtstr][i]))
 //            printf("DRAW STRP: Offset: %d; Size: %d \n", _firstix[ITtstr][i], _sizesix[ITtstr][i]);
          }
 
@@ -257,7 +257,7 @@ void trend::ToshaderLay::drawSelected()
       assert(_fstslix[STlstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
       for (unsigned i= 0; i < _asobjix[STlstr]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_STRIP, _sizslix[STlstr][i], GL_UNSIGNED_INT, _fstslix[STlstr][i])
+         DBGL_CALL(glDrawElements, GL_LINE_STRIP, _sizslix[STlstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[STlstr][i]))
    }
    if (_asobjix[STllps] > 0)
    {
@@ -265,7 +265,7 @@ void trend::ToshaderLay::drawSelected()
       assert(_fstslix[STllps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[STllps]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[STllps][i], GL_UNSIGNED_INT, _fstslix[STllps][i])
+         DBGL_CALL(glDrawElements, GL_LINE_LOOP, _sizslix[STllps][i], GL_UNSIGNED_INT,  VBO_BUFFER_OFFSET(_fstslix[STllps][i]))
    }
    if (_asobjix[STlnes] > 0)
    {
@@ -273,7 +273,7 @@ void trend::ToshaderLay::drawSelected()
       assert(_fstslix[STlnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
       for (unsigned i= 0; i < _asobjix[STlnes]; i++)
-         DBGL_CALL(tpd_glDrawElements, GL_LINES, _sizslix[STlnes][i], GL_UNSIGNED_INT, _fstslix[STlnes][i])
+         DBGL_CALL(glDrawElements, GL_LINES, _sizslix[STlnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[STlnes][i]))
    }
    TRENDC->disableVrtxAttr(trend::glsla_in_Vertex);
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
